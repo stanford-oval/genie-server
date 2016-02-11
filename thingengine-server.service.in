@@ -1,0 +1,14 @@
+# This file is part of ThingEngine
+#
+# Copyright 2015 Giovanni Campagna <gcampagn@cs.stanford.edu>
+#
+# See COPYING for details
+
+[Unit]
+Description=ThingEngine personal IoT service
+
+[Service]
+ExecStart=/usr/bin/node @pkglibdir@/main.js
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,20 @@
+extends layout
+
+block scripts
+  script(src='/javascripts/query.js')
+
+block page_name
+  | Run Query
+
+block content
+  div.form-group
+    label(for="code").control-label Query
+    textarea#code(name="code", placeholder="Write query here").form-control
+
+  p.from-group
+    button(type="button")#run.btn.btn-success Run
+
+  div.form-group
+    label(for="results").control-label Results
+    textarea#results(name="results").form-control
+

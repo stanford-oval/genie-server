@@ -1,0 +1,47 @@
+# -*- mode: GNUmakefile -*-
+
+prefix ?= /usr
+libdir ?= $(prefix)/lib
+pkglibdir ?= $(libdir)/thingengine-server
+localstatedir ?= /var/lib/thingengine-server
+systemdsystemunitdir ?= $(prefix)/lib/systemd/system
+
+SUBDIRS = engine shared node_modules
+install_sources = package.json main.js platform.js platform_config.js alljoyn.js bluez.js dbus.js
+built_sources = platform_config.js thingengine-server.service
+
+all: $(built_sources)
+	make -C engine all
+	make -C shared all
+	npm install
+	npm dedupe
+	find -name obj.target -exec rm -fr '{}' +
+	find -name .deps -exec rm -fr '{}' +
+
+all-fedora: $(built_sources)
+	make -C engine all-fedora
+	mkdir node_modules
+        npm link sqlite3
+        npm link ws
+	npm install
+	npm dedupe
+	find -name obj.target -exec rm -fr '{}' +
+	find -name .deps -exec rm -fr '{}' +
+
+platform_config.js:
+	echo "exports.PKGLIBDIR = '$(prefix)'; exports.LOCALSTATEDIR = '$(localstatedir)';" > platform_config.js
+
+thingengine-server.service : thingengine-server.service.in
+	sed -e 's|@pkglibdir@|$(pkglibdir)|g' $< > $@
+
+# Note the / after engine, forces symlink resolution
+install:
+	install -m 0755 -d $(DESTDIR)$(pkglibdir)
+	for d in $(SUBDIRS) ; do cp -pr $$d/ $(DESTDIR)$(pkglibdir) ; done
+	install -m 0644 $(install_sources) $(DESTDIR)$(pkglibdir)
+	install -m 0755 -d $(DESTDIR)$(systemdsystemunitdir)
+	install -m 0644 thingengine-server.service $(DESTDIR)$(systemdsystemunitdir)
+
+clean:
+	make -C engine clean
+	rm -f platform_config.js
