@@ -15,6 +15,8 @@ const path = require('path');
 const posix = require('posix');
 const child_process = require('child_process');
 
+const ThingPediaClient = require('thingpedia-client');
+
 // FIXME
 const sql = require('thingengine-core/lib/db/sql');
 const prefs = require('thingengine-core/lib/prefs');
@@ -126,6 +128,9 @@ module.exports = {
         case 'graphics-api':
             return true;
 
+        case 'thingpedia-client':
+            return true;
+
         default:
             return false;
         }
@@ -151,6 +156,9 @@ module.exports = {
 
         case 'graphics-api':
             return graphics;
+
+        case 'thingpedia-client':
+            return new ThingPediaClient.ClientHttp(_prefs.get('developer-key'));
 
         default:
             return null;
