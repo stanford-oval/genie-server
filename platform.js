@@ -15,7 +15,10 @@ const path = require('path');
 const posix = require('posix');
 const child_process = require('child_process');
 
-const sql = require('./engine/db/sql');
+// FIXME
+const sql = require('thingengine-core/lib/db/sql');
+const prefs = require('thingengine-core/lib/prefs');
+
 const graphics = require('./graphics');
 
 var Config;
@@ -24,7 +27,6 @@ Config = require('./platform_config');
 } catch(e) {
 Config = {};
 }
-const prefs = require('./engine/prefs');
 
 var AllJoynApi;
 try {

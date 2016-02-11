@@ -6,7 +6,8 @@
 //
 // See COPYING for details
 
-const Config = require('../../engine/config');
+// FIXME
+const Config = require('thingengine-core/lib/config');
 
 const Q = require('q');
 const http = require(Config.THINGENGINE_ACCESS_MODULE);
@@ -15,7 +16,8 @@ const url = require('url');
 const express = require('express');
 var router = express.Router();
 
-const ipAddress = require('../../engine/util/ip_address');
+// FIXME
+const ipAddress = require('thingengine-core/lib/util/ip_address');
 const user = require('../util/user');
 
 function config(req, res, next, userData, cloudData) {

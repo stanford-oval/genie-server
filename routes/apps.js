@@ -11,7 +11,7 @@ const express = require('express');
 var router = express.Router();
 
 const user = require('../util/user');
-const feeds = require('../../shared/util/feeds');
+const feeds = require('../shared/util/feeds');
 
 const ThingTalk = require('thingtalk');
 const AppCompiler = ThingTalk.Compiler;

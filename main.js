@@ -8,8 +8,8 @@
 
 const Q = require('q');
 
-const Engine = require('./engine');
-const Frontend = require('./frontend/frontend');
+const Engine = require('thingengine-core');
+const Frontend = require('./frontend');
 
 function main() {
     Q.longStackSupport = true;
