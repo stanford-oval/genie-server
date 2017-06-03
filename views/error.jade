@@ -1,1 +1,9 @@
-../shared/views/error.jade
+extends layout
+
+block page_name
+  | Error
+
+block content
+  p Sorry that did not work
+  p= message
+  a(href='javascript:history.back()').btn.btn-primary Go back
