@@ -1,3 +1,7 @@
 (function() {
-    window.ThingEngine = {};
+    window.ThingEngine = {
+        getThingpedia: function() {
+            return 'https://thingpedia.stanford.edu';
+        }
+    };
 })();

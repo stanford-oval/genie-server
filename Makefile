@@ -6,25 +6,16 @@ pwd := $(shell pwd)
 
 # Builds for local testing only
 # To build for packaging, see Makefile.distro
-all: platform_config.js
-	make -C node_modules/thingengine-core all
-	cd node_modules/thingpedia ; npm install --no-optional --only=prod
-	cd node_modules/thingpedia-client ; npm install --no-optional --only=prod
-	cd node_modules/thingpedia-discovery ; npm install --no-optional --only=prod
-	cd node_modules/thingtalk ; npm install --no-optional --only=prod
-	# remove duplicate copy of thingtalk
-	# we cannot rely on npm dedupe because we're playing submodule tricks
-	rm -fr node_modules/sabrina/node_modules/thingtalk
+all: service/platform_config.js
+	npm install sqlite3 --build-from-source --sqlite_libname=sqlcipher --sqlite=/usr/
 	npm install
-	npm dedupe
 
-platform_config.js:
-	echo "exports.PKGLIBDIR = '$(pwd)'; exports.LOCALSTATEDIR = '.';" > platform_config.js
+service/platform_config.js:
+	echo "exports.PKGLIBDIR = '$(pwd)'; exports.LOCALSTATEDIR = '.';" > $@
 
 clean:
-	make -C engine clean
 	rm -fr node_modules/
-	rm -f platform_config.js
+	rm -f service/platform_config.js
 
 # Note the / after $$d, forces symlink resolution
 dist: clean

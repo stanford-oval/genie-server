@@ -13,6 +13,8 @@ $(function() {
                 var div = $('<div>').addClass('form-group').append(label).append(input);
                 placeholder.append(div);
             });
+            // fallthrough
+        case 'none':
             placeholder.append($('<button>').addClass('btn btn-primary')
                                .attr('type', 'submit').text("Configure"));
             break;
@@ -25,6 +27,8 @@ $(function() {
                                                .attr('href', '/devices/oauth2/' + kind)
                                                .text(json.text)));
             break;
+        default: // discovery or builtin, ignore
+            break;
         }
     }
 
@@ -33,7 +37,11 @@ $(function() {
         var self = $('<div>');
         self.addClass('online-account-choice col-md-4');
 
-        var btn = $('<a>');
+        if (json.type === 'none') {
+            var btn = $('<button>').attr('type', 'submit').attr('name', 'kind').attr('value', kind);
+        } else {
+            var btn = $('<a>');
+        }
         btn.addClass('btn btn-default btn-block');
         btn.text(name);
         self.append(btn);
@@ -53,6 +61,7 @@ $(function() {
                 form.append(div);
             });
             form.append($('<button>').addClass('btn btn-primary')
+                        .attr('name', 'kind').attr('value', kind)
                         .attr('type', 'submit').text("Configure"));
             btn.attr('data-toggle', 'online-account-' + kind);
             form.collapse('hide');
@@ -65,16 +74,16 @@ $(function() {
         case 'oauth2':
             btn.attr('href', '/devices/oauth2/' + kind);
             break;
+        default: // discovery or builtin, ignore
+            break;
         }
 
         return self;
     }
 
-    $('#online-account-selector').each(function() {
-        var selector = $(this);
-
+    function handleOnlineLike(selector, klass) {
         var developerKey = $('#developer-key').text();
-        var url = ThingEngine.getThingPedia() + '/thingpedia/api/devices?class=online&developer_key='
+        var url = ThingEngine.getThingpedia() + '/thingpedia/api/devices?class=' + klass + '&developer_key='
             + developerKey;
         $.get(url, function(factoryList) {
             for (var i = 0; i < factoryList.length; i += 3) {
@@ -87,6 +96,15 @@ $(function() {
                 }
             }
         });
+    }
+
+    $('#online-account-selector').each(function() {
+        var selector = $(this);
+        handleOnlineLike(selector, 'online');
+    });
+    $('#data-source-selector').each(function() {
+        var selector = $(this);
+        handleOnlineLike(selector, 'data');
     });
 
     $('#device-kind').each(function() {
@@ -94,11 +112,13 @@ $(function() {
         var deviceFactories = {};
 
         var developerKey = $('#developer-key').text();
-        var url = ThingEngine.getThingPedia() + '/thingpedia/api/devices?class=physical&developer_key='
+        var url = ThingEngine.getThingpedia() + '/thingpedia/api/devices?class=physical&developer_key='
             + developerKey;
         $.get(url, function(factoryList) {
             factoryList.forEach(function(f) {
                 deviceFactories[f.primary_kind] = f.factory;
+                if (f.factory.type === 'discovery') // ignore discovery types online
+                    return;
 
                 selector.append(function() {
                     var self = $('<option>');

@@ -13,95 +13,67 @@ var router = express.Router();
 
 const user = require('../util/user');
 
+function getAllDevices(req, engine) {
+    return engine.devices.getAllDevices().map((d) => {
+        return { uniqueId: d.uniqueId, name: d.name || req._("Unknown device"),
+                 description: d.description || req._("Description not available"),
+                 kind: d.kind,
+                 ownerTier: d.ownerTier,
+                 available: d.available,
+                 isTransient: d.isTransient,
+                 isOnlineAccount: d.hasKind('online-account'),
+                 isDataSource: d.hasKind('data-source'),
+                 isPhysical: !d.hasKind('online-account') && !d.hasKind('data-source'),
+                 isThingEngine: d.hasKind('thingengine-system') };
+    }).filter(d => !d.isThingEngine);
+}
+
 router.get('/', user.redirectLogIn, function(req, res, next) {
-    if (req.query.class && ['online', 'physical'].indexOf(req.query.class) < 0) {
-        res.status(404).render('error', { page_title: "ThingEngine - Error",
-                                          message: "Invalid device class" });
-        return;
-    }
-
-    var online = req.query.class === 'online';
-
-    var engine = req.app.engine;
-
-    var devices = engine.devices.getAllDevices().filter(function(d) {
-        if (d.hasKind('thingengine-system'))
-            return false;
-
-        if (online)
-            return d.hasKind('online-account');
-        else
-            return !d.hasKind('online-account');
-    });
-    Q.all(devices.map(function(d) {
-        return Q(d.checkAvailable()).then(function(avail) {
-            return { uniqueId: d.uniqueId, name: d.name || "Unknown device",
-                     description: d.description || "Description not available",
-                     ownerTier: d.ownerTier,
-                     available: avail };
-        });
-    })).then(function(info) {
-        res.render('devices_list', { page_title: 'ThingEngine - configured devices',
-                                     csrfToken: req.csrfToken(),
-                                     onlineAccounts: online,
-                                     devices: info });
-    }).catch(function(e) {
-        res.status(400).render('error', { page_title: "ThingEngine - Error",
-                                          message: e.message });
-    }).done();
+    res.render('devices_list', { page_title: 'Almond - My Goods',
+                                 csrfToken: req.csrfToken(),
+                                 devices: getAllDevices(req, req.app.engine) });
 });
 
 router.get('/create', user.redirectLogIn, function(req, res, next) {
-    if (req.query.class && ['online', 'physical'].indexOf(req.query.class) < 0) {
-        res.status(404).render('error', { page_title: "ThingEngine - Error",
-                                          message: "Invalid device class" });
+    if (req.query.class && ['online', 'physical', 'data'].indexOf(req.query.class) < 0) {
+        res.status(404).render('error', { page_title: req._("Thingpedia - Error"),
+                                          message: req._("Invalid device class") });
         return;
     }
 
-    var online = req.query.class === 'online';
-
-    res.render('devices_create', { page_title: 'ThingEngine - configure device',
+    res.render('devices_create', { page_title: req._("Almond - Configure device"),
                                    csrfToken: req.csrfToken(),
-                                   onlineAccounts: online,
+                                   developerKey: req.user.developer_key,
+                                   klass: req.query.class,
+                                   ownTier: 'cloud',
                                  });
 });
 
 router.post('/create', user.requireLogIn, function(req, res, next) {
-    if (req.query.class && ['online', 'physical'].indexOf(req.query.class) < 0) {
-        res.status(404).render('error', { page_title: "ThingEngine - Error",
-                                          message: "Invalid device class" });
-        return;
-    }
-
     var engine = req.app.engine;
     var devices = engine.devices;
 
-    try {
+    Q.try(() => {
         if (typeof req.body['kind'] !== 'string' ||
             req.body['kind'].length == 0)
             throw new Error("You must choose one kind of device");
 
         delete req.body['_csrf'];
-
-        devices.loadOneDevice(req.body, true).then(function() {
-            res.redirect('/devices?class=' + (req.query.class || 'physical'));
-        }).catch(function(e) {
-            res.status(400).render('error', { page_title: "ThingEngine - Error",
-                                              message: e.message });
-        }).done();
-    } catch(e) {
-        res.status(400).render('error', { page_title: "ThingEngine - Error",
+        return devices.loadOneDevice(req.body, true);
+    }).then(() => {
+        if (req.session['device-redirect-to']) {
+            res.redirect(303, req.session['device-redirect-to']);
+            delete req.session['device-redirect-to'];
+        } else {
+            res.redirect(303, '/me');
+        }
+    }).catch(function(e) {
+        res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message });
-    }
+    }).done();
 });
 
 router.post('/delete', user.requireLogIn, function(req, res, next) {
-    if (req.query.class && ['online', 'physical'].indexOf(req.query.class) < 0) {
-        res.status(404).render('error', { page_title: "ThingEngine - Error",
-                                          message: "Invalid device class" });
-        return;
-    }
-
     var engine = req.app.engine;
     var id = req.body.id;
     var device;
@@ -112,15 +84,15 @@ router.post('/delete', user.requireLogIn, function(req, res, next) {
             device = engine.devices.getDevice(id);
 
         if (device === undefined) {
-            res.status(404).render('error', { page_title: "ThingEngine - Error",
+            res.status(404).render('error', { page_title: "Almond - Error",
                                               message: "Not found." });
             return;
         }
 
         engine.devices.removeDevice(device);
-        res.redirect('/devices?class=' + (req.query.class || 'physical'));
+        res.redirect('/devices');
     } catch(e) {
-        res.status(400).render('error', { page_title: "ThingEngine - Error",
+        res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message });
     }
 });
@@ -145,7 +117,7 @@ router.get('/oauth2/:kind', user.redirectLogIn, function(req, res, next) {
         }
     }).catch(function(e) {
         console.log(e.stack);
-        res.status(400).render('error', { page_title: "ThingEngine - Error",
+        res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message });
     }).done();
 });
@@ -162,7 +134,7 @@ router.get('/oauth2/callback/:kind', user.redirectLogIn, function(req, res, next
         res.redirect('/devices?class=online');
     }).catch(function(e) {
         console.log(e.stack);
-        res.status(400).render('error', { page_title: "ThingEngine - Error",
+        res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message });
     }).done();
 });

@@ -16,7 +16,7 @@ router.get('/', user.redirectLogIn, function(req, res, next) {
 
         if (host !== os.hostname())
             var name = os.hostname() + " (" + host + ")";
-        res.render('index', { page_title: "ThingEngine - run your things!",
+        res.render('index', { page_title: "Almond - The Open Virtual Assistant",
                               server: { name: name,
                                         port: port,
                                         initialSetup: authToken === undefined },

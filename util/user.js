@@ -25,12 +25,13 @@ const model = {
         return user;
     },
 
-    set: function(username, salt, passwordHash) {
+    set: function(salt, sqliteKeySalt, passwordHash) {
         var prefs = platform.getSharedPreferences();
-        var user = { username: username,
-                     password: passwordHash,
-                     salt: salt };
+        var user = { password: passwordHash,
+                     salt: salt,
+                     sqliteKeySalt: sqliteKeySalt };
         prefs.set('server-login', user);
+        return user;
     }
 };
 
@@ -62,13 +63,12 @@ function initializePassport() {
             try {
                 var user = model.get();
 
-                return hashPassword(user.salt, password)
-                    .then(function(hash) {
-                        if (hash !== user.password)
-                            return [false, "Invalid username or password"];
+                return hashPassword(user.salt, password).then(function(hash) {
+                    if (hash !== user.password)
+                        return [false, "Invalid username or password"];
 
-            	        return [user.username, null];
-		    });
+                    return ['local', null];
+                });
             } catch(e) {
                 return [false, e.message];
             }
@@ -83,17 +83,23 @@ function initializePassport() {
 module.exports = {
     initializePassport: initializePassport,
 
-    isConfigured: function() {
+    isConfigured() {
         return model.isConfigured();
     },
 
-    register: function(username, password) {
+    register(password) {
         var salt = makeRandom();
-        return hashPassword(salt, password)
-            .then(function(hash) {
-                model.set(username, salt, hash);
-                return username;
-            });
+        var sqliteKeySalt = makeRandom();
+        return hashPassword(salt, password).then(function(hash) {
+            return model.set(salt, sqliteKeySalt, hash);
+        });
+    },
+
+    unlock(req, password) {
+        var user = model.get();
+        hashPassword(user.sqliteKeySalt, password).then((key) => {
+            req.app.frontend.unlock(key);
+        }).done();
     },
 
     /* Middleware to check if the user is logged in before performing an
@@ -101,8 +107,11 @@ module.exports = {
      *
      * To be used for POST actions, where redirectLogin would not work.
      */
-    requireLogIn: function(req, res, next) {
-        if (model.isConfigured() && !req.user) {
+    requireLogIn(req, res, next) {
+        if (!model.isConfigured()) {
+            res.status(401).render('configuration_required',
+                                   { page_title: "ThingEngine - Error" });
+        } else if (!req.user) {
             res.status(401).render('login_required',
                                    { page_title: "ThingEngine - Error" });
         } else {
@@ -113,8 +122,11 @@ module.exports = {
     /* Middleware to insert user log in page
      * After logging in, the user will be redirected to the original page
      */
-    redirectLogIn: function(req, res, next) {
-        if (model.isConfigured() && !req.user) {
+    redirectLogIn(req, res, next) {
+        if (!model.isConfigured()) {
+            req.session.redirect_to = req.originalUrl;
+            res.redirect('/user/configure');
+        } if (!req.user) {
             req.session.redirect_to = req.originalUrl;
             res.redirect('/user/login');
         } else {

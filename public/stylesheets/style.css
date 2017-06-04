@@ -1,29 +1,8 @@
-body {
-    padding: 50px;
-    padding-top: 0px;
-}
-
-.navbar .stanford {
-    margin-left: -10px;
-    margin-right: 10px;
-    padding-top: 5px;
-}
-
-.navbar-icon-divider {
-    margin-left: -9px;
-    position: absolute;
-    margin-top: 11px;
-    height: 60%;
-    border-left: 2px solid white
-}
-
 #page-body {
-    margin-top: 81px;
+    margin-top: 60px;
 }
 
 #page-title {
-    margin-top: 0px;
-    margin-bottom: 0.5em;
     text-align: center;
 }
 
@@ -86,7 +65,7 @@ body {
     font-style: italic;
 }
 
-#app-install-well .btn {
+#app-install-well .btn, #show-hide-code .btn {
     margin-bottom: 1em;
 }
 
@@ -94,11 +73,25 @@ body {
     margin-bottom: 1em;
 }
 
-.installed-app .btn-block {
-    margin-top: 7.5px;
-    margin-bottom: 7.5px;
+pre, pre code {
+    color: black;
 }
 
-.installed-dev .panel-heading {
+.app-template {
+  margin-bottom: 0.5em;
+}
+
+.device-icon-small > img {
+    display: block;
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 5px;
+    margin: 0 auto;
+}
+
+.dev-template .panel-heading {
+    font-weight: bold;
+    text-align: center;
     display: block;
 }

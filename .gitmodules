@@ -13,3 +13,6 @@
 [submodule "node_modules/almond"]
 	path = node_modules/almond
 	url = https://github.com/Stanford-Mobisocial-IoT-Lab/Sabrina.git
+[submodule "node_modules/omlib"]
+	path = node_modules/omlib
+	url = https://github.com/Stanford-Mobisocial-IoT-Lab/omclient

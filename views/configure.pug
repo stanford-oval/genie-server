@@ -1,0 +1,28 @@
+extends layout
+
+block page_name
+  | Initial Configuration
+
+block content
+  h2 Welcome to Almond!
+
+  p You must configure a password before you use your Almond. This password will
+    |  be used to generate a secure encryption key to store your saved credentials.
+
+  each error in errors
+    div.alert.alert-danger.alert-dismissible.fade.in(role='alert')
+      button(type='button', data-dismiss='alert', aria-label="Close").close
+        span(aria-hidden='true') ×
+      p= error
+
+  form(action='/user/configure', method='post',data-toggle='validator')
+    input(type='hidden',name='_csrf',value=csrfToken)
+    div.form-group
+      label(for='password').control-label Password
+      input(type='password',name='password',value=password).form-control#password
+    div.form-group
+      label(for='confirm-password').control-label Confirm password
+      input(type='password',name='confirm-password',value='',required=true,data-match='#password',data-match-error="The password and the confirmation must match").form-control#confirm-password
+      span.help-block.with-errors
+    div.form-group
+      button(type='submit').btn.btn-primary Configure

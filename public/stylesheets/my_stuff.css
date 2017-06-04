@@ -1,0 +1,13 @@
+.app-template {
+    border: 1px gray;
+    border-radius: 5px;
+}
+
+.installed-dev .panel-heading {
+    display: block;
+}
+
+.form-delete-app {
+    float: right;
+}
+

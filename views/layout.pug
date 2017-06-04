@@ -14,6 +14,7 @@ html
     script(src="//code.jquery.com/jquery-1.11.2.min.js")
     script(src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js",integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous")
     script(src='/javascripts/validator.min.js')
+    script(src='/javascripts/jstz.min.js')
     script(src='/javascripts/shared.js')
     block scripts
 
@@ -26,15 +27,12 @@ html
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand.scroller.hidden-xs.hidden-sm(href='/') ThingEngine
-        span.navbar-icon-divider.hidden-xs.hidden-sm(aria-hidden='true')
-        a(href="https://www.stanford.edu").hidden-xs.hidden-sm
-          img.stanford(src="/images/SUSig_White_Seal_Stacked_Left.png", width='130', alt='Official Seal of Stanford University')
+        a.navbar-brand.scroller.hidden-xs.hidden-sm(href='/') Almond
         span.navbar-brand.scroller.hidden-md.hidden-lg(aria-hidden='true')
           block page_name
 
       div.navbar-collapse.collapse(role="navigation")#page-nav
-        include navbar.jade
+        include navbar.pug
 
     div.container#page-body
       if !index

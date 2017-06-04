@@ -7,45 +7,60 @@
 // See COPYING for details
 
 const Q = require('q');
+Q.longStackSupport = true;
 
 const Engine = require('thingengine-core');
-const Frontend = require('./frontend');
+const WebFrontend = require('./service/frontend');
+const AssistantDispatcher = require('./service/assistant');
+
+let _waitReady;
+let _stopped = false;
+let _engine, _frontend, _ad;
+
+const DEBUG = true;
 
 function main() {
-    Q.longStackSupport = true;
+    global.platform = require('./service/platform');
 
-    global.platform = require('./platform');
+    global.platform.init();
 
-    var test = process.argv.indexOf('--test') >= 0;
-    platform.init(test).then(function() {
-        var engine = new Engine();
-        var frontend = new Frontend();
-        platform._setFrontend(frontend);
-        frontend.setEngine(engine);
+    _frontend = new WebFrontend(global.platform);
 
-        var earlyStop = false;
-        var engineRunning = false;
-        function handleSignal() {
-            if (engineRunning)
-                engine.stop();
-            else
-                earlyStop = true;
-        }
-        //process.on('SIGINT', handleSignal);
-        //process.on('SIGTERM', handleSignal);
+    _waitReady = new Q.Promise((callback, errback) => {
+        _frontend.on('unlock', (key) => {
+            console.log('Attempting unlock...');
+            if (DEBUG)
+                console.log('Unlock key: ' + key.toString('hex'));
+            global.platform._setSqliteKey(key);
 
-        return Q.all([engine.open(), frontend.open()]).then(function() {
-            engineRunning = true;
-            if (earlyStop)
-                return;
-            return engine.run().finally(function() {
-                return Q.all([engine.close(), frontend.close()]);
-            });
+            _engine = new Engine(global.platform);
+            _frontend.setEngine(_engine);
+
+            _ad = new AssistantDispatcher(_engine);
+            global.platform.setAssistant(_ad);
+
+            callback(_engine.open());
         });
-    }).then(function () {
+        _frontend.open();
+    });
+
+    _waitReady.then(function() {
+        _running = true;
+        if (_stopped)
+            return;
+        return _engine.run();
+    }).catch(function(error) {
+        console.log('Uncaught exception: ' + error.message);
+        console.log(error.stack);
+    }).finally(function() {
+        return _engine.close();
+    }).catch(function(error) {
+        console.log('Exception during stop: ' + error.message);
+        console.log(error.stack);
+    }).finally(function() {
         console.log('Cleaning up');
         platform.exit();
-    }).done();
+    });
 }
 
 main();

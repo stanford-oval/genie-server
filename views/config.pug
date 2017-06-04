@@ -17,47 +17,16 @@ block content
       if server.extraAddresses.length > 0
         p The server is also reachable at: #{server.extraAddresses.join(', ')}.
 
-      if server.initialSetup
+      //if server.initialSetup
         p.text-danger The server is in initial setup mode and thus open to
           |  all external access. Pair your phone now!
 
-      if user.isConfigured
-        p Access to this server requires a username and a password.
-        p
-          a.btn.btn-primary(role='button',data-toggle='collapse',href='#change-server-password',aria-expanded=(user.error != null))
-            | Change password
+      p Access to this server requires a password.
+      p
+        a.btn.btn-primary(role='button',data-toggle='collapse',href='#change-server-password',aria-expanded=(user.error != null))
+          | Change password
 
-        div(class=(user.error != null ? 'well' : 'well collapse'))#change-server-password
-          if user.error
-            div.alert.alert-danger.alert-dismissible.fade.in(role='alert')
-              button(type='button', data-dismiss='alert', aria-label="Close").close
-                span(aria-hidden='true') ×
-
-              p= user.error
-
-          form(action='/config/set-server-password',method='post',data-toggle='validator')
-            input(type='hidden',name='_csrf',value=csrfToken)
-            div.form-group
-              label(for='username').control-label Username
-              input(type='text',name='username',value=user.username,required=true,maxlength=255)#username.form-control
-
-            div.form-group
-              label(for='password').control-label Password
-              input(type='password',name='password',value=user.password,required=true,maxlength=255,minlength=8,data-minlength=8).form-control#password
-              span.help-block Minimum of 8 characters
-
-            div.form-group
-              label(for='confirm-password').control-label Confirm password
-              input(type='password',name='confirm-password',value='',required=true,data-match='#password',data-match-error="The password and the confirmation must match").form-control#confirm-password
-              span.help-block.with-errors
-
-            div.form-group
-              button(type='submit').btn.btn-primary Change
-      else
-        p.text-danger
-          | You did not configure a username and a password to access this server!
-          |  You should do it now.
-
+      div(class=(user.error != null ? 'well' : 'well collapse'))#change-server-password
         if user.error
           div.alert.alert-danger.alert-dismissible.fade.in(role='alert')
             button(type='button', data-dismiss='alert', aria-label="Close").close
@@ -67,10 +36,6 @@ block content
 
         form(action='/config/set-server-password',method='post',data-toggle='validator')
           input(type='hidden',name='_csrf',value=csrfToken)
-          div.form-group
-            label(for='username').control-label Username
-            input(type='text',name='username',value=user.username,required=true,maxlength=255)#username.form-control
-
           div.form-group
             label(for='password').control-label Password
             input(type='password',name='password',value=user.password,required=true,maxlength=255,minlength=8,data-minlength=8).form-control#password
@@ -82,7 +47,7 @@ block content
             span.help-block.with-errors
 
           div.form-group
-            button(type='submit').btn.btn-primary Set Password
+            button(type='submit').btn.btn-primary Change
 
   div.panel.panel-default.config-unit
     div.panel-heading
@@ -92,16 +57,17 @@ block content
         p You successfully logged in with your cloud account.
         p Your cloud ID is <samp>#{cloud.id}</samp>
       else
-        p You did not log in to a ThingEngine Cloud account. You can do it now.
+        p You did not log in to a ThingEngine Cloud account.
+        //You can do it now.
 
-        if cloud.error
+        //if cloud.error
           div.alert.alert-danger.alert-dismissible.fade.in(role='alert')
             button(type='button', data-dismiss='alert', aria-label="Close").close
               span(aria-hidden='true') ×
 
             p= cloud.error
 
-        form(action='/config/cloud-setup', method='post').form-inline
+        //form(action='/config/cloud-setup', method='post').form-inline
           input(type='hidden',name='_csrf',value=csrfToken)
           p
             span.form-group
@@ -116,7 +82,7 @@ block content
             span.form-group
               button(type='submit').btn.btn-primary Log in
 
-        p Don't have an account yet? 
+        //p Don't have an account yet?
           a(href='https://thingengine.stanford.edu/user/register') Register now!
 
   div.panel.panel-default.config-unit
@@ -124,7 +90,7 @@ block content
       h2.panel-title Phone
     div.panel-body
       div#config-phone-desktop-browser
-        p To configure your phone, you must visit the address 
+        p To configure your phone, you must visit the address
           samp= server.address
           |  from a mobile browser.
 
