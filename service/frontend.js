@@ -62,6 +62,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
 
         this._app.use(passport.initialize());
         this._app.use(passport.session());
+        this._app.use(passport.authenticate('host-based'));
         user.initializePassport();
 
         this._isLocked = true;

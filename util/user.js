@@ -8,6 +8,7 @@
 
 const Q = require('q');
 const crypto = require('crypto');
+const BaseStrategy = require('passport-strategy');
 
 // a model of user based on sharedpreferences
 const model = {
@@ -35,6 +36,20 @@ const model = {
     }
 };
 
+class HostBasedStrategy extends BaseStrategy {
+    constructor() {
+        super();
+        this.name = 'host-based';
+    }
+
+    authenticate(req, options) {
+        if (req.host === '127.0.0.1')
+            return this.success(model.get())
+        else
+            return this.pass();
+    }
+}
+
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 
@@ -57,6 +72,8 @@ function initializePassport() {
     passport.deserializeUser(function(user, done) {
         done(null, user);
     });
+
+    passport.use(new HostBasedStrategy());
 
     passport.use(new LocalStrategy(function(username, password, done) {
         Q.try(function() {
