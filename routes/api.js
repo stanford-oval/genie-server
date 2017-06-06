@@ -35,11 +35,17 @@ var router = express.Router();
 router.use('/', user.requireLogIn);
 
 class WebsocketAssistantDelegate {
-    constructor(ws) {
+    constructor(ws, say) {
         this._ws = ws;
+        this._say = say;
     }
 
     send(text, icon) {
+        if (this._say) {
+            var audio = platform.getCapability('text-to-speech');
+            audio.say(text);
+        }
+
         return this._ws.send(JSON.stringify({ type: 'text', text: text, icon: icon }));
     }
 
@@ -73,7 +79,7 @@ router.ws('/conversation', function(ws, req, next) {
     var assistant = engine.platform.getCapability('assistant');
 
     var assistantUser = new LocalUser();
-    var delegate = new WebsocketAssistantDelegate(ws);
+    var delegate = new WebsocketAssistantDelegate(ws, req.host === '127.0.0.1');
 
     var opened = false;
     const id = 'web-' + makeRandom(16);

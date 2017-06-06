@@ -62,6 +62,13 @@ const _telephoneApi = JavaAPI.makeJavaAPI('Telephone', ['call', 'callEmergency']
 */
 const BluezBluetooth = require('./bluez');
 
+const textToSpeech = {
+    _queue: Q(),
+    say(text) {
+        this._queue = this._queue.then(() => Q.nfcall(child_process.execFile, '../mimic/mimic', ['-voice', 'slt', '-t', text]));
+    }
+}
+
 function safeMkdirSync(dir) {
     try {
         fs.mkdirSync(dir);
@@ -163,6 +170,8 @@ module.exports = {
         case 'dbus-session':
         case 'dbus-system':
             return true;
+        case 'text-to-speech':
+            return true;
 
         case 'bluetooth':
             return true;
@@ -208,6 +217,8 @@ module.exports = {
             return this._dbusSession;
         case 'dbus-system':
             return this._dbusSystem;
+        case 'text-to-speech':
+            return textToSpeech;
         case 'bluetooth':
             if (!this._btApi)
                 this._btApi = new BluezBluetooth(this);
