@@ -115,7 +115,7 @@ module.exports = {
         cacheDir = getUserCacheDir() + '/almond-server';
         safeMkdirSync(cacheDir);
 
-        this._dbusSession = DBus.sessionBus();
+        this._dbusSession = null;//DBus.sessionBus();
         this._dbusSystem = DBus.systemBus();
         this._btApi = null;
 
@@ -168,6 +168,7 @@ module.exports = {
             return true;
 
         case 'dbus-session':
+            return false;
         case 'dbus-system':
             return true;
         case 'text-to-speech':

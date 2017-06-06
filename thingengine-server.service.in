@@ -11,4 +11,4 @@ Description=ThingEngine personal IoT service
 ExecStart=/usr/bin/node @pkglibdir@/main.js
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
