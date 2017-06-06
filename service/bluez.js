@@ -44,6 +44,8 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
         this._devices = {};
 
         this._discovering = false;
+        this.ondeviceadded = null;
+        this.ondevicechanged = null;
     }
 
     start() {
@@ -75,7 +77,7 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
             return;
 
         this._discovering = true;
-        Q.ninvoke(this._defaultAdapter.as(BLUEZ_ADAPTER_INTERFACE), 'StartDiscovery').done();
+        return Q.ninvoke(this._defaultAdapter.as(BLUEZ_ADAPTER_INTERFACE), 'StartDiscovery');
     }
 
     stopDiscovery() {
@@ -83,7 +85,7 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
             return;
 
         this._discovering = false;
-        Q.ninvoke(this._defaultAdapter.as(BLUEZ_ADAPTER_INTERFACE), 'StopDiscovery').done();
+        return Q.ninvoke(this._defaultAdapter.as(BLUEZ_ADAPTER_INTERFACE), 'StopDiscovery');
     }
 
     _interfacesAdded(objectpath, interfaces) {
@@ -113,21 +115,31 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
         }
     }
 
+    readUUIDs(address) {
+        return Q();
+    }
+
     _deviceAdded(objectpath) {
         console.log('Found BlueZ device at ' + objectpath);
 
-        return Q.ninvoke(this._systemBus, 'getObject', BLUEZ_SERVICE, objectpath)
+        Q.ninvoke(this._systemBus, 'getObject', BLUEZ_SERVICE, objectpath)
             .then(function(object) {
                 object.as(PROPERTY_INTERFACE).on('PropertiesChanged', function() {
                     this._reloadDeviceProperties(object).then(function() {
-                        this.emit('device-changed', objectpath, this._devices[objectpath]);
+                        if (this.ondevicechanged)
+                            this.ondevicechanged(null, this._devices[objectpath]);
+                        //this.emit('device-changed', objectpath, this._devices[objectpath]);
                     }.bind(this));
                 }.bind(this));
 
                 return this._reloadDeviceProperties(object);
             }.bind(this)).then(function() {
-                this.emit('device-added', objectpath, this._devices[objectpath]);
-            }.bind(this));
+                if (this.ondeviceadded)
+                    this.ondeviceadded(null, this._devices[objectpath]);
+                //this.emit('device-added', objectpath, this._devices[objectpath]);
+            }.bind(this)).catch((e) => {
+            console.error('Error while processing new Bluez device: ' + e.message);
+            });
     }
 
     _reloadDeviceProperties(object) {
