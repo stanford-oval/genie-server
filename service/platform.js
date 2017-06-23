@@ -14,6 +14,7 @@ const os = require('os');
 const child_process = require('child_process');
 const Gettext = require('node-gettext');
 const DBus = require('dbus-native');
+const PulseAudio = require('pulseaudio');
 
 const prefs = require('thingengine-core/lib/util/prefs');
 
@@ -61,13 +62,7 @@ const _contactApi = JavaAPI.makeJavaAPI('Contacts', ['lookup'], [], []);
 const _telephoneApi = JavaAPI.makeJavaAPI('Telephone', ['call', 'callEmergency'], [], []);
 */
 const BluezBluetooth = require('./bluez');
-
-const textToSpeech = {
-    _queue: Q(),
-    say(text) {
-        this._queue = this._queue.then(() => Q.nfcall(child_process.execFile, '../mimic/mimic', ['-voice', 'slt', '-t', text]));
-    }
-}
+const SpeechSynthesizer = require('./speech_synthesizer');
 
 function safeMkdirSync(dir) {
     try {
@@ -118,6 +113,10 @@ module.exports = {
         this._dbusSession = null;//DBus.sessionBus();
         this._dbusSystem = DBus.systemBus();
         this._btApi = null;
+        this._pulse = new PulseAudio({
+            client: "thingengine-platform-server"
+        });
+        this._tts = new SpeechSynthesizer();
 
         this._sqliteKey = null;
         this._origin = null;
@@ -175,6 +174,7 @@ module.exports = {
             return true;
 
         case 'bluetooth':
+        case 'pulseaudio':
             return true;
 /*
         // We can use the phone capabilities
@@ -219,11 +219,13 @@ module.exports = {
         case 'dbus-system':
             return this._dbusSystem;
         case 'text-to-speech':
-            return textToSpeech;
+            return this._tts;
         case 'bluetooth':
             if (!this._btApi)
                 this._btApi = new BluezBluetooth(this);
             return this._btApi;
+        case 'pulseaudio':
+            return this._pulse;
 
 /*
         case 'notify-api':

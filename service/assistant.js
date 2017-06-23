@@ -12,6 +12,7 @@ const events = require('events');
 const util = require('util');
 
 const Almond = require('almond');
+const SpeechHandler = require('./speech_handler');
 
 module.exports = class Assistant extends events.EventEmitter {
     constructor(engine) {

@@ -24,8 +24,12 @@
     "passport-local": "^1.0.0",
     "posix": "^4.1.1",
     "pug": "^2.0.0-rc.2",
+    "pulseaudio": "bitbucket:gcampax/node-pulseaudio",
     "q": "^1.5.0",
     "serve-favicon": "^2.4.3",
-    "sqlite3": "^3.1.8"
+    "snowboy": "^1.2.0",
+    "sqlite3": "^3.1.8",
+    "uuid": "^3.1.0",
+    "ws": "^3.0.0"
   }
 }
