@@ -18,11 +18,13 @@ class DetectorStream extends stream.Transform {
         super();
 
         let models = new snowboy.Models();
-        models.add({
-            file: path.resolve(module.filename, '../../data/snowboy.umdl'),
-            sensitivity: '0.5',
-            hotwords : 'snowboy'
-        });
+        for (let m of ['snowboy.umdl', 'almond.pmdl']) {
+	     models.add({
+                 file: path.resolve(module.filename, '../../data/' + m),
+                 sensitivity: '0.5',
+                 hotwords : 'snowboy'
+             });
+        }
 
         this._detector = new snowboy.Detector({
             resource: path.resolve(module.filename, '../../data/snowboy.res'),
