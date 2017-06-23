@@ -10,8 +10,6 @@ const Q = require('q');
 const express = require('express');
 const crypto = require('crypto');
 const passport = require('passport');
-const posix = require('posix');
-
 const Config = require('../config');
 
 const user = require('../util/user');
@@ -20,32 +18,16 @@ function makeRandom(bytes) {
     return crypto.randomBytes(bytes).toString('hex');
 }
 
-class LocalUser {
-    constructor() {
-        var pwnam = posix.getpwnam(process.getuid());
-
-        this.id = process.getuid();
-        this.account = pwnam.name;
-        this.name = pwnam.gecos;
-    }
-}
-
 var router = express.Router();
 
 router.use('/', user.requireLogIn);
 
 class WebsocketAssistantDelegate {
-    constructor(ws, say) {
+    constructor(ws) {
         this._ws = ws;
-        this._say = say;
     }
 
     send(text, icon) {
-        if (this._say) {
-            var audio = platform.getCapability('text-to-speech');
-            audio.say(text);
-        }
-
         return this._ws.send(JSON.stringify({ type: 'text', text: text, icon: icon }));
     }
 
@@ -72,32 +54,48 @@ class WebsocketAssistantDelegate {
     sendAskSpecial(what) {
         return this._ws.send(JSON.stringify({ type: 'askSpecial', ask: what }));
     }
+
+    sendHypothesis(hypothesis) {
+        return this._ws.send(JSON.stringify({ type: 'hypothesis', hypothesis: hypothesis }));
+    }
+
+    sendCommand(command) {
+        return this._ws.send(JSON.stringify({ type: 'command', text: command }));
+    }
 }
 
 router.ws('/conversation', function(ws, req, next) {
-    var engine = req.app.engine;
-    var assistant = engine.platform.getCapability('assistant');
+    const engine = req.app.engine;
+    const assistant = engine.platform.getCapability('assistant');
 
-    var assistantUser = new LocalUser();
-    var delegate = new WebsocketAssistantDelegate(ws, req.host === '127.0.0.1');
+    const delegate = new WebsocketAssistantDelegate(ws);
+    const isMain = req.host === '127.0.0.1';
 
-    var opened = false;
+    let opened = false;
     const id = 'web-' + makeRandom(16);
     ws.on('error', (err) => {
         ws.close();
     });
     ws.on('close', () => {
-        if (opened)
-            assistant.closeConversation(id); // ignore errors if engine died
+        if (opened) {
+            if (isMain)
+                conversation.removeOutput(delegate);
+            else
+                assistant.closeConversation(id);
+        }
         opened = false;
     });
 
-    var conversation = assistant.openConversation(id, assistantUser, delegate, {
-        sempreUrl: Config.SEMPRE_URL,
-        showWelcome: true
-    });
-    opened = true;
-    conversation.start();
+    let conversation;
+    if (isMain) {
+        conversation = assistant.getConversation('main');
+        conversation.addOutput(delegate);
+        opened = true;
+    } else {
+        conversation = assistant.openConversation(id, delegate);
+        opened = true;
+        conversation.start();
+    }
 
     ws.on('message', (data) => {
         Q.try(() => {

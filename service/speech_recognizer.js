@@ -135,12 +135,12 @@ class SpeechRequest extends events.EventEmitter {
     _sendAudioChunk(chunk) {
         if (this._ended || this._endDetected)
             return;
-        /*if (chunk.length > 8192) {
+        if (chunk.length > 8192) {
             for (let i = 0; i < chunk.length; i += 8192)
                 this._sendAudioChunk(chunk.slice(i, Math.min(chunk.length, i+8192)));
             return;
-        }*/
-        console.log('Sending chunk of length ' + chunk.length);
+        }
+        //console.log('Sending chunk of length ' + chunk.length);
 
         let header = Buffer.from(encodeHeaders('audio', 'audio/x-wav', this._requestId), 'utf8');
         let message;

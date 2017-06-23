@@ -10,10 +10,23 @@ const child_process = require('child_process');
 
 module.exports = class SpeechSynthesizer {
     constructor() {
-        this._queue = Q();
+        this._queue = [];
+        this._promise = Q();
+    }
+
+    clearQueue() {
+        this._queue.length = 0;
     }
 
     say(text) {
-        return this._queue = this._queue.then(() => Q.nfcall(child_process.execFile, '../mimic/mimic', ['-voice', 'slt', '-t', text]));
+        this._queue.push(text);
+        return this._promise = this._promise.then(() => this._sayNext());
+    }
+
+    _sayNext() {
+        if (this._queue.length === 0)
+            return Q();
+        let text = this._queue.shift();
+        return Q.nfcall(child_process.execFile, '../mimic/mimic', ['-voice', 'slt', '-t', text]);
     }
 }

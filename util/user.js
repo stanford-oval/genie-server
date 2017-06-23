@@ -43,7 +43,7 @@ class HostBasedStrategy extends BaseStrategy {
     }
 
     authenticate(req, options) {
-        if (req.host === '127.0.0.1')
+        if (req.host === '127.0.0.1' && !req.isLocked)
             return this.success(model.get())
         else
             return this.pass();

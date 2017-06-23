@@ -38,6 +38,7 @@ function main() {
 
             _ad = new AssistantDispatcher(_engine);
             global.platform.setAssistant(_ad);
+            _ad.start();
 
             callback(_engine.open());
         });
@@ -53,6 +54,7 @@ function main() {
         console.log('Uncaught exception: ' + error.message);
         console.log(error.stack);
     }).finally(function() {
+        _ad.stop();
         return _engine.close();
     }).catch(function(error) {
         console.log('Exception during stop: ' + error.message);

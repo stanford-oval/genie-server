@@ -62,14 +62,17 @@ module.exports = class WebFrontend extends events.EventEmitter {
 
         this._app.use(passport.initialize());
         this._app.use(passport.session());
+        this._isLocked = true;
+        this._app.use((req, res, next) => {
+            req.isLocked = this._isLocked;
+            res.locals.isLocked = this._isLocked;
+            next();
+        });
         this._app.use(passport.authenticate('host-based'));
         user.initializePassport();
 
-        this._isLocked = true;
         this._app.use((req, res, next) => {
             this._platform._setOrigin(req.protocol + '://' + req.hostname + ':' + this._app.get('port'));
-
-            res.locals.isLocked = this._isLocked;
             if (req.user) {
                 res.locals.authenticated = true;
                 res.locals.user = { username: req.user, isConfigured: true };

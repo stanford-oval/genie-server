@@ -84,10 +84,10 @@ $(function() {
     }
 
     function linkMessage(title, url) {
-        if (url === '/apps')
+        /*if (url === '/apps')
             url = '/me';
         else if (url.startsWith('/devices'))
-            url = '/me' + url;
+            url = '/me' + url;*/
 
         var holder = $('<div>').addClass('col-xs-12 col-sm-6 col-md-4');
         var btn = $('<a>').addClass('message message-button btn btn-default')
@@ -158,6 +158,16 @@ $(function() {
             syncCancelButton(parsed);
             if (parsed.ask === 'yesno')
                 yesnoMessage();
+            break;
+
+        case 'hypothesis':
+            $('#input').val(parsed.hypothesis);
+            break;
+
+        case 'command':
+            $('#input').val('');
+            collapseButtons();
+            appendUserMessage(parsed.text);
             break;
         }
     }

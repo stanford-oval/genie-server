@@ -76,18 +76,12 @@ function safeMkdirSync(dir) {
 function getUserConfigDir() {
     if (process.env.XDG_CONFIG_HOME)
         return process.env.XDG_CONFIG_HOME;
-    if (process.env.HOME)
-        return process.env.HOME + '/.config';
-    // FIXME consult /etc/passwd
-    return '/home/' + process.env.USER + '/.config';
+    return os.homedir() + '/.config';
 }
 function getUserCacheDir() {
     if (process.env.XDG_CACHE_HOME)
         return process.env.XDG_CACHE_HOME;
-    if (process.env.HOME)
-        return process.env.HOME + '/.cache';
-    // FIXME consult /etc/passwd
-    return '/home/' + process.env.USER + '/.cache';
+    return os.homedir() + '/.cache';
 }
 
 module.exports = {
