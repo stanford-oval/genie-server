@@ -42,7 +42,7 @@ class SpeechRequest extends events.EventEmitter {
         this._ended = false;
         this._sentRIFFHeader = false;
 
-        this._debugFile = fs.createWriteStream('out_' + process.pid + '_' + (i++) + '.wav');
+        //this._debugFile = fs.createWriteStream('out_' + process.pid + '_' + (i++) + '.wav');
     }
 
     start(stream, connection, connectionTelemetry) {
@@ -93,7 +93,7 @@ class SpeechRequest extends events.EventEmitter {
         }));
         this._ended = true;
 
-        this._debugFile.end();
+        //this._debugFile.end();
     }
 
     _handleMessage(msg) {
@@ -166,13 +166,13 @@ class SpeechRequest extends events.EventEmitter {
             riffHeader.writeInt16LE(16, 34); // bits per sample
             riffHeader.write('data', 36);
             riffHeader.writeInt32LE(0x7fff0000, 40);
-            this._debugFile.write(riffHeader);
+            //this._debugFile.write(riffHeader);
             riffHeader.copy(message, 2 + header.length);
-            this._debugFile.write(chunk);
+            //this._debugFile.write(chunk);
             chunk.copy(message, 2 + 44 + header.length);
             this._sentRIFFHeader = true;
         } else {
-            this._debugFile.write(chunk);
+            //this._debugFile.write(chunk);
             chunk.copy(message, 2 + header.length);
         }
         if (this._connection.readyState === 1) // OPEN

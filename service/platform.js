@@ -11,6 +11,7 @@
 const Q = require('q');
 const fs = require('fs');
 const os = require('os');
+const path = require('path');
 const child_process = require('child_process');
 const Gettext = require('node-gettext');
 const DBus = require('dbus-native');
@@ -110,7 +111,7 @@ module.exports = {
         this._pulse = new PulseAudio({
             client: "thingengine-platform-server"
         });
-        this._tts = new SpeechSynthesizer();
+        this._tts = new SpeechSynthesizer(this._pulse, path.resolve(module.filename, '../../data/cmu_us_slt.flitevox'));
 
         this._sqliteKey = null;
         this._origin = null;

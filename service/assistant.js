@@ -137,6 +137,7 @@ module.exports = class Assistant extends events.EventEmitter {
         this._lastConversation = null;
 
         this._speechHandler = new SpeechHandler(engine.platform);
+        this._speechSynth = platform.getCapability('text-to-speech');
         this._mainConversation = new MainConversation(engine, this._speechHandler, {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true
@@ -145,11 +146,15 @@ module.exports = class Assistant extends events.EventEmitter {
     }
 
     start() {
-        this._speechHandler.start();
-        this._mainConversation.start();
+        return Promise.all([
+            this._speechSynth.start(),
+            this._speechHandler.start(),
+            this._mainConversation.start()
+        ]);
     }
 
     stop() {
+        this._speechSynth.stop();
         this._speechHandler.stop();
     }
 

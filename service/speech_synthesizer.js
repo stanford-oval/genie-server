@@ -6,12 +6,26 @@
 "use strict";
 
 const Q = require('q');
-const child_process = require('child_process');
+const mimic = require('node-mimic');
 
 module.exports = class SpeechSynthesizer {
-    constructor() {
+    constructor(pulseCtx, voiceFile) {
+        this._pulseCtx = pulseCtx;
+        this._voiceFile = voiceFile;
         this._queue = [];
         this._promise = Q();
+
+        this._outputStream = null;
+        this._closeTimeout = null;
+        mimic.init();
+    }
+
+    start() {
+        return this._promise = Q.nfcall(mimic.loadVoice, this._voiceFile).then((voice) => {
+            this._voice = voice;
+        });
+    }
+    stop() {
     }
 
     clearQueue() {
@@ -27,6 +41,25 @@ module.exports = class SpeechSynthesizer {
         if (this._queue.length === 0)
             return Q();
         let text = this._queue.shift();
-        return Q.nfcall(child_process.execFile, '../mimic/mimic', ['-voice', 'slt', '-t', text]);
+        return Q.ninvoke(this._voice, 'textToSpeech', text).then((result) => {
+            if (!this._outputStream) {
+                this._outputStream = this._pulseCtx.createPlaybackStream({
+                    format: 'S16NE',
+                    rate: result.sampleRate,
+                    channels: result.numChannels,
+                    stream: 'thingengine-voice-output'
+                });
+            }
+            if (this._closeTimeout)
+                clearTimeout(this._closeTimeout);
+            this._closeTimeout = setTimeout(() => {
+                this._outputStream.end();
+                this._outputStream = null;
+                this._closeTimeout = null;
+            }, 60000);
+            this._outputStream.write(result.buffer);
+        }).catch((e) => {
+            console.error('Failed to speak: ' + e);
+        });
     }
 }

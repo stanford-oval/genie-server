@@ -20,6 +20,7 @@
     "levelup": "^1.3.8",
     "morgan": "^1.8.2",
     "node-gettext": "https://github.com/gcampax/node-gettext/tarball/master",
+    "node-mimic": "0.0.1",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "posix": "^4.1.1",
