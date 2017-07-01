@@ -6,6 +6,7 @@
 //
 // See COPYING for details
 
+module.exports.ENABLE_DB_ENCRYPTION = false;
 module.exports.SEMPRE_URL = 'https://sabrina-nl.stanford.edu';
 module.exports.S3_CLOUDFRONT_HOST = 'https://d1ge76rambtuys.cloudfront.net';
 module.exports.THINGPEDIA_URL = 'https://thingpedia.stanford.edu';

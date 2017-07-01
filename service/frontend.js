@@ -62,7 +62,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
 
         this._app.use(passport.initialize());
         this._app.use(passport.session());
-        this._isLocked = true;
+        this._isLocked = Config.ENABLE_DB_ENCRYPTION;
         this._app.use((req, res, next) => {
             req.isLocked = this._isLocked;
             res.locals.isLocked = this._isLocked;

@@ -13,11 +13,13 @@ const Engine = require('thingengine-core');
 const WebFrontend = require('./service/frontend');
 const AssistantDispatcher = require('./service/assistant');
 
+const Config = require('./config');
+
 let _waitReady;
 let _stopped = false;
 let _engine, _frontend, _ad;
 
-const DEBUG = true;
+const DEBUG = false;
 
 function main() {
     global.platform = require('./service/platform');
@@ -26,24 +28,31 @@ function main() {
 
     _frontend = new WebFrontend(global.platform);
 
-    _waitReady = new Q.Promise((callback, errback) => {
-        _frontend.on('unlock', (key) => {
-            console.log('Attempting unlock...');
-            if (DEBUG)
-                console.log('Unlock key: ' + key.toString('hex'));
-            global.platform._setSqliteKey(key);
+    function init() {
+        _engine = new Engine(global.platform);
+        _frontend.setEngine(_engine);
 
-            _engine = new Engine(global.platform);
-            _frontend.setEngine(_engine);
-
-            _ad = new AssistantDispatcher(_engine);
-            global.platform.setAssistant(_ad);
-            _ad.start();
-
-            callback(_engine.open());
+        _ad = new AssistantDispatcher(_engine);
+        global.platform.setAssistant(_ad);
+        return _engine.open().then(() => {
+            return _ad.start();
         });
-        _frontend.open();
-    });
+    }
+
+    if (Config.ENABLE_DB_ENCRYPTION) {
+        _waitReady = new Q.Promise((callback, errback) => {
+            _frontend.on('unlock', (key) => {
+                console.log('Attempting unlock...');
+                if (DEBUG)
+                    console.log('Unlock key: ' + key.toString('hex'));
+                global.platform._setSqliteKey(key);
+                callback(init());
+            });
+        });
+    } else {
+        _waitReady = init();
+    }
+    _frontend.open();
 
     _waitReady.then(function() {
         _running = true;
