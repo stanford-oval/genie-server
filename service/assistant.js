@@ -158,15 +158,15 @@ module.exports = class Assistant extends events.EventEmitter {
         this._speechHandler.stop();
     }
 
-    notifyAll(data) {
+    notifyAll(...data) {
         return Q.all(Object.keys(this._conversations).map(function(id) {
-            return this._conversations[id].notify(data);
+            return this._conversations[id].notify(...data);
         }.bind(this)));
     }
 
-    notifyErrorAll(data) {
+    notifyErrorAll(...data) {
         return Q.all(Object.keys(this._conversations).map(function(id) {
-            return this._conversations[id].notifyError(data);
+            return this._conversations[id].notifyError(...data);
         }.bind(this)));
     }
 
