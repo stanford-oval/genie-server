@@ -57,7 +57,12 @@ module.exports = class SpeechSynthesizer {
                 this._outputStream = null;
                 this._closeTimeout = null;
             }, 60000);
+
+            let duration = result.buffer.length /2 /
+                result.sampleRate / result.numChannels * 1000;
+            console.log('outputstream write for ' + text);
             this._outputStream.write(result.buffer);
+            return Q.delay(duration);
         }).catch((e) => {
             console.error('Failed to speak: ' + e);
         });
