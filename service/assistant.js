@@ -61,7 +61,7 @@ class MainConversationDelegate {
         this._outputs.add(out);
     }
     removeOutput(out) {
-        this._outputs.remove(out);
+        this._outputs.delete(out);
     }
 
     send(text, icon) {

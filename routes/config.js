@@ -10,8 +10,6 @@
 const Config = require('thingengine-core/lib/config');
 
 const Q = require('q');
-const http = require(Config.THINGENGINE_ACCESS_MODULE);
-const httpStatusCodes = require('http').STATUS_CODES;
 const url = require('url');
 const express = require('express');
 var router = express.Router();
