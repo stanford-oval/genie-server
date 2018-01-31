@@ -6,6 +6,7 @@
     "start": "node main.js"
   },
   "dependencies": {
+    "almond": "github:Stanford-Mobisocial-IoT-Lab/almond-dialog-agent#stable",
     "body-parser": "^1.17.2",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.3",
@@ -21,6 +22,7 @@
     "morgan": "^1.8.2",
     "node-gettext": "https://github.com/gcampax/node-gettext/tarball/master",
     "node-mimic": "0.0.1",
+    "omlib": "github:Stanford-Mobisocial-IoT-Lab/omclient#master",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",
     "posix": "^4.1.1",
@@ -30,6 +32,10 @@
     "serve-favicon": "^2.4.3",
     "snowboy": "^1.2.0",
     "sqlite3": "^3.1.8",
+    "thingengine-core": "github:Stanford-Mobisocial-IoT-Lab/thingengine-core#stable",
+    "thingpedia": "github:Stanford-Mobisocial-IoT-Lab/thingpedia-api#stable",
+    "thingpedia-discovery": "github:Stanford-Mobisocial-IoT-Lab/thingpedia-discovery#stable",
+    "thingtalk": "github:Stanford-Mobisocial-IoT-Lab/ThingTalk#stable",
     "uuid": "^3.1.0",
     "ws": "^3.0.0"
   }
