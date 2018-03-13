@@ -19,8 +19,13 @@ In addition, as a special exception, the copyright holders give
 permission to link the code of portions of this program with the
 OpenSSL library, and distribute linked combinations
 including the two.
+In addition, as a special exception, the copyright holders give
+permission to link the code of portions of this program with the
+Snowboy binary library, and distribute linked combinations
+including the two.
+
 You must obey the GNU General Public License in all respects
-for all of the code used other than OpenSSL.  If you modify
+for all of the code used other than OpenSSL and Snowboy.  If you modify
 file(s) with this exception, you may extend this exception to your
 version of the file(s), but you are not obligated to do so.  If you
 do not wish to do so, delete this exception statement from your
@@ -32,6 +37,23 @@ files in the program, then also delete it here.
 This package depends on various third-party node.js modules. Those
 modules are copyright of their respective authors, and the license
 to each module is included in the module folder.
+
+This package also includes the cmu_us_slt voice file
+(data/cmu_us_slt.flitevox)
+This was obtained from the mimic project, which in turn obtained it
+from the flite project.
+This file is copyright 1999-2014 Language Technologies Institute, Carnegie Mellon University
+It is licensed under the flite project license.
+
+This package also includes the snowboy resource file, and the
+snowboy pretrained model for the "snowboy" hotword (files
+data/snowboy.res, data/snowboy.umdl).
+These files are Copyright 2017 Kitt.AI, and are available under
+the Apache 2.0 license.
+
+This package also includes the snowboy pretrained model for the
+"almond" hotword (file data/almond.pmdl). This file is
+under the public domain.
 
 ===================================================================
 
