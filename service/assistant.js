@@ -13,6 +13,7 @@ const Q = require('q');
 const events = require('events');
 const util = require('util');
 const posix = require('posix');
+const child_process = require('child_process');
 
 const Almond = require('almond');
 const SpeechHandler = require('./speech_handler');
@@ -38,6 +39,10 @@ class MainConversationDelegate {
         this._speechHandler.on('hypothesis', (hypothesis) => {
             for (let out of this._outputs)
                 out.sendHypothesis(hypothesis);
+        });
+        this._speechHandler.on('hotword', (hotword) => {
+            child_process.spawn('xset', ['dpms', 'force', 'on']);
+            child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
         });
         this._speechHandler.on('utterance', (utterance) => {
             for (let out of this._outputs)
@@ -142,7 +147,7 @@ module.exports = class Assistant extends events.EventEmitter {
         this._speechSynth = platform.getCapability('text-to-speech');
         this._mainConversation = new MainConversation(engine, this._speechHandler, {
             sempreUrl: Config.SEMPRE_URL,
-            showWelcome: true
+            showWelcome: false
         });
         this._conversations['main'] = this._lastConversation = this._mainConversation;
     }

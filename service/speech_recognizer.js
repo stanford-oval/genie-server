@@ -17,8 +17,7 @@ const Url = require('url');
 const uuid = require('uuid');
 const WebSocket = require('ws');
 
-const MS_SPEECH_RECOGNITION_PRIMARY_KEY = "14661070ff9c496398a09c939b41bd72";
-const MS_SPEECH_RECOGNITION_SECONDARY_KEY = "155d0afd2d084be48dbe18dc8844cfa8";
+const Config = require('../config');
 
 function encodeHeaders(path, contentType, requestId) {
     let headers = {
@@ -80,8 +79,12 @@ class SpeechRequest extends events.EventEmitter {
         this._endTime = (new Date).toISOString();
 
         let receivedMessages = [];
-        for (let path in this._receivedMessages)
-            receivedMessages.push({ [path]: this._receivedMessages[path] });
+        for (let path in this._receivedMessages) {
+            if (this._receivedMessages[path].length === 1)
+                receivedMessages.push({ [path]: this._receivedMessages[path][0] });
+            else
+                receivedMessages.push({ [path]: this._receivedMessages[path] });
+        }
         this._sendTextMessage('telemetry', 'application/json', JSON.stringify({
             ReceivedMessages: receivedMessages,
             Metrics: [
@@ -209,7 +212,7 @@ module.exports = class SpeechRecognizer extends events.EventEmitter {
         url.method = 'POST';
         url.headers = {
             'Content-type': 'application/x-www-form-urlencoded',
-            'Ocp-Apim-Subscription-Key': MS_SPEECH_RECOGNITION_PRIMARY_KEY,
+            'Ocp-Apim-Subscription-Key': Config.MS_SPEECH_RECOGNITION_PRIMARY_KEY,
             'Content-Length': '0'
         };
         return new Promise((callback, errback) => {
@@ -256,7 +259,7 @@ module.exports = class SpeechRecognizer extends events.EventEmitter {
             perMessageDeflate: true,
             headers: {
                 'Authorization': 'Bearer ' + accessToken,
-                'Ocp-Apim-Subscription-Key': MS_SPEECH_RECOGNITION_SECONDARY_KEY,
+                'Ocp-Apim-Subscription-Key': Config.MS_SPEECH_RECOGNITION_SECONDARY_KEY,
                 'X-ConnectionId': connectionId
             }
         });
@@ -275,8 +278,8 @@ module.exports = class SpeechRecognizer extends events.EventEmitter {
                         },
                         os: {
                             platform: 'Linux',
-                            name: 'Fedora',
-                            version: '26.0.0',
+                            name: 'Debian',
+                            version: '9.0.0',
                         },
                         device: {
                             manufacturer: 'Unknown',
@@ -293,10 +296,16 @@ module.exports = class SpeechRecognizer extends events.EventEmitter {
             });
             connection.on('close', (code, reason) => {
                 if (code !== 1000) // 1000 = normal closure (eg timeout, or we closed on our side)
-                console.log('Connection to MS Speech Recognizer service closed: ' + code + ' ' + reason);
+                    console.log('Connection to MS Speech Recognizer service closed: ' + code + ' ' + reason);
                 this._connection = null;
             });
-            connection.on('error', (e) => this.emit('error', e));
+            connection.on('error', (e) => {
+                this._connection = null;
+                if (e.code === 'ECONNRESET')
+                    console.log('Error on MS Speech Recognizer: Connection Reset');
+                else
+                    this.emit('error', e);
+            });
         });
     }
 
