@@ -7,6 +7,7 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 //
 // See COPYING for details
+"use strict";
 
 const Q = require('q');
 const crypto = require('crypto');
@@ -14,13 +15,13 @@ const BaseStrategy = require('passport-strategy');
 
 // a model of user based on sharedpreferences
 const model = {
-    isConfigured: function() {
+    isConfigured() {
         var prefs = platform.getSharedPreferences();
         var user = prefs.get('server-login');
         return user !== undefined;
     },
 
-    get: function() {
+    get() {
         var prefs = platform.getSharedPreferences();
         var user = prefs.get('server-login');
         if (user === undefined)
@@ -28,7 +29,7 @@ const model = {
         return user;
     },
 
-    set: function(salt, sqliteKeySalt, passwordHash) {
+    set(salt, sqliteKeySalt, passwordHash) {
         var prefs = platform.getSharedPreferences();
         var user = { password: passwordHash,
                      salt: salt,
@@ -46,7 +47,7 @@ class HostBasedStrategy extends BaseStrategy {
 
     authenticate(req, options) {
         if (req.host === '127.0.0.1' && !req.isLocked && model.isConfigured())
-            return this.success(model.get())
+            return this.success(model.get());
         else
             return this.pass();
     }
@@ -61,28 +62,26 @@ function makeRandom() {
 
 function hashPassword(salt, password) {
     return Q.nfcall(crypto.pbkdf2, password, salt, 10000, 32)
-        .then(function(buffer) {
-            return buffer.toString('hex');
-        });
+        .then((buffer) => buffer.toString('hex'));
 }
 
 function initializePassport() {
-    passport.serializeUser(function(user, done) {
+    passport.serializeUser((user, done) => {
         done(null, user);
     });
 
-    passport.deserializeUser(function(user, done) {
+    passport.deserializeUser((user, done) => {
         done(null, user);
     });
 
     passport.use(new HostBasedStrategy());
 
-    passport.use(new LocalStrategy(function(username, password, done) {
-        Q.try(function() {
+    passport.use(new LocalStrategy((username, password, done) => {
+        Q.try(() => {
             try {
                 var user = model.get();
 
-                return hashPassword(user.salt, password).then(function(hash) {
+                return hashPassword(user.salt, password).then((hash) => {
                     if (hash !== user.password)
                         return [false, "Invalid username or password"];
 
@@ -91,9 +90,9 @@ function initializePassport() {
             } catch(e) {
                 return [false, e.message];
             }
-        }).then(function(result) {
+        }).then((result) => {
             done(null, result[0], { message: result[1] });
-        }, function(err) {
+        }, (err) => {
             done(err);
         }).done();
     }));
@@ -109,7 +108,7 @@ module.exports = {
     register(password) {
         var salt = makeRandom();
         var sqliteKeySalt = makeRandom();
-        return hashPassword(salt, password).then(function(hash) {
+        return hashPassword(salt, password).then((hash) => {
             return model.set(salt, sqliteKeySalt, hash);
         });
     },
@@ -150,6 +149,6 @@ module.exports = {
             res.redirect('/user/login');
         } else {
             next();
-        };
+        }
     }
 };

@@ -7,6 +7,7 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 //
 // See COPYING for details
+"use strict";
 
 const Q = require('q');
 
@@ -27,16 +28,16 @@ function getAllDevices(req, engine) {
                  isDataSource: d.hasKind('data-source'),
                  isPhysical: !d.hasKind('online-account') && !d.hasKind('data-source'),
                  isThingEngine: d.hasKind('thingengine-system') };
-    }).filter(d => !d.isThingEngine);
+    }).filter((d) => !d.isThingEngine);
 }
 
-router.get('/', user.redirectLogIn, function(req, res, next) {
+router.get('/', user.redirectLogIn, (req, res, next) => {
     res.render('devices_list', { page_title: 'Almond - My Goods',
                                  csrfToken: req.csrfToken(),
                                  devices: getAllDevices(req, req.app.engine) });
 });
 
-router.get('/create', user.redirectLogIn, function(req, res, next) {
+router.get('/create', user.redirectLogIn, (req, res, next) => {
     if (req.query.class && ['online', 'physical', 'data'].indexOf(req.query.class) < 0) {
         res.status(404).render('error', { page_title: req._("Thingpedia - Error"),
                                           message: req._("Invalid device class") });
@@ -51,13 +52,13 @@ router.get('/create', user.redirectLogIn, function(req, res, next) {
                                  });
 });
 
-router.post('/create', user.requireLogIn, function(req, res, next) {
+router.post('/create', user.requireLogIn, (req, res, next) => {
     var engine = req.app.engine;
     var devices = engine.devices;
 
     Q.try(() => {
         if (typeof req.body['kind'] !== 'string' ||
-            req.body['kind'].length == 0)
+            req.body['kind'].length === 0)
             throw new Error("You must choose one kind of device");
 
         delete req.body['_csrf'];
@@ -69,13 +70,13 @@ router.post('/create', user.requireLogIn, function(req, res, next) {
         } else {
             res.redirect(303, '/me');
         }
-    }).catch(function(e) {
+    }).catch((e) => {
         res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message });
     }).done();
 });
 
-router.post('/delete', user.requireLogIn, function(req, res, next) {
+router.post('/delete', user.requireLogIn, (req, res, next) => {
     var engine = req.app.engine;
     var id = req.body.id;
     var device;
@@ -99,15 +100,15 @@ router.post('/delete', user.requireLogIn, function(req, res, next) {
     }
 });
 
-router.get('/oauth2/:kind', user.redirectLogIn, function(req, res, next) {
+router.get('/oauth2/:kind', user.redirectLogIn, (req, res, next) => {
     var kind = req.params.kind;
 
     var engine = req.app.engine;
     var devFactory = engine.devices.factory;
 
-    Q.try(function() {
+    Q.try(() => {
         return Q(devFactory.runOAuth2(kind, null));
-    }).then(function(result) {
+    }).then((result) => {
         if (result !== null) {
             var redirect = result[0];
             var session = result[1];
@@ -117,24 +118,24 @@ router.get('/oauth2/:kind', user.redirectLogIn, function(req, res, next) {
         } else {
             res.redirect('/devices?class=online');
         }
-    }).catch(function(e) {
+    }).catch((e) => {
         console.log(e.stack);
         res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message });
     }).done();
 });
 
-router.get('/oauth2/callback/:kind', user.redirectLogIn, function(req, res, next) {
+router.get('/oauth2/callback/:kind', user.redirectLogIn, (req, res, next) => {
     var kind = req.params.kind;
 
     var engine = req.app.engine;
     var devFactory = engine.devices.factory;
 
-    Q.try(function() {
-        return Q(devFactory.runOAuth2(kind, req));
-    }).then(function() {
+    Q.try(() => {
+        return devFactory.runOAuth2(kind, req);
+    }).then(() => {
         res.redirect('/devices?class=online');
-    }).catch(function(e) {
+    }).catch((e) => {
         console.log(e.stack);
         res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message });

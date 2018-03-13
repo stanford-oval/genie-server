@@ -11,7 +11,6 @@
 
 const Q = require('q');
 const events = require('events');
-const util = require('util');
 const posix = require('posix');
 const child_process = require('child_process');
 
@@ -109,7 +108,7 @@ class MainConversationDelegate {
         for (let out of this._outputs)
             out.sendAskSpecial.apply(out, arguments);
     }
-};
+}
 
 class MainConversation extends Almond {
     constructor(engine, speechHandler, options) {
@@ -166,15 +165,15 @@ module.exports = class Assistant extends events.EventEmitter {
     }
 
     notifyAll(...data) {
-        return Q.all(Object.keys(this._conversations).map(function(id) {
+        return Q.all(Object.keys(this._conversations).map((id) => {
             return this._conversations[id].notify(...data);
-        }.bind(this)));
+        }));
     }
 
     notifyErrorAll(...data) {
-        return Q.all(Object.keys(this._conversations).map(function(id) {
+        return Q.all(Object.keys(this._conversations).map((id) => {
             return this._conversations[id].notifyError(...data);
-        }.bind(this)));
+        }));
     }
 
     getMainConversation() {
@@ -208,4 +207,4 @@ module.exports = class Assistant extends events.EventEmitter {
             this._lastConversation = null;
         delete this._conversations[feedId];
     }
-}
+};

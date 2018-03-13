@@ -7,8 +7,8 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 //
 // See COPYING for details
+"use strict";
 
-const Q = require('q');
 const express = require('express');
 var router = express.Router();
 

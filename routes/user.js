@@ -7,6 +7,7 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 //
 // See COPYING for details
+"use strict";
 
 const Q = require('q');
 const express = require('express');
@@ -16,7 +17,7 @@ const user = require('../util/user');
 
 var router = express.Router();
 
-router.get('/configure', function(req, res, next) {
+router.get('/configure', (req, res, next) => {
     if (user.isConfigured()) {
         res.status(400).render('error', {
             message: "User already configured",
@@ -31,7 +32,7 @@ router.get('/configure', function(req, res, next) {
     });
 });
 
-router.post('/configure', function(req, res, next) {
+router.post('/configure', (req, res, next) => {
     if (user.isConfigured()) {
         res.status(400).render('error', {
             message: "User already configured",
@@ -60,15 +61,15 @@ router.post('/configure', function(req, res, next) {
         return;
     }
 
-    user.register(password).then(function(userObj) {
+    user.register(password).then((userObj) => {
         user.unlock(req, password);
         return Q.ninvoke(req, 'login', userObj);
-    }).then(function() {
+    }).then(() => {
         // Redirection back to the original page
         var redirect_to = req.session.redirect_to || '/';
         delete req.session.redirect_to;
         res.redirect(redirect_to);
-    }).catch(function(error) {
+    }).catch((error) => {
         res.render('configure', {
             csrfToken: req.csrfToken(),
             page_title: "Almond - Setup",
@@ -77,7 +78,7 @@ router.post('/configure', function(req, res, next) {
     });
 });
 
-router.get('/login', function(req, res, next) {
+router.get('/login', (req, res, next) => {
     res.render('login', {
         csrfToken: req.csrfToken(),
         errors: req.flash('error'),
@@ -87,16 +88,15 @@ router.get('/login', function(req, res, next) {
 
 
 router.post('/login', passport.authenticate('local', { failureRedirect: '/user/login',
-                                                       failureFlash: true }),
-    function(req, res, next) {
-        user.unlock(req, req.body.password);
-        // Redirection back to the original page
-        var redirect_to = req.session.redirect_to || '/';
-        delete req.session.redirect_to;
-        res.redirect(redirect_to);
-    });
+                                                       failureFlash: true }), (req, res, next) => {
+    user.unlock(req, req.body.password);
+    // Redirection back to the original page
+    var redirect_to = req.session.redirect_to || '/';
+    delete req.session.redirect_to;
+    res.redirect(redirect_to);
+});
 
-router.get('/logout', function(req, res, next) {
+router.get('/logout', (req, res, next) => {
     req.logout();
     res.redirect('/');
 });

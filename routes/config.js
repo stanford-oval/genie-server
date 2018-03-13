@@ -7,12 +7,9 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 //
 // See COPYING for details
-
-// FIXME
-const Config = require('thingengine-core/lib/config');
+"use strict";
 
 const Q = require('q');
-const url = require('url');
 const express = require('express');
 var router = express.Router();
 

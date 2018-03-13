@@ -7,12 +7,12 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 //
 // See COPYING for details
+"use strict";
 
 const crypto = require('crypto');
-const Q = require('q');
 
 module.exports = {
-    getSecretKey: function() {
+    getSecretKey() {
         var prefs = platform.getSharedPreferences();
 
         var sessionKey = prefs.get('session-key');

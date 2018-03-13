@@ -1,3 +1,4 @@
+"use strict";
 $(function() {
     var url = (location.protocol === 'https' ? 'wss' : 'ws') + '://' + location.host
         + '/api/conversation';
@@ -17,8 +18,8 @@ $(function() {
 
     function almondMessage(icon) {
         var msg = $('<span>').addClass('message-container from-almond');
-        icon = icon || 'org.thingpedia.builtin.almond';
-        var src = 'https://d1ge76rambtuys.cloudfront.net/icons/' + icon + '.png';
+        icon = icon || 'org.thingpedia.builtin.thingengine.builtin';
+        var src = 'https://crowdie.stanford.edu/thingpedia/api/devices/icon/' + icon;
         msg.append($('<img>').addClass('icon').attr('src', src));
         container.append(msg);
         return msg;
@@ -58,7 +59,7 @@ $(function() {
     }
 
     function choice(idx, title) {
-        var holder = $('<div>').addClass('col-xs-12 col-sm-4 col-md-3');
+        var holder = $('<div>').addClass('col-xs-12 col-sm-6');
         var btn = $('<a>').addClass('message message-choice btn btn-default')
             .attr('href', '#').text(title);
         btn.click(function(event) {
@@ -71,7 +72,7 @@ $(function() {
     }
 
     function buttonMessage(title, json) {
-        var holder = $('<div>').addClass('col-xs-12 col-sm-4 col-md-3');
+        var holder = $('<div>').addClass('col-xs-12 col-sm-6 col-md-4');
         var btn = $('<a>').addClass('message message-button btn btn-default')
             .attr('href', '#').text(title);
         btn.click(function(event) {
@@ -102,17 +103,17 @@ $(function() {
             .attr('href', '#').text("Yes");
         btn.click(function(event) {
             appendUserMessage("Yes");
-            handleParsedCommand('{"special":{"id":"tt:root.special.yes"}}');
+            handleSpecial('yes');
             event.preventDefault();
         });
         holder.append(btn);
         getGrid().append(holder);
-        var holder = $('<div>').addClass('col-xs-6 col-sm-4 col-md-3');
-        var btn = $('<a>').addClass('message message-yesno btn btn-default')
+        holder = $('<div>').addClass('col-xs-6 col-sm-4 col-md-3');
+        btn = $('<a>').addClass('message message-yesno btn btn-default')
             .attr('href', '#').text("No");
         btn.click(function(event) {
             appendUserMessage("No");
-            handleParsedCommand('{"special":{"id":"tt:root.special.no"}}');
+            handleSpecial('no');
             event.preventDefault();
         });
         holder.append(btn);
@@ -170,7 +171,7 @@ $(function() {
             appendUserMessage(parsed.text);
             break;
         }
-    }
+    };
     ws.onclose = function() {
         console.error('Web socket closed');
         // reconnect here...
@@ -184,7 +185,10 @@ $(function() {
         ws.send(JSON.stringify({ type: 'parsed', json: json }));
     }
     function handleChoice(idx) {
-        handleParsedCommand(JSON.stringify({answer:{type:'Choice', value: idx}}));
+        handleParsedCommand({ code: ['bookkeeping', 'choice', String(idx)], entities: {} });
+    }
+    function handleSpecial(special) {
+        handleParsedCommand({ code: ['bookkeeping', 'special', 'special:'+special ], entities: {} });
     }
 
     function appendUserMessage(text) {
@@ -203,6 +207,6 @@ $(function() {
     });
     $('#cancel').click(function() {
         collapseButtons();
-        handleParsedCommand(JSON.stringify({special:{id:'tt:root.special.nevermind'}}));
+        handleSpecial('nevermind');
     });
 });
