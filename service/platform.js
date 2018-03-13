@@ -2,13 +2,14 @@
 //
 // This file is part of ThingEngine
 //
-// Copyright 2015 The Board of Trustees of the Leland Stanford Junior University
+// Copyright 2015-2018 The Board of Trustees of the Leland Stanford Junior University
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 //
 // See COPYING for details
+"use strict";
 
-// GNOME platform
+// Server platform
 
 const Q = require('q');
 const fs = require('fs');
@@ -25,7 +26,7 @@ var _unzipApi = {
     unzip(zipPath, dir) {
         var args = ['-uo', zipPath, '-d', dir];
         return Q.nfcall(child_process.execFile, '/usr/bin/unzip', args, {
-            maxBuffer: 10 * 1024 * 1024 }).then(function(zipResult) {
+            maxBuffer: 10 * 1024 * 1024 }).then((zipResult) => {
             var stdout = zipResult[0];
             var stderr = zipResult[1];
             console.log('stdout', stdout);
@@ -71,7 +72,7 @@ function safeMkdirSync(dir) {
     try {
         fs.mkdirSync(dir);
     } catch(e) {
-        if (e.code != 'EEXIST')
+        if (e.code !== 'EEXIST')
             throw e;
     }
 }
@@ -99,13 +100,13 @@ module.exports = {
         safeMkdirSync(this._filesDir);
         this._locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || 'en-US';
         // normalize this._locale to something that Intl can grok
-        this._locale = this._locale.split(/[-_\.@]/).slice(0,2).join('-');
+        this._locale = this._locale.split(/[-_.@]/).slice(0,2).join('-');
 
-        this._gettext.setlocale(this._locale);
+        this._gettext.setLocale(this._locale);
         this._timezone = process.env.TZ;
         this._prefs = new prefs.FilePreferences(this._filesDir + '/prefs.db');
-        cacheDir = getUserCacheDir() + '/almond-server';
-        safeMkdirSync(cacheDir);
+        this._cacheDir = getUserCacheDir() + '/almond-server';
+        safeMkdirSync(this._cacheDir);
 
         this._dbusSession = null;//DBus.sessionBus();
         this._dbusSystem = DBus.systemBus();
@@ -294,7 +295,7 @@ module.exports = {
     // Get a directory good for long term caching of code
     // and metadata
     getCacheDir: function() {
-        return cacheDir;
+        return this._cacheDir;
     },
 
     // Get the filename of the sqlite database
@@ -331,7 +332,6 @@ module.exports = {
     // Returns true if the change actually happened
     setDeveloperKey: function(key) {
         return this._prefs.set('developer-key', key);
-        return true;
     },
 
     // Return a server/port URL that can be used to refer to this

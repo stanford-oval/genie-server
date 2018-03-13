@@ -7,6 +7,7 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 //
 // See COPYING for details
+"use strict";
 
 const Q = require('q');
 Q.longStackSupport = true;
@@ -31,7 +32,7 @@ function main() {
     _frontend = new WebFrontend(global.platform);
 
     function init() {
-        _engine = new Engine(global.platform);
+        _engine = new Engine(global.platform, { thingpediaUrl: Config.THINGPEDIA_URL });
         _frontend.setEngine(_engine);
 
         _ad = new AssistantDispatcher(_engine);
@@ -42,7 +43,7 @@ function main() {
     }
 
     if (Config.ENABLE_DB_ENCRYPTION) {
-        _waitReady = new Q.Promise((callback, errback) => {
+        _waitReady = new Promise((callback, errback) => {
             _frontend.on('unlock', (key) => {
                 console.log('Attempting unlock...');
                 if (DEBUG)
@@ -56,21 +57,20 @@ function main() {
     }
     _frontend.open();
 
-    _waitReady.then(function() {
-        _running = true;
+    Q(_waitReady).then(() => {
         if (_stopped)
-            return;
+            return Promise.resolve();
         return _engine.run();
-    }).catch(function(error) {
+    }).catch((error) => {
         console.log('Uncaught exception: ' + error.message);
         console.log(error.stack);
-    }).finally(function() {
+    }).finally(() => {
         _ad.stop();
         return _engine.close();
-    }).catch(function(error) {
+    }).catch((error) => {
         console.log('Exception during stop: ' + error.message);
         console.log(error.stack);
-    }).finally(function() {
+    }).finally(() => {
         console.log('Cleaning up');
         platform.exit();
     });

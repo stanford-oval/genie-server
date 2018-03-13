@@ -2,12 +2,12 @@
 /**
  * Module dependencies.
  */
+"use strict";
 
 const Q = require('q');
 const events = require('events');
 
 const express = require('express');
-const http = require('http');
 const path = require('path');
 const logger = require('morgan');
 const favicon = require('serve-favicon');
@@ -55,7 +55,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
         expressWs(this._app);
 
         // development only
-        if ('development' == this._app.get('env')) {
+        if ('development' === this._app.get('env')) {
             console.log('Frontend initialized in development mode');
             this._app.use(errorHandler());
         }
@@ -81,7 +81,6 @@ module.exports = class WebFrontend extends events.EventEmitter {
                 res.locals.user = { isConfigured: user.isConfigured() };
             }
 
-            res.locals.S3_CLOUDFRONT_HOST = Config.S3_CLOUDFRONT_HOST;
             res.locals.THINGPEDIA_URL = Config.THINGPEDIA_URL;
 
             next();
@@ -131,7 +130,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
     }
 
     close() {
-        return Q.ninvoke(server, 'close').then(function() {
+        return Q.ninvoke(this._server, 'close').then(function() {
             console.log('Express server stopped');
         }).catch(function(error) {
             console.log('Error stopping Express server: ' + error);
