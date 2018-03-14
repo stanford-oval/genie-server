@@ -55,8 +55,6 @@ class MainConversationDelegate {
             child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
         });
         this._speechHandler.on('utterance', (utterance) => {
-            for (let out of this._outputs)
-                out.sendCommand(utterance);
             this._conversation.handleCommand(utterance).catch((e) => {
                 console.error(e.stack);
             });
