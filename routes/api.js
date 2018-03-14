@@ -12,7 +12,6 @@
 const Q = require('q');
 const express = require('express');
 const crypto = require('crypto');
-const Config = require('../config');
 
 const user = require('../util/user');
 
@@ -66,7 +65,7 @@ class WebsocketAssistantDelegate {
     }
 }
 
-router.ws('/conversation', function(ws, req, next) {
+router.ws('/conversation', (ws, req, next) => {
     const engine = req.app.engine;
     const assistant = engine.platform.getCapability('assistant');
 
@@ -101,14 +100,16 @@ router.ws('/conversation', function(ws, req, next) {
 
     ws.on('message', (data) => {
         Q.try(() => {
-            var parsed = JSON.parse(data);
+            const parsed = JSON.parse(data);
             switch(parsed.type) {
             case 'command':
                 return conversation.handleCommand(parsed.text);
-                break;
             case 'parsed':
-                return conversation.handleParsedCommand(parsed.json);
-                break;
+                return conversation.handleParsedCommand(parsed.json, parsed.title);
+            case 'tt':
+                return conversation.handleThingTalk(parsed.code);
+            default:
+                throw new Error('Invalid command type ' + parsed.type);
             }
         }).catch((e) => {
             console.error(e.stack);

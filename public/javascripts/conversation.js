@@ -29,12 +29,14 @@ $(function() {
         var container = almondMessage(icon);
         container.append($('<span>').addClass('message message-text')
             .text(text));
+        container[0].scrollIntoView(false);
     }
 
     function picture(url, icon) {
         var container = almondMessage(icon);
         container.append($('<img>').addClass('message message-picture')
             .attr('src', url));
+        container[0].scrollIntoView(false);
     }
 
     function rdl(rdl, icon) {
@@ -46,6 +48,7 @@ $(function() {
         rdlMessage.append($('<span>').addClass('message-rdl-content')
             .text(rdl.displayText));
         container.append(rdlMessage);
+        container[0].scrollIntoView(false);
     }
 
     function getGrid() {
@@ -63,12 +66,12 @@ $(function() {
         var btn = $('<a>').addClass('message message-choice btn btn-default')
             .attr('href', '#').text(title);
         btn.click(function(event) {
-            appendUserMessage(title);
-            handleChoice(idx);
+            handleChoice(idx, title);
             event.preventDefault();
         });
         holder.append(btn);
         getGrid().append(holder);
+        holder[0].scrollIntoView(false);
     }
 
     function buttonMessage(title, json) {
@@ -76,12 +79,12 @@ $(function() {
         var btn = $('<a>').addClass('message message-button btn btn-default')
             .attr('href', '#').text(title);
         btn.click(function(event) {
-            appendUserMessage(title);
-            handleParsedCommand(json);
+            handleParsedCommand(json, title);
             event.preventDefault();
         });
         holder.append(btn);
         getGrid().append(holder);
+        holder[0].scrollIntoView(false);
     }
 
     function linkMessage(title, url) {
@@ -95,6 +98,7 @@ $(function() {
             .attr('href', url).text(title);
         holder.append(btn);
         getGrid().append(holder);
+        holder[0].scrollIntoView(false);
     }
 
     function yesnoMessage() {
@@ -102,8 +106,7 @@ $(function() {
         var btn = $('<a>').addClass('message message-yesno btn btn-default')
             .attr('href', '#').text("Yes");
         btn.click(function(event) {
-            appendUserMessage("Yes");
-            handleSpecial('yes');
+            handleSpecial('yes', "Yes");
             event.preventDefault();
         });
         holder.append(btn);
@@ -112,12 +115,12 @@ $(function() {
         btn = $('<a>').addClass('message message-yesno btn btn-default')
             .attr('href', '#').text("No");
         btn.click(function(event) {
-            appendUserMessage("No");
-            handleSpecial('no');
+            handleSpecial('no', "No");
             event.preventDefault();
         });
         holder.append(btn);
         getGrid().append(holder);
+        holder[0].scrollIntoView(false);
     }
 
     function collapseButtons() {
@@ -177,36 +180,53 @@ $(function() {
         // reconnect here...
     };
 
+    function handleSlashR(line) {
+        line = line.trim();
+        if (line.startsWith('{'))
+            handleParsedCommand(JSON.parse(line));
+        else
+            handleParsedCommand({ code: line.split(' '), entities: {} });
+    }
+
     function handleCommand(text) {
+        if (text.startsWith('\\r')) {
+            handleSlashR(text.substring(3));
+            return;
+        }
+        if (text.startsWith('\\t')) {
+            handleThingTalk(text.substring(3));
+            return;
+        }
+
         ws.send(JSON.stringify({ type: 'command', text: text }));
     }
-    function handleParsedCommand(json) {
-        collapseButtons();
-        ws.send(JSON.stringify({ type: 'parsed', json: json }));
+    function handleParsedCommand(json, title) {
+        ws.send(JSON.stringify({ type: 'parsed', json: json, title: title }));
     }
-    function handleChoice(idx) {
-        handleParsedCommand({ code: ['bookkeeping', 'choice', String(idx)], entities: {} });
+    function handleThingTalk(tt) {
+        ws.send(JSON.stringify({ type: 'tt', code: tt }));
     }
-    function handleSpecial(special) {
-        handleParsedCommand({ code: ['bookkeeping', 'special', 'special:'+special ], entities: {} });
+    function handleChoice(idx, title) {
+        handleParsedCommand({ code: ['bookkeeping', 'choice', String(idx)], entities: {} }, title);
+    }
+    function handleSpecial(special, title) {
+        handleParsedCommand({ code: ['bookkeeping', 'special', 'special:'+special ], entities: {} }, title);
     }
 
     function appendUserMessage(text) {
         container.append($('<span>').addClass('message message-text from-user')
             .text(text));
+        container[0].scrollIntoView(false);
     }
 
     $('#input-form').submit(function(event) {
         var text = $('#input').val();
         $('#input').val('');
 
-        collapseButtons();
-        appendUserMessage(text);
         handleCommand(text);
         event.preventDefault();
     });
     $('#cancel').click(function() {
-        collapseButtons();
-        handleSpecial('nevermind');
+        handleSpecial('nevermind', "Cancel.");
     });
 });

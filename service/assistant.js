@@ -29,6 +29,17 @@ class LocalUser {
     }
 }
 
+const MessageType = {
+    TEXT: 0,
+    PICTURE: 1,
+    CHOICE: 2,
+    LINK: 3,
+    BUTTON: 4,
+    ASK_SPECIAL: 5,
+    RDL: 6,
+    MAX: 6
+};
+
 class MainConversationDelegate {
     constructor(platform, speechHandler) {
         this._speechSynth = platform.getCapability('text-to-speech');
@@ -54,6 +65,8 @@ class MainConversationDelegate {
             console.log('Error in speech recognition: ' + error.message);
             this._speechSynth.say("Sorry, I had an error understanding your speech: " + error.message);
         });
+
+        this._history = [];
     }
 
     clearSpeechQueue() {
@@ -65,48 +78,69 @@ class MainConversationDelegate {
 
     addOutput(out) {
         this._outputs.add(out);
+        for (let [,msg] of this._history) // replay the history
+            msg(out);
     }
     removeOutput(out) {
         this._outputs.delete(out);
     }
 
+    _emit(msg) {
+        for (let out of this._outputs)
+            msg(out);
+    }
+
+    collapseButtons() {
+        for (let i = this._history.length-1; i >= 0; i--) {
+            let [type,] = this._history[i];
+            if (type === MessageType.ASK_SPECIAL || type === MessageType.CHOICE || type === MessageType.BUTTON)
+                this._history.pop();
+            else
+                break;
+        }
+    }
+
+    _addMessage(type, msg) {
+        this._history.push([type, msg]);
+        if (this._history.length > 30)
+            this._history.shift();
+        this._emit(msg);
+    }
+
+    addCommandToHistory(msg) {
+        this._addMessage(MessageType.TEXT, (out) => out.sendCommand(msg));
+    }
+
     send(text, icon) {
         this._speechSynth.say(text);
-        for (let out of this._outputs)
-            out.send.apply(out, arguments);
+        this._addMessage(MessageType.TEXT, (out) => out.send(text, icon));
     }
 
     sendPicture(url, icon) {
-        for (let out of this._outputs)
-            out.sendPicture.apply(out, arguments);
-    }
-
-    sendRDL(rdl, icon) {
-        this._speechSynth.say(rdl.title);
-        for (let out of this._outputs)
-            out.sendRDL.apply(out, arguments);
+        this._addMessage(MessageType.PICTURE, (out) => out.sendPicture(url, icon));
     }
 
     sendChoice(idx, what, title, text) {
         this._speechSynth.say(title);
-        for (let out of this._outputs)
-            out.sendChoice.apply(out, arguments);
+        this._addMessage(MessageType.CHOICE, (out) => out.sendChoice(idx, what, title, text));
+    }
+
+    sendLink(title, url) {
+        this._addMessage(MessageType.LINK, (out) => out.sendLink(title, url));
     }
 
     sendButton(title, json) {
         this._speechSynth.say(title);
-        for (let out of this._outputs)
-            out.sendButton.apply(out, arguments);
-    }
-
-    sendLink(title, url) {
-        for (let out of this._outputs)
-            out.sendLink.apply(out, arguments);
+        this._addMessage(MessageType.BUTTON, (out) => out.sendButton(title, json));
     }
 
     sendAskSpecial(what) {
-        for (let out of this._outputs)
-            out.sendAskSpecial.apply(out, arguments);
+        this._addMessage(MessageType.ASK_SPECIAL, (out) => out.sendAskSpecial(what));
+    }
+
+    sendRDL(rdl, icon) {
+        this._speechSynth.say(rdl.displayTitle);
+        this._addMessage(MessageType.RDL, (out) => out.sendRDL(rdl, icon));
     }
 }
 
@@ -123,14 +157,31 @@ class MainConversation extends Almond {
         this._delegate.removeOutput(out);
     }
 
-    handleCommand() {
+    handleCommand(command) {
         this._delegate.clearSpeechQueue();
+        this._delegate.collapseButtons();
+        this._delegate.addCommandToHistory(command);
         return super.handleCommand.apply(this, arguments);
     }
 
-    handleParsedCommand() {
+    handleParsedCommand(json, title) {
         this._delegate.clearSpeechQueue();
+        this._delegate.collapseButtons();
+        this._delegate.addCommandToHistory(title);
         return super.handleParsedCommand.apply(this, arguments);
+    }
+
+    handleThingTalk(code) {
+        this._delegate.clearSpeechQueue();
+        this._delegate.collapseButtons();
+        this._delegate.addCommandToHistory("Code: " + code);
+        return super.handleThingTalk.apply(this, arguments);
+    }
+
+    presentExample() {
+        this._delegate.clearSpeechQueue();
+        this._delegate.collapseButtons();
+        return super.presentExample.apply(this, arguments);
     }
 }
 
@@ -146,7 +197,7 @@ module.exports = class Assistant extends events.EventEmitter {
         this._speechSynth = platform.getCapability('text-to-speech');
         this._mainConversation = new MainConversation(engine, this._speechHandler, {
             sempreUrl: Config.SEMPRE_URL,
-            showWelcome: false
+            showWelcome: true
         });
         this._conversations['main'] = this._lastConversation = this._mainConversation;
     }

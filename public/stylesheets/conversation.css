@@ -69,8 +69,8 @@
   margin-bottom: 6px;
 }
 
-#ui {
+#chat {
   overflow: auto;
-  height: auto;
-  max-height: calc(100vh - 64px);
+  scroll-behavior: smooth;
+  height: calc(100vh - 243px);
 }
