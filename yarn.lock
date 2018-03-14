@@ -94,7 +94,7 @@ align-text@^0.1.1, align-text@^0.1.3:
 
 "almond@github:Stanford-Mobisocial-IoT-Lab/almond-dialog-agent":
   version "1.0.0"
-  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/almond-dialog-agent/tar.gz/833a067108f6de4113aab283e25661e408efc72a"
+  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/almond-dialog-agent/tar.gz/a146c416f1eb30ce281a93288d177bae8b54046c"
   dependencies:
     adt "~0.7.2"
     thingpedia "github:Stanford-Mobisocial-IoT-Lab/thingpedia-api"
@@ -2840,7 +2840,7 @@ text-table@~0.2.0:
 
 "thingengine-core@github:Stanford-Mobisocial-IoT-Lab/thingengine-core":
   version "1.0.0"
-  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/thingengine-core/tar.gz/fb8cdc1b21627b682be17bbe264371548ae2d188"
+  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/thingengine-core/tar.gz/4c08f232e4207013ac5b26025f1b98afbe897e25"
   dependencies:
     adt "^0.7.2"
     babel-runtime "^6.26.0"
