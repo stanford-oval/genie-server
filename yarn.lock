@@ -1799,9 +1799,9 @@ node-gettext@^2.0.0:
   dependencies:
     lodash.get "^4.4.2"
 
-node-mimic@0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/node-mimic/-/node-mimic-0.0.1.tgz#07c8f2504f9446fadd132377078f7b962a8767ed"
+node-mimic@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/node-mimic/-/node-mimic-0.0.2.tgz#a303f2145aa61af3fd20204328d66f3aa08a0671"
   dependencies:
     bindings "^1.2.1"
 
