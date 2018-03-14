@@ -61,7 +61,7 @@ function makeRandom() {
 }
 
 function hashPassword(salt, password) {
-    return Q.nfcall(crypto.pbkdf2, password, salt, 10000, 32)
+    return Q.nfcall(crypto.pbkdf2, password, salt, 10000, 32, 'sha1')
         .then((buffer) => buffer.toString('hex'));
 }
 
