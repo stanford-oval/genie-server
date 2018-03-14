@@ -67,6 +67,7 @@ const _telephoneApi = JavaAPI.makeJavaAPI('Telephone', ['call', 'callEmergency']
 */
 const BluezBluetooth = require('./bluez');
 const SpeechSynthesizer = require('./speech_synthesizer');
+const MediaPlayer = require('./media_player');
 
 function safeMkdirSync(dir) {
     try {
@@ -115,6 +116,7 @@ module.exports = {
             client: "thingengine-platform-server"
         });
         this._tts = new SpeechSynthesizer(this._pulse, path.resolve(module.filename, '../../data/cmu_us_slt.flitevox'));
+        this._media = new MediaPlayer();
 
         this._sqliteKey = null;
         this._origin = null;
@@ -142,7 +144,7 @@ module.exports = {
     // this platform
     // (eg we don't need discovery on the cloud, and we don't need graphdb,
     // messaging or the apps on the phone client)
-    hasFeature: function(feature) {
+    hasFeature(feature) {
         switch(feature) {
         case 'ui':
             return false;
@@ -152,12 +154,16 @@ module.exports = {
         }
     },
 
+    getPlatformDevice() {
+        return 'home';
+    },
+
     // Check if this platform has the required capability
     // (eg. long running, big storage, reliable connectivity, server
     // connectivity, stable IP, local device discovery, bluetooth, etc.)
     //
     // Which capabilities are available affects which apps are allowed to run
-    hasCapability: function(cap) {
+    hasCapability(cap) {
         switch(cap) {
         case 'code-download':
             // If downloading code from the thingpedia server is allowed on
@@ -173,6 +179,7 @@ module.exports = {
 
         case 'bluetooth':
         case 'pulseaudio':
+        case 'media-player':
             return true;
 /*
         // We can use the phone capabilities
@@ -206,7 +213,7 @@ module.exports = {
     // platform
     //
     // This will return null if hasCapability(cap) is false
-    getCapability: function(cap) {
+    getCapability(cap) {
         switch(cap) {
         case 'code-download':
             // We have the support to download code
@@ -224,6 +231,8 @@ module.exports = {
             return this._btApi;
         case 'pulseaudio':
             return this._pulse;
+        case 'media-player':
+            return this._media;
 
 /*
         case 'notify-api':
@@ -274,13 +283,13 @@ module.exports = {
     // but private to this instance (tier) of the platform
     // Preferences should be normally used only by the engine code, and a persistent
     // shared store such as DataVault should be used by regular apps
-    getSharedPreferences: function() {
+    getSharedPreferences() {
         return this._prefs;
     },
 
     // Get a directory that is guaranteed to be writable
     // (in the private data space for Android)
-    getWritableDir: function() {
+    getWritableDir() {
         return this._filesDir;
     },
 
@@ -288,18 +297,18 @@ module.exports = {
     // Also guaranteed to be writable, but not guaranteed
     // to persist across reboots or for long times
     // (ie, it could be periodically cleaned by the system)
-    getTmpDir: function() {
+    getTmpDir() {
         return os.tmpdir();
     },
 
     // Get a directory good for long term caching of code
     // and metadata
-    getCacheDir: function() {
+    getCacheDir() {
         return this._cacheDir;
     },
 
     // Get the filename of the sqlite database
-    getSqliteDB: function() {
+    getSqliteDB() {
         return this._filesDir + '/sqlite.db';
     },
 
@@ -307,11 +316,11 @@ module.exports = {
         this._sqliteKey = key.toString('hex');
     },
 
-    getSqliteKey: function() {
+    getSqliteKey() {
         return this._sqliteKey;
     },
 
-    getGraphDB: function() {
+    getGraphDB() {
         return this._filesDir + '/rdf.db';
     },
 
@@ -319,18 +328,18 @@ module.exports = {
     // (In Android, this only stops the node.js thread)
     // This function should be called by the platform integration
     // code, after stopping the engine
-    exit: function() {
+    exit() {
         process.exit();
     },
 
     // Get the ThingPedia developer key, if one is configured
-    getDeveloperKey: function() {
+    getDeveloperKey() {
         return this._prefs.get('developer-key');
     },
 
     // Change the ThingPedia developer key, if possible
     // Returns true if the change actually happened
-    setDeveloperKey: function(key) {
+    setDeveloperKey(key) {
         return this._prefs.set('developer-key', key);
     },
 
@@ -341,7 +350,7 @@ module.exports = {
         this._origin = origin;
     },
 
-    getOrigin: function() {
+    getOrigin() {
         return this._origin;
     },
 
@@ -356,7 +365,7 @@ module.exports = {
     // Change the auth token
     // Returns true if a change actually occurred, false if the change
     // was rejected
-    setAuthToken: function(authToken) {
+    setAuthToken(authToken) {
         var oldAuthToken = this._prefs.get('auth-token');
         if (oldAuthToken !== undefined && authToken !== oldAuthToken)
             return false;
