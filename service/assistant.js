@@ -183,6 +183,24 @@ class MainConversation extends Almond {
     }
 }
 
+class OtherConversation extends Almond {
+
+    handleCommand(command) {
+        this._delegate.sendCommand(command);
+        return super.handleCommand(command);
+    }
+
+    handleParsedCommand(json, title) {
+        this._delegate.sendCommand(title);
+        return super.handleParsedCommand(json);
+    }
+
+    handleThingTalk(code) {
+        this._delegate.sendCommand("Code: " + code);
+        return super.handleThingTalk(code);
+    }
+}
+
 module.exports = class Assistant extends events.EventEmitter {
     constructor(engine) {
         super();
@@ -241,7 +259,7 @@ module.exports = class Assistant extends events.EventEmitter {
     openConversation(feedId, delegate) {
         if (this._conversations[feedId])
             delete this._conversations[feedId];
-        var conv = new Almond(this._engine, feedId, new LocalUser(), delegate, {
+        var conv = new OtherConversation(this._engine, feedId, new LocalUser(), delegate, {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true
         });
