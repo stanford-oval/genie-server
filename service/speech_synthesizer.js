@@ -15,7 +15,7 @@ module.exports = class SpeechSynthesizer {
         this._pulseCtx = pulseCtx;
         this._voiceFile = voiceFile;
         this._queue = [];
-        this._promise = Q();
+        this._load = Q();
 
         this._outputStream = null;
         this._closeTimeout = null;
@@ -23,7 +23,7 @@ module.exports = class SpeechSynthesizer {
     }
 
     start() {
-        return this._promise = Q.nfcall(mimic.loadVoice, this._voiceFile).then((voice) => {
+        return this._load = Q.nfcall(mimic.loadVoice, this._voiceFile).then((voice) => {
             this._voice = voice;
         });
     }
@@ -36,21 +36,36 @@ module.exports = class SpeechSynthesizer {
 
     say(text) {
         this._queue.push(text);
-        return this._promise = this._promise.then(() => this._sayNext());
+        this._sayNext();
+    }
+
+    _silence() {
+        if (!this._outputStream)
+            return Q();
+
+        // force flush the buffer with 0.5 seconds of silence
+        let bufferLength = 0.5 * this._sampleRate * this._numChannels * 2;
+        this._outputStream.write(Buffer.alloc(bufferLength));
+        return Q.delay(500);
     }
 
     _sayNext() {
         if (this._queue.length === 0)
-            return Q();
+            return this._silence();
         let text = this._queue.shift();
-        return Q.ninvoke(this._voice, 'textToSpeech', text).then((result) => {
+        return this._load.then(() => {
+            return Q.ninvoke(this._voice, 'textToSpeech', text);
+        }).then((result) => {
             if (!this._outputStream) {
                 this._outputStream = this._pulseCtx.createPlaybackStream({
-                    format: 'S16NE',
+                    format: 'S16NE', // signed 16 bit native endian
                     rate: result.sampleRate,
                     channels: result.numChannels,
-                    stream: 'thingengine-voice-output'
+                    stream: 'thingengine-voice-output',
+                    latency: 100000, // us (= 0.1 s)
                 });
+                this._sampleRate = result.sampleRate;
+                this._numChannels = result.numChannels;
             }
             if (this._closeTimeout)
                 clearTimeout(this._closeTimeout);
@@ -62,11 +77,11 @@ module.exports = class SpeechSynthesizer {
 
             let duration = result.buffer.length /2 /
                 result.sampleRate / result.numChannels * 1000;
-            console.log('outputstream write for ' + text);
+            console.log('outputstream write for ' + text + ', delay of ' + duration);
             this._outputStream.write(result.buffer);
-            return Q.delay(duration);
+            return Q.delay(duration).then(() => this._sayNext());
         }).catch((e) => {
             console.error('Failed to speak: ' + e);
         });
     }
-}
+};
