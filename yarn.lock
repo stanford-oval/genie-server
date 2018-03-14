@@ -2868,7 +2868,7 @@ text-table@~0.2.0:
 
 "thingpedia@github:Stanford-Mobisocial-IoT-Lab/thingpedia-api":
   version "1.0.0"
-  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/thingpedia-api/tar.gz/5c13985d5af499b07a64d8c7addbfd50a42b396d"
+  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/thingpedia-api/tar.gz/f89b2bff37220f18986efa3c58a941014dfe49b1"
   dependencies:
     ip "~1.1.0"
     oauth "~0.9.14"
