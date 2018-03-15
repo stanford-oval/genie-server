@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js"
   },
   "dependencies": {
     "almond": "github:Stanford-Mobisocial-IoT-Lab/almond-dialog-agent",
+    "babel-core": "^6.26.0",
+    "babelify": "^8.0.0",
     "body-parser": "^1.17.2",
+    "browserify": "^16.1.1",
+    "color-scheme": "^1.0.0",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.3",
     "csurf": "^1.9.0",

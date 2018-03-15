@@ -35,4 +35,12 @@ router.get('/', user.redirectLogIn, (req, res, next) => {
     }).done();
 });
 
+router.get('/conversation', user.redirectLogIn, (req, res, next) => {
+    res.render('conversation', { page_title: req._("Almond - Chat") });
+});
+
+router.get('/widgets', user.redirectLogIn, (req, res, next) => {
+    res.render('brassau', { page_title: req._("Almond - Widgets") });
+});
+
 module.exports = router;

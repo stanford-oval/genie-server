@@ -1,0 +1,1386 @@
+{
+  "org.thingpedia.builtin.bluetooth.generic": {},
+  "com.thecatapi": {
+    "colors_dominant": [
+      "#000000",
+      "#8f8f8f",
+      "#414141"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "org.thingpedia.builtin.thingengine.phone": {
+    "colors_dominant": [
+      "#000000",
+      "#505050",
+      "#b3b3b3"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "edu.stanford.rakeshr1.fitbit": {
+    "colors_dominant": [
+      "#142529",
+      "#2ebec0",
+      "#7b8587",
+      "#c1c5c6"
+    ],
+    "colors_palette_default": [
+      "#008ca1",
+      "#006270",
+      "#bff7ff",
+      "#80eeff",
+      "#ff6d00",
+      "#b34c00",
+      "#ffdbbf",
+      "#ffb680"
+    ],
+    "colors_palette_light": [
+      "#bff7ff",
+      "#60b3bf",
+      "#e6fcff",
+      "#80eeff",
+      "#ffdbbf",
+      "#bf8960",
+      "#fff0e6",
+      "#ffb680"
+    ]
+  },
+  "com.live.onedrive": {
+    "colors_dominant": [
+      "#0054d8",
+      "#a9c0e7",
+      "#5885d0"
+    ],
+    "colors_palette_default": [
+      "#006eb0",
+      "#004d7b",
+      "#bfe7ff",
+      "#80cfff",
+      "#ff7d00",
+      "#b35800",
+      "#ffdfbf",
+      "#ffbe80"
+    ],
+    "colors_palette_light": [
+      "#bfe7ff",
+      "#609bbf",
+      "#e6f5ff",
+      "#80cfff",
+      "#ffdfbf",
+      "#bf8f60",
+      "#fff2e6",
+      "#ffbe80"
+    ]
+  },
+  "com.tumblr": {
+    "colors_dominant": [
+      "#5e7694",
+      "#ffffff",
+      "#bac4d1"
+    ],
+    "colors_palette_default": [
+      "#0070ad",
+      "#004f79",
+      "#bfe9ff",
+      "#80d2ff",
+      "#ff7b00",
+      "#b35600",
+      "#ffdebf",
+      "#ffbd80"
+    ],
+    "colors_palette_light": [
+      "#bfe9ff",
+      "#609ebf",
+      "#e6f6ff",
+      "#80d2ff",
+      "#ffdebf",
+      "#bf8e60",
+      "#fff2e6",
+      "#ffbd80"
+    ]
+  },
+  "org.thingpedia.weather": {
+    "colors_dominant": [
+      "#929497",
+      "#ffb100",
+      "#1e87e8",
+      "#ffd679"
+    ],
+    "colors_palette_default": [
+      "#005cb8",
+      "#004181",
+      "#bfdfff",
+      "#80c0ff",
+      "#ff8500",
+      "#b35d00",
+      "#ffe1bf",
+      "#ffc280"
+    ],
+    "colors_palette_light": [
+      "#bfdfff",
+      "#6090bf",
+      "#e6f2ff",
+      "#80c0ff",
+      "#ffe1bf",
+      "#bf9260",
+      "#fff3e6",
+      "#ffc280"
+    ]
+  },
+  "com.facebook": {
+    "colors_dominant": [
+      "#3c5a99",
+      "#ffffff",
+      "#afbbd5"
+    ],
+    "colors_palette_default": [
+      "#0064b5",
+      "#00467f",
+      "#bfe2ff",
+      "#80c6ff",
+      "#ff8200",
+      "#b35b00",
+      "#ffe0bf",
+      "#ffc180"
+    ],
+    "colors_palette_light": [
+      "#bfe2ff",
+      "#6094bf",
+      "#e6f4ff",
+      "#80c6ff",
+      "#ffe0bf",
+      "#bf9060",
+      "#fff3e6",
+      "#ffc180"
+    ]
+  },
+  "com.giphy": {
+    "colors_dominant": [
+      "#000000",
+      "#7a57a3",
+      "#33c5f3",
+      "#faf39a",
+      "#f16667",
+      "#83c675",
+      "#404040",
+      "#beb3cc"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "com.youtube": {
+    "colors_dominant": [
+      "#c91d20",
+      "#ffffff",
+      "#f3a19e"
+    ],
+    "colors_palette_default": [
+      "#fc0007",
+      "#b10005",
+      "#ffbfc1",
+      "#ff8083",
+      "#03cf00",
+      "#029100",
+      "#c0ffbf",
+      "#81ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfc1",
+      "#bf6062",
+      "#ffe6e6",
+      "#ff8083",
+      "#c0ffbf",
+      "#61bf60",
+      "#e6ffe6",
+      "#81ff80"
+    ]
+  },
+  "com.reddit.frontpage": {
+    "colors_dominant": [
+      "#000000",
+      "#ff4500",
+      "#bfbfbf",
+      "#3f3f3f",
+      "#7f7f7f",
+      "#ff8a5f"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "com.github": {
+    "colors_dominant": [
+      "#323131",
+      "#ababab",
+      "#6f6e6e"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "com.tesla": {
+    "colors_dominant": [
+      "#e31937",
+      "#ffffff",
+      "#ee798a"
+    ],
+    "colors_palette_default": [
+      "#f0003d",
+      "#a8002b",
+      "#ffbfd0",
+      "#ff80a0",
+      "#1feb00",
+      "#16a400",
+      "#c8ffbf",
+      "#90ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfd0",
+      "#bf6078",
+      "#ffe6ec",
+      "#ff80a0",
+      "#c8ffbf",
+      "#6cbf60",
+      "#e9ffe6",
+      "#90ff80"
+    ]
+  },
+  "com.instagram": {
+    "colors_dominant": [
+      "#d62f7c",
+      "#fca846",
+      "#8140b1",
+      "#d899cf"
+    ],
+    "colors_palette_default": [
+      "#cf0092",
+      "#910066",
+      "#ffbfec",
+      "#ff80d9",
+      "#8bff00",
+      "#61b300",
+      "#e2ffbf",
+      "#c5ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfec",
+      "#bf60a3",
+      "#ffe6f7",
+      "#ff80d9",
+      "#e2ffbf",
+      "#94bf60",
+      "#f3ffe6",
+      "#c5ff80"
+    ]
+  },
+  "com.bing": {
+    "colors_dominant": [
+      "#ffb900",
+      "#ffd872"
+    ],
+    "colors_palette_default": [
+      "#ffd800",
+      "#b39700",
+      "#fff5bf",
+      "#ffec80",
+      "#390099",
+      "#28006b",
+      "#d7bfff",
+      "#af80ff"
+    ],
+    "colors_palette_light": [
+      "#fff5bf",
+      "#bfb160",
+      "#fffbe6",
+      "#ffec80",
+      "#d7bfff",
+      "#8360bf",
+      "#efe6ff",
+      "#af80ff"
+    ]
+  },
+  "org.thingpedia.rss": {
+    "colors_dominant": [
+      "#f8991d",
+      "#ffffff",
+      "#fccc8e"
+    ],
+    "colors_palette_default": [
+      "#ffb000",
+      "#b37b00",
+      "#ffebbf",
+      "#ffd880",
+      "#171bb5",
+      "#10137f",
+      "#c7c9ff",
+      "#9093ff"
+    ],
+    "colors_palette_light": [
+      "#ffebbf",
+      "#bfa260",
+      "#fff7e6",
+      "#ffd880",
+      "#c7c9ff",
+      "#6c6ebf",
+      "#e9e9ff",
+      "#9093ff"
+    ]
+  },
+  "com.linkedin": {
+    "colors_dominant": [
+      "#007bb6",
+      "#ffffff",
+      "#9ccbe2"
+    ],
+    "colors_palette_default": [
+      "#0085a3",
+      "#005d72",
+      "#bff3ff",
+      "#80e8ff",
+      "#ff7000",
+      "#b34e00",
+      "#ffdbbf",
+      "#ffb880"
+    ],
+    "colors_palette_light": [
+      "#bff3ff",
+      "#60aebf",
+      "#e6faff",
+      "#80e8ff",
+      "#ffdbbf",
+      "#bf8a60",
+      "#fff1e6",
+      "#ffb880"
+    ]
+  },
+  "com.imgflip": {
+    "colors_dominant": [
+      "#202020",
+      "#717171",
+      "#ff0000",
+      "#adadad",
+      "#960f0f"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "com.twitter": {
+    "colors_dominant": [
+      "#55acee"
+    ],
+    "colors_palette_default": [
+      "#007ea6",
+      "#005874",
+      "#bff0ff",
+      "#80e0ff",
+      "#ff7400",
+      "#b35100",
+      "#ffdcbf",
+      "#ffba80"
+    ],
+    "colors_palette_light": [
+      "#bff0ff",
+      "#60a8bf",
+      "#e6f9ff",
+      "#80e0ff",
+      "#ffdcbf",
+      "#bf8b60",
+      "#fff1e6",
+      "#ffba80"
+    ]
+  },
+  "com.washingtonpost": {
+    "colors_dominant": [
+      "#272727",
+      "#ffffff",
+      "#a0a0a0",
+      "#636363"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "com.yahoo.finance": {
+    "colors_dominant": [
+      "#f2f2f3",
+      "#743393",
+      "#390f43",
+      "#b6b6b5"
+    ],
+    "colors_palette_default": [
+      "#0033cc",
+      "#00248f",
+      "#bfcfff",
+      "#809fff",
+      "#ff9900",
+      "#b36b00",
+      "#ffe6bf",
+      "#ffcc80"
+    ],
+    "colors_palette_light": [
+      "#bfcfff",
+      "#6078bf",
+      "#e6ecff",
+      "#809fff",
+      "#ffe6bf",
+      "#bf9960",
+      "#fff5e6",
+      "#ffcc80"
+    ]
+  },
+  "com.gmail": {
+    "colors_dominant": [
+      "#ed4335",
+      "#b0b0b0"
+    ],
+    "colors_palette_default": [
+      "#ff1100",
+      "#b30c00",
+      "#ffc4bf",
+      "#ff8880",
+      "#00c422",
+      "#008918",
+      "#bfffca",
+      "#80ff96"
+    ],
+    "colors_palette_light": [
+      "#ffc4bf",
+      "#bf6660",
+      "#ffe7e6",
+      "#ff8880",
+      "#bfffca",
+      "#60bf70",
+      "#e6ffea",
+      "#80ff96"
+    ]
+  },
+  "com.wsj": {
+    "colors_dominant": [
+      "#000000",
+      "#858585",
+      "#3e3e3e",
+      "#bfbfbf"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "com.parklonamerica.heatpad": {
+    "colors_dominant": [
+      "#0b59ab",
+      "#afc8de",
+      "#5f90be"
+    ],
+    "colors_palette_default": [
+      "#0078ab",
+      "#005478",
+      "#bfecff",
+      "#80d9ff",
+      "#ff7700",
+      "#b35300",
+      "#ffddbf",
+      "#ffbb80"
+    ],
+    "colors_palette_light": [
+      "#bfecff",
+      "#60a3bf",
+      "#e6f7ff",
+      "#80d9ff",
+      "#ffddbf",
+      "#bf8c60",
+      "#fff1e6",
+      "#ffbb80"
+    ]
+  },
+  "com.google.drive": {
+    "colors_dominant": [
+      "#fbcc48",
+      "#276de5",
+      "#059a59",
+      "#7e99ba"
+    ],
+    "colors_palette_default": [
+      "#ffdb00",
+      "#b39900",
+      "#fff6bf",
+      "#ffed80",
+      "#3b0099",
+      "#29006b",
+      "#d8bfff",
+      "#b180ff"
+    ],
+    "colors_palette_light": [
+      "#fff6bf",
+      "#bfb260",
+      "#fffbe6",
+      "#ffed80",
+      "#d8bfff",
+      "#8560bf",
+      "#efe6ff",
+      "#b180ff"
+    ]
+  },
+  "uk.co.thedogapi": {
+    "colors_dominant": [
+      "#805f51",
+      "#ffc49c",
+      "#8d9dab"
+    ],
+    "colors_palette_default": [
+      "#ff5200",
+      "#b33900",
+      "#ffd4bf",
+      "#ffa980",
+      "#00a385",
+      "#00725d",
+      "#bffff3",
+      "#80ffe8"
+    ],
+    "colors_palette_light": [
+      "#ffd4bf",
+      "#bf7e60",
+      "#ffeee6",
+      "#ffa980",
+      "#bffff3",
+      "#60bfae",
+      "#e6fffa",
+      "#80ffe8"
+    ]
+  },
+  "com.hue": {
+    "colors_dominant": [
+      "#3c3c3c",
+      "#ffffff",
+      "#0065d9",
+      "#b7bac2",
+      "#f6be00",
+      "#e30613",
+      "#42b8aa",
+      "#eb5f67",
+      "#d7e15b",
+      "#000000",
+      "#8c7f6f"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "com.nest": {
+    "colors_dominant": [
+      "#00b5dd",
+      "#9be2f1"
+    ],
+    "colors_palette_default": [
+      "#008f9e",
+      "#00646f",
+      "#bff9ff",
+      "#80f3ff",
+      "#ff6b00",
+      "#b34b00",
+      "#ffdabf",
+      "#ffb580"
+    ],
+    "colors_palette_light": [
+      "#bff9ff",
+      "#60b6bf",
+      "#e6fdff",
+      "#80f3ff",
+      "#ffdabf",
+      "#bf8860",
+      "#fff0e6",
+      "#ffb580"
+    ]
+  },
+  "com.bodytrace.scale": {
+    "colors_dominant": [
+      "#0065d7",
+      "#8fb5da"
+    ],
+    "colors_palette_default": [
+      "#0074ab",
+      "#005178",
+      "#bfeaff",
+      "#80d6ff",
+      "#ff7900",
+      "#b35500",
+      "#ffdebf",
+      "#ffbc80"
+    ],
+    "colors_palette_light": [
+      "#bfeaff",
+      "#60a0bf",
+      "#e6f7ff",
+      "#80d6ff",
+      "#ffdebf",
+      "#bf8d60",
+      "#fff2e6",
+      "#ffbc80"
+    ]
+  },
+  "com.dropbox": {
+    "colors_dominant": [
+      "#017ee6",
+      "#7abbf1"
+    ],
+    "colors_palette_default": [
+      "#007aa8",
+      "#005676",
+      "#bfeeff",
+      "#80dcff",
+      "#ff7600",
+      "#b35300",
+      "#ffddbf",
+      "#ffbb80"
+    ],
+    "colors_palette_light": [
+      "#bfeeff",
+      "#60a5bf",
+      "#e6f8ff",
+      "#80dcff",
+      "#ffddbf",
+      "#bf8c60",
+      "#fff1e6",
+      "#ffbb80"
+    ]
+  },
+  "com.yandex.translate": {
+    "colors_dominant": [
+      "#ff0000",
+      "#383838",
+      "#ff7272",
+      "#b7b7b7",
+      "#757575",
+      "#991e1e"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "org.thingpedia.builtin.thingengine.remote": {
+    "colors_dominant": [
+      "#dea844",
+      "#403b3c",
+      "#cababe",
+      "#847a7c"
+    ],
+    "colors_palette_default": [
+      "#ffc900",
+      "#b38d00",
+      "#fff2bf",
+      "#ffe480",
+      "#30039c",
+      "#22026d",
+      "#d3c0ff",
+      "#a782ff"
+    ],
+    "colors_palette_light": [
+      "#fff2bf",
+      "#bfab60",
+      "#fffae6",
+      "#ffe480",
+      "#d3c0ff",
+      "#7d61bf",
+      "#ede6ff",
+      "#a782ff"
+    ]
+  },
+  "com.nytimes": {
+    "colors_dominant": [
+      "#363636",
+      "#ffffff",
+      "#969696"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "org.thingpedia.demo.light_bulb": {
+    "colors_dominant": [
+      "#3c3c3c",
+      "#ffffff",
+      "#0065d9",
+      "#b7bac2",
+      "#f6be00",
+      "#e30613",
+      "#42b8aa",
+      "#eb5f67",
+      "#d7e15b",
+      "#000000",
+      "#8c7f6f"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "com.phdcomics": {
+    "colors_dominant": [
+      "#000000",
+      "#797979",
+      "#bdc7cb",
+      "#3a3a3a"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "org.thingpedia.builtin.thingengine": {
+    "colors_dominant": [
+      "#dea844",
+      "#403b3c",
+      "#cababe",
+      "#847a7c"
+    ],
+    "colors_palette_default": [
+      "#ffc900",
+      "#b38d00",
+      "#fff2bf",
+      "#ffe480",
+      "#30039c",
+      "#22026d",
+      "#d3c0ff",
+      "#a782ff"
+    ],
+    "colors_palette_light": [
+      "#fff2bf",
+      "#bfab60",
+      "#fffae6",
+      "#ffe480",
+      "#d3c0ff",
+      "#7d61bf",
+      "#ede6ff",
+      "#a782ff"
+    ]
+  },
+  "com.xkcd": {
+    "colors_dominant": [
+      "#000000",
+      "#625946",
+      "#a19e97"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "org.thingpedia.builtin.omlet": {
+    "colors_dominant": [
+      "#50e3f8",
+      "#fdfdfd",
+      "#f8c824",
+      "#662021",
+      "#fade89",
+      "#aa7822",
+      "#09a7d3"
+    ],
+    "colors_palette_default": [
+      "#00929c",
+      "#00666d",
+      "#bffbff",
+      "#80f7ff",
+      "#ff6900",
+      "#b34a00",
+      "#ffdabf",
+      "#ffb480"
+    ],
+    "colors_palette_light": [
+      "#bffbff",
+      "#60b9bf",
+      "#e6fdff",
+      "#80f7ff",
+      "#ffdabf",
+      "#bf8760",
+      "#fff0e6",
+      "#ffb480"
+    ]
+  },
+  "org.thingpedia.builtin.thingengine.builtin": {
+    "colors_dominant": [
+      "#dea844",
+      "#403b3c",
+      "#cababe",
+      "#847a7c"
+    ],
+    "colors_palette_default": [
+      "#ffc900",
+      "#b38d00",
+      "#fff2bf",
+      "#ffe480",
+      "#30039c",
+      "#22026d",
+      "#d3c0ff",
+      "#a782ff"
+    ],
+    "colors_palette_light": [
+      "#fff2bf",
+      "#bfab60",
+      "#fffae6",
+      "#ffe480",
+      "#d3c0ff",
+      "#7d61bf",
+      "#ede6ff",
+      "#a782ff"
+    ]
+  },
+  "com.google": {
+    "colors_dominant": [
+      "#ea4335",
+      "#34a853",
+      "#4285f4",
+      "#fbbc05",
+      "#f3a099",
+      "#a3c3f9",
+      "#7fc792"
+    ],
+    "colors_palette_default": [
+      "#ff1100",
+      "#b30c00",
+      "#ffc4bf",
+      "#ff8880",
+      "#00c422",
+      "#008918",
+      "#bfffca",
+      "#80ff96"
+    ],
+    "colors_palette_light": [
+      "#ffc4bf",
+      "#bf6660",
+      "#ffe7e6",
+      "#ff8880",
+      "#bfffca",
+      "#60bf70",
+      "#e6ffea",
+      "#80ff96"
+    ]
+  },
+  "org.thingpedia.demo.coffee": {
+    "colors_dominant": [
+      "#fbe3bf",
+      "#603512",
+      "#aa7a3c"
+    ],
+    "colors_palette_default": [
+      "#ffbb00",
+      "#b38300",
+      "#ffeebf",
+      "#ffdd80",
+      "#2211ab",
+      "#180c78",
+      "#ccc6ff",
+      "#998cff"
+    ],
+    "colors_palette_light": [
+      "#ffeebf",
+      "#bfa660",
+      "#fff8e6",
+      "#ffdd80",
+      "#ccc6ff",
+      "#7369bf",
+      "#ebe8ff",
+      "#998cff"
+    ]
+  },
+  "gov.nasa": {
+    "colors_dominant": [
+      "#1a5dad",
+      "#ffffff",
+      "#ee293d",
+      "#92b2d8",
+      "#f6959f",
+      "#8e406f"
+    ],
+    "colors_palette_default": [
+      "#0074ab",
+      "#005178",
+      "#bfeaff",
+      "#80d6ff",
+      "#ff7900",
+      "#b35500",
+      "#ffdebf",
+      "#ffbc80"
+    ],
+    "colors_palette_light": [
+      "#bfeaff",
+      "#60a0bf",
+      "#e6f7ff",
+      "#80d6ff",
+      "#ffdebf",
+      "#bf8d60",
+      "#fff2e6",
+      "#ffbc80"
+    ]
+  },
+  "com.slack": {
+    "colors_dominant": [
+      "#3eb991",
+      "#e01563",
+      "#e8a820",
+      "#371039",
+      "#64851c",
+      "#a3dbe7",
+      "#f0c781",
+      "#cc0f01",
+      "#ab6981"
+    ],
+    "colors_palette_default": [
+      "#00a385",
+      "#00725d",
+      "#bffff3",
+      "#80ffe8",
+      "#ff5200",
+      "#b33900",
+      "#ffd4bf",
+      "#ffa980"
+    ],
+    "colors_palette_light": [
+      "#bffff3",
+      "#60bfae",
+      "#e6fffa",
+      "#80ffe8",
+      "#ffd4bf",
+      "#bf7e60",
+      "#ffeee6",
+      "#ffa980"
+    ]
+  },
+  "us.sportradar": {
+    "colors_dominant": [
+      "#cd0724",
+      "#f9b1be",
+      "#d16575"
+    ],
+    "colors_palette_default": [
+      "#f0003d",
+      "#a8002b",
+      "#ffbfd0",
+      "#ff80a0",
+      "#1feb00",
+      "#16a400",
+      "#c8ffbf",
+      "#90ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfd0",
+      "#bf6078",
+      "#ffe6ec",
+      "#ff80a0",
+      "#c8ffbf",
+      "#6cbf60",
+      "#e9ffe6",
+      "#90ff80"
+    ]
+  },
+  "org.thingpedia.bluetooth.speaker.a2dp": {
+    "colors_dominant": [
+      "#010101",
+      "#fec23e",
+      "#fc1922",
+      "#6d6d6d",
+      "#bababa",
+      "#8e161d"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "com.lg.tv.webos2": {
+    "colors_dominant": [
+      "#fefefe",
+      "#be014d",
+      "#d9769b",
+      "#000000",
+      "#717171",
+      "#eb6e1e"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "com.jawbone.up": {
+    "colors_dominant": [
+      "#100e0f",
+      "#4a4a4a",
+      "#ffffff",
+      "#c1c1c1",
+      "#878787"
+    ],
+    "colors_palette_default": [
+      "#cc0099",
+      "#8f006b",
+      "#ffbfef",
+      "#ff80df",
+      "#99ff00",
+      "#6bb300",
+      "#e6ffbf",
+      "#ccff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfef",
+      "#bf60a7",
+      "#ffe6f9",
+      "#ff80df",
+      "#e6ffbf",
+      "#99bf60",
+      "#f5ffe6",
+      "#ccff80"
+    ]
+  },
+  "com.uber": {
+    "colors_dominant": [
+      "#103b49",
+      "#13a1a8",
+      "#91a0a6"
+    ],
+    "colors_palette_default": [
+      "#0088a1",
+      "#005f70",
+      "#bff5ff",
+      "#80ebff",
+      "#ff6f00",
+      "#b34e00",
+      "#ffdbbf",
+      "#ffb780"
+    ],
+    "colors_palette_light": [
+      "#bff5ff",
+      "#60b0bf",
+      "#e6fbff",
+      "#80ebff",
+      "#ffdbbf",
+      "#bf8960",
+      "#fff1e6",
+      "#ffb780"
+    ]
+  },
+  "org.thingpedia.icalendar": {
+    "colors_dominant": [
+      "#585858",
+      "#e7564e",
+      "#c0c0c0",
+      "#1c1e20"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  },
+  "org.thingpedia.holidays": {
+    "colors_dominant": [
+      "#585858",
+      "#e7564e",
+      "#c0c0c0",
+      "#1c1e20"
+    ],
+    "colors_palette_default": [
+      "#ff0000",
+      "#b30000",
+      "#ffbfbf",
+      "#ff8080",
+      "#00cc00",
+      "#008f00",
+      "#bfffbf",
+      "#80ff80"
+    ],
+    "colors_palette_light": [
+      "#ffbfbf",
+      "#bf6060",
+      "#ffe6e6",
+      "#ff8080",
+      "#bfffbf",
+      "#60bf60",
+      "#e6ffe6",
+      "#80ff80"
+    ]
+  }
+}
