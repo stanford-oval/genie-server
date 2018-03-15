@@ -42,8 +42,8 @@
   /*border: 3px solid darkgray;*/
   /*background: -webkit-linear-gradient(left, #ffba00 0%, #fc9244 30%, #252d47 100%);*/
   background: white;
-  width: 300px;
-  min-height: 300px;
+  width: 400px;
+  height: 400px;
   display: block;
 }
 .grid-item:hover {
@@ -397,4 +397,9 @@ input[type=text].program-input, textarea.program-input {
 }
 .checkbox-slider--b input:checked + span:before {
   outline: solid #66afe9 0px;
+}
+
+.grid {
+  width: 1680px;
+  margin: auto;
 }

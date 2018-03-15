@@ -19,8 +19,9 @@ html
     block scripts
 
   - var index = false;
+  - var stdlayout = true;
   body
-    nav.navbar.navbar-inverse.navbar-fixed-top(role="banner")
+    nav.navbar-inverse.navbar.navbar-fixed-top(role="banner")
       div.navbar-header
         button(class="navbar-toggle collapsed", data-toggle="collapse", data-target="#page-nav")
           span.sr-only Toggle navigation
@@ -34,11 +35,14 @@ html
       div.navbar-collapse.collapse(role="navigation")#page-nav
         include navbar.pug
 
-    div.container#page-body
-      if !index
-        div.row.hidden-xs.hidden-sm
-          h1.col-sm-12#page-title
-            block page_name
-      div.row
-        div.col-sm-12
-          block content
+    if stdlayout
+      div.container#page-body
+        if !index
+          div.row.hidden-xs.hidden-sm
+            h1.col-sm-12#page-title
+              block page_name
+        div.row
+          div.col-sm-12
+            block content
+    else
+      block content

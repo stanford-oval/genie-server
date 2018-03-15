@@ -17,17 +17,18 @@ block page_name
   | Widgets
 
 block content
-  nav.navbar.sticky-top.navbar-dark.bg-dark
-    form(action='#')#input_command_form
-      div.input-group
-        input(type="text", placeholder="start here").form-control#input_command
-        span.input-group-btn
-          button.btn.btn-secondary(type="submit") Go!
+  div#page-body
+    nav.navbar.sticky-top.navbar-dark.bg-dark
+      form(action='#')#input_command_form
+        div.input-group
+          input(type="text", placeholder="start here").form-control#input_command
+          span.input-group-btn
+            button.btn.btn-secondary(type="submit") Go!
 
-  div#loader
-    div#loader-inner
-      span#loader-cell
-        span.loading(aria-hidden="true")
-      span.sr-only Loading
+    div#loader
+      div#loader-inner
+        span#loader-cell
+          span.loading(aria-hidden="true")
+        span.sr-only Loading
 
-  div.grid
+    div.grid

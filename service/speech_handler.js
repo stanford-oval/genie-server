@@ -20,13 +20,13 @@ class DetectorStream extends stream.Transform {
         super();
 
         let models = new snowboy.Models();
-        for (let p of ['silei', 'gcampagn']) {
+        /*for (let p of ['silei', 'gcampagn']) {*/
              models.add({
-                 file: path.resolve(module.filename, '../../data/' + p + '.pmdl'),
-                 sensitivity: '0.3',
-                 hotwords : 'almond-' + p
+                 file: path.resolve(module.filename, '../../data/gcampagn.pmdl'),
+                 sensitivity: '0.4',
+                 hotwords : 'almond'
              });
-        }
+        /*}*/
 
         this._detector = new snowboy.Detector({
             resource: path.resolve(module.filename, '../../data/snowboy.res'),
