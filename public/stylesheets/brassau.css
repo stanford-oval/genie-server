@@ -46,15 +46,6 @@
   min-height: 300px;
   display: block;
 }
-.grid-item--small {
-  width: 95px;
-  height: 95px;
-  min-height: auto;
-  /*background: #DEEFF5;*/
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
 .grid-item:hover {
   border-color: #FFFF99;
   cursor: move;
@@ -161,6 +152,17 @@
   height: 100%;
   width: 100%;
 }
+
+@media (max-width: 768px) {
+.grid-item--small {
+  width: 95px;
+  height: 95px;
+  min-height: auto;
+  /*background: #DEEFF5;*/
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
 .grid-item--small {
   padding: 10px;
 }
@@ -209,6 +211,21 @@
   height: 60px;
   padding: 0
 }
+.grid-item--small {
+  background: white !important;
+}
+.grid-item--small * {
+/*.grid-item--small *:not(.color_background) {*/
+  display: none;
+}
+.grid-item--small .program-notification-badge {
+  display: block;
+}
+.grid-item--small .program-notification-badge span {
+  display: inline;
+}
+}
+
 button.close {
   position: absolute;
   top: 0px;
@@ -320,45 +337,9 @@ input[type=text].program-input, textarea.program-input {
   margin-left: auto;
   margin-right: auto;
 }
-.grid-item--small {
-  background: white !important;
-}
-.grid-item--small * {
-/*.grid-item--small *:not(.color_background) {*/
-  display: none;
-}
-.grid-item--small .program-notification-badge {
-  display: block;
-}
-.grid-item--small .program-notification-badge span {
-  display: inline;
-}
 .program-input-group .slider.slider-horizontal {
   max-width: 100%;
   max-height: 100%;
-}
-:not(.grid-item--small).layoutless {
-  padding-bottom: 1em;
-  padding-left: 2em;
-  padding-right: 2em;
-  padding-top: 1.5em;
-  overflow: auto;
-}
-.layoutless .program-input-group, .layoutless .program-output-group {
-  margin-top: 1em;
-  margin-bottom: 1em;
-  text-align: left;
-  font-size: 16px;
-}
-.layoutless .program-output {
-  font-size: unset;
-}
-.layoutless .program-input.form-control {
-  padding: .5rem .75rem;
-}
-.layoutless:not(.grid-item--small) {
-  width: 300px;
-  height: 300px;
 }
 .palettes {
   position: absolute;

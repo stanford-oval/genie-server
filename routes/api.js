@@ -15,13 +15,138 @@ const crypto = require('crypto');
 
 const user = require('../util/user');
 
+const Config = require('../config');
+
 function makeRandom(bytes) {
     return crypto.randomBytes(bytes).toString('hex');
 }
 
 var router = express.Router();
 
-router.use('/', user.requireLogIn);
+router.use('/', (req, res, next) => {
+    const compareTo = req.protocol + '://' + req.hostname + ':' + req.app.get('port');
+    if (req.headers.origin && req.headers.origin !== compareTo) {
+        res.status(403).send('Forbidden Cross Origin Request');
+        return;
+    }
+
+    next();
+}, user.requireLogIn);
+
+router.get('/parse', (req, res, next) => {
+    let query = req.query.q || null;
+    if (!query) {
+        res.status(400).json({error:'Missing query'});
+        return;
+    }
+
+    const engine = req.app.engine;
+    const assistant = engine.platform.getCapability('assistant');
+    Promise.resolve().then(() => {
+        return assistant.parse(query);
+    }).then((result) => {
+        res.json(result);
+    }).catch((e) => {
+        console.error(e.stack);
+        res.status(500).json({error:e.message});
+    });
+});
+
+function describeApp(app) {
+    return {
+        uniqueId: app.uniqueId,
+        description: app.description,
+        error: app.error,
+        code: app.code,
+        icon: app.icon ? Config.THINGPEDIA_URL + '/api/devices/icon/' + app.icon : null
+    };
+}
+
+router.post('/apps/create', (req, res, next) => {
+    const engine = req.app.engine;
+    const assistant = engine.platform.getCapability('assistant');
+
+    Promise.resolve().then(() => {
+        return assistant.createApp(req.body);
+    }).then((result) => {
+        if (result.error)
+            res.status(400);
+        res.json(result);
+    }).catch((e) => {
+        console.error(e.stack);
+        res.status(500).json({error:e.message});
+    });
+});
+
+router.get('/apps/list', (req, res, next) => {
+    const engine = req.app.engine;
+
+    Promise.resolve().then(() => {
+        return engine.apps.getAllApps();
+    }).then((apps) => {
+        res.json(apps.map(describeApp));
+    }).catch((e) => {
+        console.error(e.stack);
+        res.status(500).json({error:e.message});
+    });
+});
+
+router.get('/apps/get/:appId', (req, res, next) => {
+    const engine = req.app.engine;
+
+    Promise.resolve().then(() => {
+        return engine.apps.getApp(req.params.appId);
+    }).then((app) => {
+        if (!app) {
+            res.status(404);
+            return { error: 'No such app' };
+        } else {
+            return describeApp(app);
+        }
+    }).then((result) => {
+        res.json(result);
+    }).catch((e) => {
+        console.error(e.stack);
+        res.status(500).json({error:e.message});
+    });
+});
+
+router.post('/apps/delete/:appId', (req, res, next) => {
+    const engine = req.app.engine;
+
+    Promise.resolve().then(() => {
+        return engine.apps.getApp(req.params.appId);
+    }).then((app) => {
+        if (!app) {
+            res.status(404);
+            return { error: 'No such app' };
+        } else {
+            return Promise.resolve(engine.apps.removeApp(app)).then(() => ({status:'ok'}));
+        }
+    }).then((result) => {
+        res.json(result);
+    }).catch((e) => {
+        console.error(e.stack);
+        res.status(500).json({error:e.message});
+    });
+});
+
+router.ws('/results', (ws, req, next) => {
+    const engine = req.app.engine;
+    const assistant = engine.platform.getCapability('assistant');
+
+    Promise.resolve().then(() => {
+        ws.on('close', () => {
+            assistant.removeOutput(ws);
+        });
+        ws.on('ping', (data) => ws.pong(data));
+
+        return assistant.addOutput(ws);
+    }).catch((error) => {
+        console.error('Error in API websocket: ' + error.message);
+        ws.close();
+    });
+});
 
 class WebsocketAssistantDelegate {
     constructor(ws) {

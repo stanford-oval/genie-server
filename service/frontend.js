@@ -6,11 +6,12 @@
 
 const Q = require('q');
 const events = require('events');
+const http = require('http');
 
 const express = require('express');
 const path = require('path');
 const logger = require('morgan');
-const favicon = require('serve-favicon');
+//const favicon = require('serve-favicon');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const session = require('express-session');
@@ -34,6 +35,22 @@ module.exports = class WebFrontend extends events.EventEmitter {
         // all environments
         this._app = express();
         this._app.frontend = this;
+        this._server = http.createServer(this._app);
+        expressWs(this._app, this._server);
+
+        // work around a crash in expressWs if a WebSocket route fails with an error
+        // code and express-session tries to save the session
+        this._app.use((req, res, next) => {
+            if (req.ws) {
+                const originalWriteHead = res.writeHead;
+                res.writeHead = function(statusCode) {
+                    originalWriteHead.apply(this, arguments);
+                    http.ServerResponse.prototype.writeHead.apply(this, arguments);
+                };
+            }
+
+            next();
+        });
 
         this._app.set('port', process.env.PORT || 3000);
         this._app.set('views', path.join(__dirname, '../views'));
@@ -46,13 +63,8 @@ module.exports = class WebFrontend extends events.EventEmitter {
         this._app.use(session({ resave: false,
                                 saveUninitialized: false,
                                 secret: secretKey.getSecretKey() }));
-        this._app.use(csurf({ cookie: false,
-                              ignoreMethods: ['GET','HEAD','OPTIONS',
-                                              'UPGRADE','CONNECT']
-                            }));
         this._app.use(connect_flash());
         this._app.use(express.static(path.join(__dirname, '../public')));
-        expressWs(this._app);
 
         // development only
         if ('development' === this._app.get('env')) {
@@ -97,7 +109,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
         const gettext = gt.dgettext.bind(gt, 'thingengine-platform-server');;
         const pgettext = gt.dpgettext.bind(gt, 'thingengine-platform-server');
         const ngettext = gt.dngettext.bind(gt, 'thingengine-platform-server');
-        this._app.use(function(req, res, next) {
+        this._app.use((req, res, next) => {
             req.locale = platform.locale;
             req.gettext = gettext;
             req._ = req.gettext;
@@ -111,18 +123,23 @@ module.exports = class WebFrontend extends events.EventEmitter {
             next();
         });
 
+        // mount /api before csurf so we can perform requests without the CSRF token
+        this._app.use('/api', require('../routes/api'));
+
+        this._app.use(csurf({ cookie: false,
+                              ignoreMethods: ['GET','HEAD','OPTIONS',
+                                              'UPGRADE','CONNECT'] }));
         this._app.use('/', require('../routes/index'));
         this._app.use('/apps', require('../routes/apps'));
         this._app.use('/user', require('../routes/user'));
         this._app.use('/config', require('../routes/config'));
         this._app.use('/devices', require('../routes/devices'));
-        this._app.use('/api', require('../routes/api'));
     }
 
     open() {
         // '::' means the same as 0.0.0.0 but for IPv6
         // without it, node.js will only listen on IPv4
-        return Q.ninvoke(this._app, 'listen', this._app.get('port'), '::')
+        return Q.ninvoke(this._server, 'listen', this._app.get('port'), '::')
             .then(function() {
                 console.log('Express server listening on port ' + this._app.get('port'));
             }.bind(this));
@@ -151,4 +168,4 @@ module.exports = class WebFrontend extends events.EventEmitter {
         this._isLocked = false;
         this.emit('unlock', key);
     }
-}
+};

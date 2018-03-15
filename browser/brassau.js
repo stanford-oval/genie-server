@@ -192,7 +192,7 @@ $(function() {
 
             for (let i = 0; i < assigned_this_round; i++) {
                 let [primId, inOutParam, ] = inputOutputParams[from_label][i + assign_offset];
-                assignment[primId + ':' + inOutParam.name] = boxes[to_label][i + box_offset];
+                assignment[primId + ':' + (inOutParam.isInputParam ? inOutParam.name : inOutParam)] = boxes[to_label][i + box_offset];
             }
         }
 
@@ -461,75 +461,27 @@ $(function() {
     window.tileStorageManager = tileStorageManager;
 
     function isProgramComplete(program) {
-        function isInvocationComplete(invocation) {
-            if (invocation.selector.isBuiltin)
-                return true;
-            if (!invocation.selector.id) {
-                console.log('incomplete program, missing id');
-                return false;
-            }
-            for (let in_param of invocation.in_params) {
-                if (in_param.value.isUndefined)
+        for (let [,slot] of ThingTalk.Generate.iterateSlots(program)) {
+            if (slot instanceof ThingTalk.Ast.Selector) {
+                if (slot.isBuiltin)
+                    continue;
+                if (!slot.id && !slot.principal)
                     return false;
-            }
-            return (function filterRecurse(expr) {
-                if (expr.isTrue || expr.isFalse)
-                    return true;
-                if (expr.isNot)
-                    return filterRecurse(expr.expr);
-                if (expr.isAnd || expr.isOr)
-                    return expr.operands.every(filterRecurse);
-                return !expr.filter.value.isUndefined;
-            })(invocation.filter);
-        }
-        for (let rule of program.rules) {
-            if (rule.trigger) {
-                if (!isInvocationComplete(rule.trigger))
-                    return false;
-            }
-            for (let query of rule.queries) {
-                if (!isInvocationComplete(query))
-                    return false;
-            }
-            for (let action of rule.actions) {
-                if (!isInvocationComplete(action))
+            } else {
+                if (slot.value.isUndefined)
                     return false;
             }
         }
         return true;
     }
 
-    function extractEntityValues(program) {
-        let into = [];
-        function extractEntityValuesInvocation(prim) {
-            for (let in_param of prim.in_params) {
-                if (in_param.value.isEntity)
-                    into.push(in_param.value);
-            }
-            (function filterRecurse(expr) {
-                if (expr.isTrue || expr.isFalse)
-                    return;
-                if (expr.isAnd || expr.isOr) {
-                    expr.operands.forEach(filterRecurse);
-                    return;
-                }
-                if (expr.isNot) {
-                    filterRecurse(expr.expr);
-                    return;
-                }
-                if (expr.filter.value.isEntity)
-                    into.push(expr.filter.value);
-            })(prim.filter);
+    function* extractEntityValues(program) {
+        for (let [,slot] of ThingTalk.Generate.iterateSlots(program)) {
+            if (slot instanceof ThingTalk.Ast.Selector)
+                continue;
+            if (slot.value.isEntity)
+                yield slot.value;
         }
-        for (let rule of program.rules) {
-            if (rule.trigger)
-                extractEntityValuesInvocation(rule.trigger);
-            for (let query of rule.queries)
-                extractEntityValuesInvocation(query);
-            for (let action of rule.actions)
-                extractEntityValuesInvocation(action);
-        }
-        return into;
     }
 
     let next_in_param_id = 0;
@@ -547,6 +499,13 @@ $(function() {
                 $('#loader').hide();
                 return Promise.resolve();
             }
+            if (json.candidates.length === 0) {
+                alert("Sorry, I did not understand your command. Try a different one.");
+                $('#loader').hide();
+                return Promise.resolve();
+            }
+            // drop all candidates but the best one (to save memory and disk space)
+            json.candidates.length = 1;
 
             let tile = {
                 json: json
@@ -562,6 +521,8 @@ $(function() {
             });
         }).catch(function(e) {
             console.error('Error creating tile', e);
+            alert('Sorry, that did not work: ' + e.message);
+            $('#loader').hide();
         });
     }
 
@@ -600,68 +561,61 @@ $(function() {
     });
 
     function createTile(data, options) {
-        let json = data.json;
-        let code = json.code;
+        const candidate = data.json.candidates[0];
+        const code = candidate.code;
+
+        console.log('data', data);
+        console.log('code', code);
 
         return ThingTalk.Grammar.parseAndTypecheck(code, schemaRetriever, true).then((program) => {
-            if (program.rules.length > 1)
+            if (program.rules.length > 1 || program.declarations.length > 0)
                 throw new Error('Sorry, I cannot handle programs with more than one rule');
 
-            console.log({
-                program: program,
-                json: json
-            });
-
             let rule = program.rules[0];
-            let all_prims = [];
-            let prim_map = {};
             let has_trigger = false, has_action = false;
-            if (rule.trigger) {
+            if (rule.isRule)
                 has_trigger = true;
-                all_prims.push(`r0_t`);
-                prim_map[`r0_t`] = rule.trigger;
-            }
-            rule.queries.forEach(function(query, j) {
-                all_prims.push(`r0_q${j}`);
-                prim_map[`r0_q${j}`] = query;
-            });
-            rule.actions.forEach(function(action, j) {
+            for (let action of rule.actions) {
                 if (!action.selector.isBuiltin) {
                     has_action = true;
-                    all_prims.push(`r0_a${j}`);
-                    prim_map[`r0_a${j}`] = action;
+                    break;
                 }
-            });
-            if (all_prims.length === 0)
-                throw new Error('??? a program with no primitives?');
+            }
 
-            let display_prim_id = all_prims[all_prims.length-1];
-            let display_prim = prim_map[display_prim_id];
-            console.log('display prim id', display_prim_id);
+            let display_prim;
             let display_prim_type;
-            if (display_prim_id.startsWith('r0_t'))
-                display_prim_type = 'trigger';
-             else if (display_prim_id.startsWith('r0_q'))
-                display_prim_type = 'query';
-             else if (display_prim_id.startsWith('r0_a'))
-                display_prim_type = 'action';
+            let all_prims2 = [];
+            let prim_map = new Map;
+            for (let [primType, prim] of ThingTalk.Generate.iteratePrimitives(program)) {
+                if (prim.selector.isBuiltin)
+                    continue;
+                display_prim = prim;
+                display_prim_type = primType;
+                all_prims2.push(prim);
+                prim_map.set(prim, all_prims2.length-1);
+            }
+            let display_prim_id = all_prims2.length-1;
+
+            if (!display_prim || !display_prim_type)
+                throw new Error('??? a program with no primitives?');
 
             console.log('has_trigger', has_trigger);
             console.log('has_action', has_action);
 
             let in_params = [];
-            all_prims.forEach(function(primId) {
-                let prim = prim_map[primId];
-                prim.in_params.forEach(function(in_param) {
-                    if (in_param.value.isVarRef || in_param.value.isEvent)
-                        return;
-                    in_params.push([primId, in_param]);
-                });
-            });
-            let out_params = display_prim.out_params;
+            for (let [,slot,prim,] of ThingTalk.Generate.iterateSlots(program)) {
+                if (!(slot instanceof ThingTalk.Ast.InputParam))
+                    continue;
+                if (slot.value.isVarRef || slot.value.isEvent)
+                    continue;
+                in_params.push([prim_map.get(prim), slot]);
+            }
+            //let out_params = display_prim.out_params;
+            let out_param_types = rule.stream ? rule.stream.schema.out :
+                rule.table ? rule.table.schema.out : {};
+            let out_params2 = Object.keys(out_param_types);
 
-            function makeTitle(primId) {
-                let prim = prim_map[primId];
+            function makeTitle(prim) {
                 let title = prim.schema.canonical;
                 title = title.split(' ');
                 let onIndex = title.indexOf('on');
@@ -670,16 +624,16 @@ $(function() {
                 title = title.join(' ');
                 return title;
             }
-            let title = all_prims.map(makeTitle).join(' then ');
-            let display_title = makeTitle(display_prim_id);
+            let title = all_prims2.map(makeTitle).join(' then ');
+            let display_title = makeTitle(display_prim);
             let first_two_words = display_title.split(' ').slice(0, 1).join(' ');
 
-            function getIconKind(primId) {
-                let device_choices = data.json.devices[primId];
+            function getIconKind(prim, primId) {
+                let device_choices = candidate.devices[`p_${primId}`];
                 // if (!Array.isArray(device_choices))
                 //     throw new Error('Must configure at least one device of kind ' + device_choices.kind)
                 let device = device_choices[0];
-                let device_kind = device ? device.kind : display_prim.selector.kind;
+                let device_kind = device ? device.kind : prim.selector.kind;
                 if (device_kind.indexOf('.') < 0) {
                     switch (device_kind) {
                     case 'activity-tracker':
@@ -705,18 +659,18 @@ $(function() {
                 }
                 return device_kind;
             }
-            function getIcon(primId) {
-                return thingpedia_icon_base_url + getIconKind(primId) + ".png";
+            function getIcon(prim, primId) {
+                return thingpedia_icon_base_url + getIconKind(prim, primId) + ".png";
             }
-            let device_icons = all_prims.map(getIcon);
+            let device_icons = all_prims2.map(getIcon);
 
-            let color_scheme = COLOR_SCHEMES[getIconKind(display_prim_id)];
+            let color_scheme = COLOR_SCHEMES[getIconKind(display_prim, all_prims2.length-1)];
             let colors_dominant = color_scheme.colors_dominant;
 
             // tiles are created small by default, the /command code will remove grid-item--small as appropriate
             let a = `<div class="grid-item grid-item--small tile" >`;
 
-            let entities = extractEntityValues(program);
+            let entities = Array.from(extractEntityValues(program));
             function entityHasLogo(entityType) {
                 return entityType.startsWith('sportradar:') || entityType === 'tt:stock_id' || entityType === 'tt:iso_lang_code';
             }
@@ -741,8 +695,8 @@ $(function() {
             // for now, bad heuristic: if a numeric out parameter is present,
             // we assume it's a replace when
             if (has_trigger) {
-                is_list = !out_params.some(function(o) {
-                    let ptype = display_prim.schema.out[o.value];
+                is_list = !out_params2.some(function(o) {
+                    let ptype = out_param_types[o];
                     return ptype.isNumber || ptype.isMeasure;
                 });
 
@@ -756,7 +710,7 @@ $(function() {
                 if (display_prim.selector.kind === 'org.thingpedia.builtin.thingengine.phone' &&
                     display_prim.channel === 'gps')
                     is_list = false;
-            } else if (display_prim_type === 'query') {
+            } else if (display_prim_type === 'table') {
                 let has_count = false;
                 display_prim.in_params.forEach(function(in_param) {
                     if (in_param.name === 'count')
@@ -792,14 +746,10 @@ $(function() {
                     </span>`;
                 }
             }
-            let has_link = out_params.some(function(out_param) {
-                let ptype = display_prim.schema.out[out_param.value];
-                return ptype.isEntity && ptype.type === 'tt:url' && out_param.value === 'link';
-            }) && out_params.length > 1;
-            let has_alt_text = out_params.some(function(out_param) {
-                let ptype = display_prim.schema.out[out_param.value];
-                return ptype.isString && out_param.value === 'alt_text';
-            });
+            let has_link = out_params2.length > 1 &&
+                out_param_types.link && out_param_types.link.isEntity &&
+                out_param_types.link.type === 'tt:url';
+            let has_alt_text = out_param_types.alt_text && out_param_types.alt_text.isString;
 
             let in_param_map = {};
             let in_param_types = {};
@@ -828,7 +778,7 @@ $(function() {
 
             let display_in_params = [];
             in_params.forEach(function([primId, in_param]) {
-                let prim = prim_map[primId];
+                let prim = all_prims2[primId];
 
                 let tt_type = prim.schema.inReq[in_param.name] || prim.schema.inOpt[in_param.name];
                 let display_type = HARDCODED_INPUT_PARAM_TYPES[in_param.name];
@@ -896,7 +846,7 @@ $(function() {
                 'Entity(sportradar:ncaambb_team)': -20,
             };
             function computeInputParamImportance(primId, in_param) {
-                let prim = prim_map[primId];
+                let prim = all_prims2[primId];
                 let display_type = in_param_types[primId + ':' + in_param.name];
                 let tt_type = prim.schema.inReq[in_param.name] || prim.schema.inOpt[in_param.name];
 
@@ -1062,7 +1012,7 @@ frameborder="0" allowFullScreen></iframe>`,
                     show: true,
                 },
                 channel_id: {
-                    display: value => `<a href="http://www.youtube.com/channel/${escapeHTML(value)}" target="_blank">Go To Channel</a>`,
+                    display: value => `<a href="http://www.youtube.com/channel/${escapeHTML(value)}" target="_blank">Go To Channel</a>`,//"
                     show: true
                 },
                 link: {
@@ -1134,11 +1084,11 @@ frameborder="0" allowFullScreen></iframe>`,
             }
 
             let display_out_params = [];
-            out_params.forEach(function(out_param) {
-                let ptype = display_prim.schema.out[out_param.value];
+            out_params2.forEach(function(out_param) {
+                let ptype = out_param_types[out_param];
 
-                let key = display_prim.selector.kind + ':' + display_prim.channel + ':' + out_param.value;
-                let format = MORE_HARDCODED_OUTPUT_PARAMS[key] || HARDCODED_OUTPUT_PARAMS[out_param.value] || OUTPUT_PARAM_BY_TYPES[String(ptype)];
+                let key = display_prim.selector.kind + ':' + display_prim.channel + ':' + out_param;
+                let format = MORE_HARDCODED_OUTPUT_PARAMS[key] || HARDCODED_OUTPUT_PARAMS[out_param] || OUTPUT_PARAM_BY_TYPES[String(ptype)];
                 if (!format && ptype.isEntity) {
                     format = OUTPUT_PARAM_BY_TYPES[String(ptype)] = {
                         display: makeEntityDisplay(ptype.type),
@@ -1155,8 +1105,8 @@ frameborder="0" allowFullScreen></iframe>`,
                     format = DEFAULT_OUTPUT_PARAM;
                 if (!format.show)
                     return;
-                if (display_prim_type === 'trigger' && out_param.value === 'time')
-                    return;
+                /*if (display_prim_type === 'trigger' && out_param === 'time')
+                    return;*/
                 display_out_params.push([display_prim_id, out_param]);
             });
 
@@ -1191,11 +1141,10 @@ frameborder="0" allowFullScreen></iframe>`,
                 // everything else is 0
             };
 
-            function computeOutputParamImportance(out_param) {
-                let pname = out_param.value;
+            function computeOutputParamImportance(pname) {
                 if (HARDCODED_OUTPUT_PARAM_IMPORTANCE[pname])
                     return HARDCODED_OUTPUT_PARAM_IMPORTANCE[pname];
-                let ptype = display_prim.schema.out[pname];
+                let ptype = out_param_types[pname];
 
                 let importance = OUTPUT_PARAM_IMPORTANCE_BY_TYPE[String(ptype)];
                 if (importance)
@@ -1237,7 +1186,7 @@ frameborder="0" allowFullScreen></iframe>`,
                 } else {
                     // output parameters get 4.9 extra points just for being outputs
                     importance = 4.9 + computeOutputParamImportance(inOutParam);
-                    let tt_type = display_prim.schema.out[inOutParam.value];
+                    let tt_type = out_param_types[inOutParam];
                     box_label;
                     if ((tt_type.isEntity && tt_type.type === 'tt:picture') || inOutParam.value === 'video_id')
                         box_label = 'image';
@@ -1257,12 +1206,10 @@ frameborder="0" allowFullScreen></iframe>`,
                     let [aPrimId, aInOutParam, aImportance] = a;
                     let [bPrimId, bInOutParam, bImportance] = b;
                     if (bImportance === aImportance) {
-                        // a before q before t, which works out nicely
-                        // to put later parameters more important than earlier parameters
-                        let primOrder = aPrimId.localeCompare(bPrimId);
+                        let primOrder = aPrimId - bPrimId;
                         if (primOrder === 0) {
-                            let aIndex = prim_map[aPrimId].schema.index[aInOutParam.isInputParam ? aInOutParam.name : aInOutParam.value];
-                            let bIndex = prim_map[bPrimId].schema.index[bInOutParam.isInputParam ? bInOutParam.name : bInOutParam.value];
+                            let aIndex = all_prims2[aPrimId].schema.index[aInOutParam.isInputParam ? aInOutParam.name : aInOutParam];
+                            let bIndex = all_prims2[bPrimId].schema.index[bInOutParam.isInputParam ? bInOutParam.name : bInOutParam];
                             return aIndex - bIndex;
                         } else {
                             return primOrder;
@@ -1319,10 +1266,10 @@ frameborder="0" allowFullScreen></iframe>`,
                 return inputOutputAssignment[primId + ':' + in_param.name];
             });
             display_out_params = display_out_params.filter(function([primId, out_param]) {
-                return !!inputOutputAssignment[primId + ':' + out_param.name];
+                return !!inputOutputAssignment[primId + ':' + out_param];
             });
             output_rects = display_out_params.map(function([primId, out_param]) {
-                return inputOutputAssignment[primId + ':' + out_param.name];
+                return inputOutputAssignment[primId + ':' + out_param];
             });
 
             console.log('input_rects', input_rects);
@@ -1409,7 +1356,7 @@ frameborder="0" allowFullScreen></iframe>`,
             a += `</div>`;
 
             display_in_params.forEach(function([primId, in_param]) {
-                let prim = prim_map[primId];
+                let prim = all_prims2[primId];
                 let display_type = in_param_types[primId + ':' + in_param.name];
                 if (!display_type)
                     throw new Error('???');
@@ -1476,7 +1423,7 @@ frameborder="0" allowFullScreen></iframe>`,
 
                     case 'entity':
                         a += `<span id="input-${in_param_id}" class="program-input program-constant-input">
-                            <img src="https://thingpedia.stanford.edu/thingpedia/api/entities/icon?entity_type=${in_param.value.type}&entity_value=${encodeURIComponent(in_param.value.value)}&entity_display=${encodeURIComponent(in_param.value.display || '')}" style="width:32px; height:32px; object-fit: contain; margin-right:6px">${in_param.value.display || in_param.value.value}
+                            <img src="https://thingpedia.stanford.edu/thingpedia/api/entities/icon?entity_type=${in_param.value.type}&entity_value=${encodeURIComponent(in_param.value.value)}&entity_display=${encodeURIComponent(in_param.value.display || '')}" style="width:32px; height:32px; object-fit: contain; margin-right:6px">${in_param.value.display || in_param.value.value /*"*/}
                             </span>`;
                         break;
 
@@ -1546,7 +1493,7 @@ frameborder="0" allowFullScreen></iframe>`,
                             a += `<span class="input-group-addon">@</span>`;
                         else if (tt_type.isEntity && tt_type.type === 'tt:hashtag')
                             a += `<span class="input-group-addon">#</span>`;
-                        a += `<input id="input-${in_param_id}" type="text" placeholder="${in_param.name.replace(/_/g, ' ')}" class="program-input form-control ${in_param.value.isUndefined ? 'incomplete' : ''}" value="${escapeHTML(in_param.value.value || '')}" >`;
+                        a += `<input id="input-${in_param_id}" type="text" placeholder="${in_param.name.replace(/_/g, ' ')}" class="program-input form-control ${in_param.value.isUndefined ? 'incomplete' : ''}" value="${escapeHTML(in_param.value.value || '')}" >`;//"
                         if (tt_type.isMeasure)
                             a += `<span class="input-group-addon">${in_param.value.unit || tt_type.unit}</span>`;
                         a += `</div>`;
@@ -1571,7 +1518,7 @@ frameborder="0" allowFullScreen></iframe>`,
                         break;
 
                     case "textarea":
-                        a += `<textarea id="input-${in_param_id}" placeholder="${in_param.name.replace(/_/g, ' ')}" class="program-input form-control ${in_param.value.isUndefined ? 'incomplete' : ''}" rows="5" >${escapeHTML(in_param.value.value || '')}</textarea>`;
+                        a += `<textarea id="input-${in_param_id}" placeholder="${in_param.name.replace(/_/g, ' ')}" class="program-input form-control ${in_param.value.isUndefined ? 'incomplete' : ''}" rows="5" >${escapeHTML(in_param.value.value || '')}</textarea>`;//"
                         in_param_map[in_param_id].onchange = function(element, event) {
                             this.in_param.value = ThingTalk.Ast.Value.String(element.value);
                         };
@@ -1608,27 +1555,24 @@ frameborder="0" allowFullScreen></iframe>`,
 
             function createOneProgramResult(result, outputElements) {
                 let alt_text ='';
-                if (has_alt_text) {
-                    let param_index = display_prim.schema.index.alt_text;
-                    alt_text = `title="${escapeHTML(String(result.raw[param_index]))}"`;
-                }
+                if (has_alt_text)
+                    alt_text = `title="${escapeHTML(String(result.raw.alt_text))}"`;
 
                 let a = `<div class="program-result-item" ${alt_text}>`;
 
                 if (has_link) {
-                    let link = result.raw[display_prim.schema.index.link];
+                    let link = result.raw.link;
                     a += `<a href="${escapeHTML(link.value || link)}" target="_blank">`;
                 }
 
                 display_out_params.forEach(function([primId, out_param]) {
-                    let prim = prim_map[primId];
-                    let ptype = prim.schema.out[out_param.value];
+                    let prim = all_prims2[primId];
+                    let ptype = out_param_types[out_param];
                     let out_param_id = next_out_param_id++;
 
-                    let key = prim.selector.kind + ':' + prim.channel + ':' + out_param.value;
-                    let format = MORE_HARDCODED_OUTPUT_PARAMS[key] || HARDCODED_OUTPUT_PARAMS[out_param.value] || OUTPUT_PARAM_BY_TYPES[String(ptype)];
-                    let param_index = prim.schema.index[out_param.value];
-                    let param_value = result.raw[param_index];
+                    let key = prim.selector.kind + ':' + prim.channel + ':' + out_param;
+                    let format = MORE_HARDCODED_OUTPUT_PARAMS[key] || HARDCODED_OUTPUT_PARAMS[out_param] || OUTPUT_PARAM_BY_TYPES[String(ptype)];
+                    let param_value = result.raw[out_param];
                     let is_long = false;
                     if (ptype.isString && param_value.length >= 100)
                         is_long = true;
@@ -1648,7 +1592,7 @@ frameborder="0" allowFullScreen></iframe>`,
                 });
                 if (has_link)
                     a += `</a>`;
-                a += '</div>';
+                a += '</div>';//'
 
                 return $(a);
             }
@@ -1751,7 +1695,7 @@ frameborder="0" allowFullScreen></iframe>`,
             }
 
             if (title === button ||
-                (all_prims.length === 1 && (button === 'send' || button === 'post' || button === 'search')))
+                (all_prims2.length === 1 && (button === 'send' || button === 'post' || button === 'search')))
                 title = '';
             if (title === 'set minimum maximum temperature')
                 title = 'set min max temperature';
@@ -1773,7 +1717,7 @@ frameborder="0" allowFullScreen></iframe>`,
                 });
             }
             $item.css({
-                backgroundImage: 'url(img/backgrounds/annotated/' + escapeBackgroundImage(background_image) + ')',
+                backgroundImage: 'url(https://thingpedia.stanford.edu/brassau/backgrounds/' + escapeBackgroundImage(background_image) + ')',
                 backgroundSize: 'contain',
                 //backgroundColor: rgbToHex(backgroundMeta['color-palette'][0])
             });
@@ -1822,8 +1766,8 @@ frameborder="0" allowFullScreen></iframe>`,
                 else
                     in_param_handler = in_param_map[element.id.substr('input-'.length)];
                 in_param_handler.onchange(element, event, state);
-                json.description = describe_program(program);
-                $('#input_command').val(json.description);
+                candidate.description = describe_program(program);
+                $('#input_command').val(candidate.description);
             }
             $("input.program-input, select.program-input, textarea.program-input", $item).on('change', bindInputParamChange);
             $(".program-input.checkbox-switch", $item).on('switchChange.bootstrapSwitch', bindInputParamChange);
@@ -1897,7 +1841,7 @@ frameborder="0" allowFullScreen></iframe>`,
                     position: 'absolute',
                     top: 5,
                     right: '12%',
-                    left: (10 * all_prims.length) + '%',
+                    left: (10 * all_prims2.length) + '%',
                     height: '1.2em',
                     margin: 'auto',
                     textAlign: 'center'
@@ -1914,16 +1858,18 @@ frameborder="0" allowFullScreen></iframe>`,
             });
 
             function executeGetOrDo(event) {
+                console.log('executeGetOrDo');
                 if (event)
                     event.preventDefault();
                 if (!isProgramComplete(program)) {
+                    console.log('program is incomplete');
                     $('.incomplete', $item).focus();
                     return;
                 }
                 let code = ThingTalk.Ast.prettyprint(program);
                 // console.log('new code', code);
-                if (code !== data.json.code) {
-                    data.json.code = code;
+                if (code !== candidate.code) {
+                    candidate.code = code;
                     tileStorageManager.storeTile(data);
                 }
 
@@ -1971,8 +1917,8 @@ frameborder="0" allowFullScreen></iframe>`,
             function executeWhen(event) {
                 let state = this.checked;
                 let code = ThingTalk.Ast.prettyprint(program);
-                if (code !== data.json.code) {
-                    data.json.code = code;
+                if (code !== candidate.code) {
+                    candidate.code = code;
                     tileStorageManager.storeTile(data);
                 }
                 //$('.checkbox-activate-program-label', $item).text('\xa0\xa0' + (state ? 'active' : 'inactive'))
@@ -2164,8 +2110,8 @@ frameborder="0" allowFullScreen></iframe>`,
                     });
                 }
 
-                if (!$item.hasClass('grid-item--small'))
-                    textFit($('.autofontsize .program-output:not(.picture)', $item), { alignVert: true, multiLine: true, minFontSize: 10, maxFontSize: 16 });
+                //if (!$item.hasClass('grid-item--small'))
+                textFit($('.autofontsize .program-output:not(.picture)', $item), { alignVert: true, multiLine: true, minFontSize: 10, maxFontSize: 16 });
 
             }
 

@@ -44,12 +44,10 @@ module.exports = {
     },
 
     parseCommand(command) {
-        return Promise.resolve($.ajax({
-            url:  '/api/parse',
+        return Promise.resolve($.ajax('/api/parse', {
             data: {
-                command: command
-            },
-            contentType: 'application/json'
+                q: command
+            }
         }));
     }
 };

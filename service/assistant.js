@@ -16,6 +16,7 @@ const child_process = require('child_process');
 
 const Almond = require('almond');
 const SpeechHandler = require('./speech_handler');
+const AlmondApi = require('./almond_api');
 
 const Config = require('../config');
 
@@ -206,8 +207,7 @@ module.exports = class Assistant extends events.EventEmitter {
         super();
 
         this._engine = engine;
-        this._conversations = {};
-        this._lastConversation = null;
+        this._api = new AlmondApi(this._engine);
 
         this._speechHandler = new SpeechHandler(engine.platform);
         this._speechSynth = platform.getCapability('text-to-speech');
@@ -215,7 +215,25 @@ module.exports = class Assistant extends events.EventEmitter {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true
         });
-        this._conversations['main'] = this._lastConversation = this._mainConversation;
+
+        this._conversations = {
+            api: this._api,
+            main: this._mainConversation
+        };
+        this._lastConversation = this._mainConversation;
+    }
+
+    parse(sentence, target) {
+        return this._api.parse(sentence, target);
+    }
+    createApp(data) {
+        return this._api.createApp(data);
+    }
+    addOutput(out) {
+        this._api.addOutput(out);
+    }
+    removeOutput(out) {
+        this._api.removeOutput(out);
     }
 
     start() {
