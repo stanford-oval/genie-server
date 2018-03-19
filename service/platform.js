@@ -69,6 +69,27 @@ const BluezBluetooth = require('./bluez');
 const SpeechSynthesizer = require('./speech_synthesizer');
 const MediaPlayer = require('./media_player');
 
+const _contentApi = {
+    getStream(url) {
+        return new Promise((resolve, reject) => {
+            if (url.startsWith('file:///')) {
+                const path = url.substring('file://'.length);
+                child_process.execFile('xdg-mime', ['query', 'filetype', path], (err, stdout, stderr) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    let stream = fs.createReadStream(path);
+                    stream.contentType = stdout;
+                    resolve(stream);
+                });
+            } else {
+                reject(new Error('Unsupported url ' + url));
+            }
+        });
+    }
+};
+
 function safeMkdirSync(dir) {
     try {
         fs.mkdirSync(dir);
@@ -191,13 +212,13 @@ module.exports = {
         case 'audio-router':
         case 'system-apps':
         case 'graphics-api':
-        case 'content-api':
         case 'contacts':
         case 'telephone':
         // for compat
         case 'notify-api':
             return true;
 */
+        case 'content-api':
         case 'assistant':
             return true;
 
@@ -233,6 +254,8 @@ module.exports = {
             return this._pulse;
         case 'media-player':
             return this._media;
+        case 'content-api':
+            return _contentApi;
 
 /*
         case 'notify-api':
