@@ -80,7 +80,7 @@ const _contentApi = {
                         return;
                     }
                     let stream = fs.createReadStream(path);
-                    stream.contentType = stdout;
+                    stream.contentType = String(stdout).trim();
                     resolve(stream);
                 });
             } else {
