@@ -14,6 +14,9 @@
 
 #chat {
   margin-bottom: 1em;
+  overflow: auto;
+  scroll-behavior: smooth;
+  height: calc(100vh - 243px);
 }
 
 .message-container {
@@ -61,16 +64,22 @@
   display: block;
 }
 
+.message-picture {
+  max-width: 80%;
+}
+
 .button-grid {
   width: 80%;
 }
 
 .button-grid .btn {
   margin-bottom: 6px;
+  white-space: normal;
 }
 
-#chat {
-  overflow: auto;
-  scroll-behavior: smooth;
-  height: calc(100vh - 243px);
+.message-rdl-title {
+  font-weight: bold;
+}
+.message-rdl-content {
+  display: block;
 }
