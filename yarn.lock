@@ -3657,11 +3657,9 @@ text-table@~0.2.0:
 
 "thingpedia-discovery@github:Stanford-Mobisocial-IoT-Lab/thingpedia-discovery":
   version "1.0.0"
-  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/thingpedia-discovery/tar.gz/44afe722f3c56590aa9c35260f3bcbafa31a59d4"
+  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/thingpedia-discovery/tar.gz/7505f55d8b8bf35bd9a5b14b7e6a7d77d5bc52e0"
   dependencies:
     node-ssdp "^2.7.2"
-    oauth "~0.9.14"
-    q "~1.4.1"
 
 "thingpedia@github:Stanford-Mobisocial-IoT-Lab/thingpedia-api":
   version "1.0.0"
