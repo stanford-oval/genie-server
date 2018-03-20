@@ -2395,7 +2395,11 @@ nan@2.4.x, nan@~2.4.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.4.0.tgz#fb3c59d45fe4effe215f0b890f8adf6eb32d2232"
 
-nan@^2.0.5, nan@^2.0.9:
+nan@^2.0.5:
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
+
+nan@^2.0.9:
   version "2.9.2"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.9.2.tgz#f564d75f5f8f36a6d9456cca7a6c4fe488ab7866"
 
@@ -3359,7 +3363,14 @@ setprototypeof@1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/setprototypeof/-/setprototypeof-1.1.0.tgz#d0bd85536887b6fe7c0d818cb962d9d91c54e656"
 
-sha.js@^2.4.0, sha.js@^2.4.8, sha.js@~2.4.4:
+sha.js@^2.4.0:
+  version "2.4.11"
+  resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.11.tgz#37a5cf0b81ecbc6943de109ba2960d1b26584ae7"
+  dependencies:
+    inherits "^2.0.1"
+    safe-buffer "^5.0.1"
+
+sha.js@^2.4.8, sha.js@~2.4.4:
   version "2.4.10"
   resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.10.tgz#b1fde5cd7d11a5626638a07c604ab909cfa31f9b"
   dependencies:
@@ -3637,7 +3648,7 @@ text-table@~0.2.0:
 
 "thingengine-core@github:Stanford-Mobisocial-IoT-Lab/thingengine-core":
   version "1.0.0"
-  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/thingengine-core/tar.gz/4c08f232e4207013ac5b26025f1b98afbe897e25"
+  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/thingengine-core/tar.gz/c88ecd4301e2f9b5687447c418650dd05f07c5b7"
   dependencies:
     adt "^0.7.2"
     babel-runtime "^6.26.0"
@@ -3660,14 +3671,17 @@ text-table@~0.2.0:
   resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/thingpedia-discovery/tar.gz/7505f55d8b8bf35bd9a5b14b7e6a7d77d5bc52e0"
   dependencies:
     node-ssdp "^2.7.2"
+    oauth "~0.9.14"
+    q "~1.4.1"
 
 "thingpedia@github:Stanford-Mobisocial-IoT-Lab/thingpedia-api":
   version "1.0.0"
-  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/thingpedia-api/tar.gz/f89b2bff37220f18986efa3c58a941014dfe49b1"
+  resolved "https://codeload.github.com/Stanford-Mobisocial-IoT-Lab/thingpedia-api/tar.gz/d84dc49d7b9ce5fd93380dbeac93d517a296e05e"
   dependencies:
     ip "~1.1.0"
     oauth "~0.9.14"
     q "~1.4.1"
+    thingtalk "github:Stanford-Mobisocial-IoT-Lab/ThingTalk"
     tmp "0.0.31"
     xml2js "^0.4.17"
 
