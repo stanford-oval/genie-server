@@ -68,7 +68,7 @@ router.post('/create', user.requireLogIn, (req, res, next) => {
             res.redirect(303, req.session['device-redirect-to']);
             delete req.session['device-redirect-to'];
         } else {
-            res.redirect(303, '/me');
+            res.redirect(303, '/devices');
         }
     }).catch((e) => {
         res.status(400).render('error', { page_title: "Almond - Error",
