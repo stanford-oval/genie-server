@@ -12,6 +12,6 @@
 module.exports.ENABLE_DB_ENCRYPTION = false;
 module.exports.SEMPRE_URL = 'https://almond-nl.stanford.edu';
 module.exports.THINGPEDIA_URL = 'https://thingpedia.stanford.edu/thingpedia';
-module.exports.MS_SPEECH_RECOGNITION_PRIMARY_KEY = '73eb312a31a04edca3117ad60cb05c1b';
-module.exports.MS_SPEECH_RECOGNITION_SECONDARY_KEY = '1e519691660a4e2ea5b12db7fe9dbe20';
+module.exports.MS_SPEECH_RECOGNITION_PRIMARY_KEY = 'de1f02817356494483ba502b2ce95f6f';
+module.exports.MS_SPEECH_RECOGNITION_SECONDARY_KEY = '3dc6ce0b832940f0b0c984a1517c457e';
 
