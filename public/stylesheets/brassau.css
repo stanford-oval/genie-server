@@ -400,6 +400,6 @@ input[type=text].program-input, textarea.program-input {
 }
 
 .grid {
-  width: 1680px;
+  /*width: 1680px;*/
   margin: auto;
 }
