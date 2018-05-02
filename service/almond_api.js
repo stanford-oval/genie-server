@@ -23,7 +23,7 @@ const FACTORING_IMPLEMENTED = false; // FIXME
 module.exports = class AlmondApi {
     constructor(engine) {
         this._engine = engine;
-        this._parser = new ParserClient(undefined, engine.platform.locale);
+        this._parser = new ParserClient(undefined, engine.platform.locale, engine.platform.getSharedPreferences());
         this._formatter = new Formatter(this._engine);
 
         this._outputs = new Set;
