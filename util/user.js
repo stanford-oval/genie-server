@@ -144,7 +144,7 @@ module.exports = {
         if (!model.isConfigured()) {
             req.session.redirect_to = req.originalUrl;
             res.redirect('/user/configure');
-        } if (!req.user) {
+        } else if (!req.user) {
             req.session.redirect_to = req.originalUrl;
             res.redirect('/user/login');
         } else {
