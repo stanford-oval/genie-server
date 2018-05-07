@@ -468,6 +468,7 @@ $(function() {
         }
     }
     let tileStorageManager = new TileStorageManager();
+    tileStorageManager.clearAll();
     window.tileStorageManager = tileStorageManager;
 
     function isProgramComplete(program) {
