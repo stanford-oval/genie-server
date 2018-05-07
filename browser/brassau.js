@@ -17,8 +17,18 @@ const ThingTalk = require('thingtalk');
 const ThingpediaClient = require('./thingpediaclient.js');
 const ThingEngineApi = require('./thingengine');
 
-const BACKGROUNDS = require('./backgrounds.json');
-const COLOR_SCHEMES = require('./color_schemes.json');
+let BACKGROUNDS;
+$.holdReady(true);
+$.get('https://almond.stanford.edu/brassau/backgrounds/backgrounds.json').then((data) => {
+    BACKGROUNDS = data;
+    $.holdReady(false);
+});
+let COLOR_SCHEMES;
+$.holdReady(true);
+$.get('https://almond.stanford.edu/brassau/backgrounds/color_schemes.json').then((data) => {
+    COLOR_SCHEMES = data;
+    $.holdReady(false);
+});
 
 function toWidthHeight(box) {
     let [[x0, y0], [x1, y1]] = box;
