@@ -35,6 +35,7 @@ $.get('https://almond.stanford.edu/brassau/backgrounds/color_schemes.json').then
 const params = new URLSearchParams(document.location.search.substring(1));
 const DISABLE_ALL_LAYOUT = params.has('layout') && params.get('layout') === 'no';
 const DISABLE_ALL_BACKGROUND = params.has('background') && params.get('background') === 'no';
+const RUN_TEST_CASES = params.has('test_cases') && params.get('test_cases') === 'baseline';
 
 function toWidthHeight(box) {
     let [[x0, y0], [x1, y1]] = box;
@@ -508,7 +509,10 @@ $(function() {
     $('#input_command').focus();
 
     function handleCommand(command, options) {
-        options = options || {};
+        options = options || {
+            disableLayout: DISABLE_ALL_LAYOUT,
+            disableBackground: DISABLE_ALL_LAYOUT || DISABLE_ALL_BACKGROUND
+        };
         return ThingEngineApi.parseCommand(command).then(function(json) {
             if (json.error) {
                 console.error('Received server error', json.error);
@@ -558,6 +562,22 @@ $(function() {
         $grid.packery('fit', $item, 0, 0);
         $grid.packery('layout');
         $('#input_command').val(tile.json.description);
+    }
+
+    if (RUN_TEST_CASES) {
+        tileStorageManager.clearAll()
+        const testCases = require('./test_cases.json');
+
+        let tiles = $('.grid-item.tile');
+        function nextTestCase(i) {
+            if (i === testCases.length)
+                return;
+            console.log('processing test case #' + (i+1) + '/' + testCases.length);
+
+            handleCommand(testCases[i], { number: i });
+            setTimeout(() => { nextTestCase(i+1); }, 1000);
+        }
+        nextTestCase(0);
     }
 
     Promise.all(tileStorageManager.getTiles().map(function (tile) {

@@ -484,7 +484,9 @@ module.exports = class AlmondApi {
             }).then((account) => {
                 return this._engine.messaging.getUserByAccount(account);
             }).then((user) => {
-                return this._engine.messaging.getBlobDownloadLink(user.thumbnail).then((thumbnail) => ({
+                return Promise.resolve().then(() => {
+                    return this._engine.messaging.getBlobDownloadLink(user.thumbnail);
+                }).then((thumbnail) => ({
                     contact: contact,
                     omletAccount: user.account,
                     omletName: user.name,
