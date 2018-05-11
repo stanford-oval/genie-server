@@ -361,7 +361,7 @@ $(function() {
         return minCostChoice;
     }
 
-    let thingpediaClient = new ThingpediaClient();
+    let thingpediaClient = new ThingpediaClient($('body').attr('data-developer-key'));
     let schemaRetriever = new ThingTalk.SchemaRetriever(thingpediaClient);
 
     class AppManager {

@@ -94,6 +94,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
             }
 
             res.locals.THINGPEDIA_URL = Config.THINGPEDIA_URL;
+            res.locals.developerKey = (this._app.engine ? this._app.engine.platform.getSharedPreferences().get('developer-key') : '') || '';
 
             next();
         });
