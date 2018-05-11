@@ -32,7 +32,7 @@ router.get('/', user.redirectLogIn, (req, res, next) => {
                                         port: port,
                                         initialSetup: authToken === undefined },
                               cloud: { isConfigured: cloudId !== undefined } });
-    }).done();
+    }).catch(next);
 });
 
 router.get('/conversation', user.redirectLogIn, (req, res, next) => {
@@ -41,6 +41,10 @@ router.get('/conversation', user.redirectLogIn, (req, res, next) => {
 
 router.get('/widgets', user.redirectLogIn, (req, res, next) => {
     res.render('brassau', { page_title: req._("Almond - Widgets") });
+});
+
+router.get('/friends_hub', user.redirectLogIn, (req, res, next) => {
+    res.render('friends_hub', { page_title: req._("Friends Hub")});
 });
 
 module.exports = router;

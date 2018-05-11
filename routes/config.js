@@ -51,7 +51,7 @@ function config(req, res, next, userData, cloudData) {
 }
 
 router.get('/', user.redirectLogIn, function(req, res, next) {
-    config(req, res, next, {}, {}).done();
+    config(req, res, next, {}, {}).catch(next);
 });
 
 router.post('/set-server-password', user.requireLogIn, function(req, res, next) {

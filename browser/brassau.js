@@ -11,6 +11,8 @@
 // See COPYING for details
 "use strict";
 
+require('thingengine-core/lib/polyfill');
+
 const ColorScheme = require('color-scheme');
 const ThingTalk = require('thingtalk');
 
@@ -468,7 +470,7 @@ $(function() {
         }
     }
     let tileStorageManager = new TileStorageManager();
-    tileStorageManager.clearAll();
+    //tileStorageManager.clearAll();
     window.tileStorageManager = tileStorageManager;
 
     function isProgramComplete(program) {
@@ -737,6 +739,10 @@ $(function() {
                     is_list = false;
                 if (has_count)
                     is_list = true;
+                for (let prim of all_prims2) {
+                    if (prim.schema.is_list)
+                        is_list = true;
+                }
 
                 /*let has_count_param = !!(display_prim.schema.inReq['count'] || display_prim.schema.inOpt['count'])
                 if (has_count_param && !has_count) {
@@ -1126,7 +1132,8 @@ frameborder="0" allowFullScreen></iframe>`,
                 name: 12,
                 uber_type: 11.6,
                 low_estimate: 11.5,
-                description: 10.1,
+                description: 9.9,
+                translated_text: 10.5,
                 // String: 10
                 from: 9.5,
                 in_reply_to: 9
