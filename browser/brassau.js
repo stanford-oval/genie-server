@@ -32,6 +32,10 @@ $.get('https://almond.stanford.edu/brassau/backgrounds/color_schemes.json').then
     $.holdReady(false);
 });
 
+const params = new URLSearchParams(document.location.search.substring(1));
+const DISABLE_ALL_LAYOUT = params.has('layout') && params.get('layout') === 'no';
+const DISABLE_ALL_BACKGROUND = params.has('background') && params.get('background') === 'no';
+
 function toWidthHeight(box) {
     let [[x0, y0], [x1, y1]] = box;
 
@@ -558,7 +562,10 @@ $(function() {
 
     Promise.all(tileStorageManager.getTiles().map(function (tile) {
         console.log('restoring tile ' + tile.uniqueId + ': ' + tile.json.description);
-        return createTile(tile, {});
+        return createTile(tile, {
+            disableLayout: DISABLE_ALL_LAYOUT,
+            disableBackground: DISABLE_ALL_BACKGROUND || DISABLE_ALL_LAYOUT
+        });
     })).then(() => {
         $('#loader').hide();
 
@@ -678,10 +685,12 @@ $(function() {
             let device_icons = all_prims2.map(getIcon);
 
             let color_scheme = COLOR_SCHEMES[getIconKind(display_prim, all_prims2.length-1)];
+            if (!color_scheme)
+                color_scheme = COLOR_SCHEMES['org.thingpedia.builtin.thingengine.builtin'];
             let colors_dominant = color_scheme.colors_dominant;
 
             // tiles are created small by default, the /command code will remove grid-item--small as appropriate
-            let a = `<div class="grid-item grid-item--small tile" >`;
+            let a = `<div class="grid-item grid-item--small tile ${options.disableLayout ? 'layoutless' : ''}" >`;
 
             let entities = Array.from(extractEntityValues(program));
             function entityHasLogo(entityType) {
@@ -1702,7 +1711,7 @@ frameborder="0" allowFullScreen></iframe>`,
                 }
 
                 a += `<a
-                    class="btn btn-secondary btn-sm button-execute"
+                    class="btn btn-default btn-sm button-execute"
                     href="#">${button}</a>`;
             } else {
                 a += `<div class="switch-when-container"><div class="checkbox checkbox-slider--b switch-when">
@@ -1734,11 +1743,13 @@ frameborder="0" allowFullScreen></iframe>`,
                     return '%' + c.charCodeAt(0).toString(16);
                 });
             }
-            $item.css({
-                backgroundImage: 'url(https://thingpedia.stanford.edu/brassau/backgrounds/' + escapeBackgroundImage(background_image) + ')',
-                backgroundSize: 'contain',
-                //backgroundColor: rgbToHex(backgroundMeta['color-palette'][0])
-            });
+            if (!options.disableBackground) {
+                $item.css({
+                    backgroundImage: 'url(https://thingpedia.stanford.edu/brassau/backgrounds/' + escapeBackgroundImage(background_image) + ')',
+                    backgroundSize: 'contain',
+                    //backgroundColor: rgbToHex(backgroundMeta['color-palette'][0])
+                });
+            }
             $grid.prepend( $item ).packery( 'prepended', $item);
             //$item.draggabilly()
             //let draggie = $item.data('draggabilly')
@@ -1811,7 +1822,7 @@ frameborder="0" allowFullScreen></iframe>`,
             });
 
             updateInputLayout(Object.keys(in_param_map));
-            if (inputOutputAssignment['__action_button']) {
+            if (!options.disableLayout && inputOutputAssignment['__action_button']) {
                 let button_rect = inputOutputAssignment['__action_button'];
                 putElementInBox('.button-execute', button_rect, action_button_color);
                 putElementInBox('.switch-when-container', button_rect, action_button_color, true);
@@ -1836,7 +1847,7 @@ frameborder="0" allowFullScreen></iframe>`,
                     right: 3,
                 });
             }
-            if (inputOutputAssignment['__logo']) {
+            if (!options.disableLayout && inputOutputAssignment['__logo']) {
                 let logo_rect = inputOutputAssignment['__logo'];
                 putElementInBox('.program-logo', logo_rect, colors_dominant[0]);
             } else {
@@ -1845,7 +1856,7 @@ frameborder="0" allowFullScreen></iframe>`,
                     '-webkit-filter': 'drop-shadow(0px 0px 10px rgba(255,255,255,0.5))',
                 });
             }
-            if (inputOutputAssignment['__title']) {
+            if (!options.disableLayout && inputOutputAssignment['__title']) {
                 let title_rect = inputOutputAssignment['__title'];
                 putElementInBox('.program-title', title_rect, title_color);
                 if (!title_rect.cover) {
@@ -1864,16 +1875,20 @@ frameborder="0" allowFullScreen></iframe>`,
                     margin: 'auto',
                     textAlign: 'center'
                 }).addClass('autofontsize');
-                $('.program-title', $item).css({
-                    color: title_color
+                if (!options.disableBackground) {
+                    $('.program-title', $item).css({
+                        color: title_color
+                    });
+                }
+            }
+            if (!options.disableLayout) {
+                emptyBoxes.forEach(createEmptyBox);
+                output_rects.forEach(function(rect) {
+                    let box = createEmptyBox(rect);
+                    if (box)
+                        box.addClass('program-temporary-box');
                 });
             }
-            emptyBoxes.forEach(createEmptyBox);
-            output_rects.forEach(function(rect) {
-                let box = createEmptyBox(rect);
-                if (box)
-                    box.addClass('program-temporary-box');
-            });
 
             function executeGetOrDo(event) {
                 console.log('executeGetOrDo');
@@ -2002,10 +2017,12 @@ frameborder="0" allowFullScreen></iframe>`,
             if (data.unreadItems > 0)
                 $(".program-notification-badge", $item).show();
             data.onexpand = function() {
-                textFit($('.autofontsize .program-constant-input', $item), { minFontSize: 12 });
-                textFit($('.autofontsize .program-output:not(.picture)', $item), { alignVert: true, multiLine: true, minFontSize: 10, maxFontSize: 16 });
-                textFit($('.program-title.autofontsize', $item), { multiLine: false, minFontSize: 12, maxFontSize: 30 });
-                textFit($('.button-execute.autofontsize', $item), { multiLine: false, minFontSize: 12, maxFontSize: 30 });
+                if (!options.disableLayout) {
+                    textFit($('.autofontsize .program-constant-input', $item), { minFontSize: 12 });
+                    textFit($('.autofontsize .program-output:not(.picture)', $item), { alignVert: true, multiLine: true, minFontSize: 10, maxFontSize: 16 });
+                    textFit($('.program-title.autofontsize', $item), { multiLine: false, minFontSize: 12, maxFontSize: 30 });
+                    textFit($('.button-execute.autofontsize', $item), { multiLine: false, minFontSize: 12, maxFontSize: 30 });
+                }
 
                 if (has_trigger || is_list) {
                     if (data.lastResult)
@@ -2067,15 +2084,17 @@ frameborder="0" allowFullScreen></iframe>`,
                     });
                 }
 
-                if (color) {
-                    $element.css({
-                        color: color
-                    });
-                }
-                if (rect.cover || forceCover) {
-                    $element.css({
-                        backgroundImage: `linear-gradient(90deg, rgb(${rect['left-color']}), rgb(${rect['right-color']}))`,
-                    });
+                if (!options.disableBackground) {
+                    if (color) {
+                        $element.css({
+                            color: color
+                        });
+                    }
+                    if (rect.cover || forceCover) {
+                        $element.css({
+                            backgroundImage: `linear-gradient(90deg, rgb(${rect['left-color']}), rgb(${rect['right-color']}))`,
+                        });
+                    }
                 }
 
                 return box;
@@ -2097,14 +2116,18 @@ frameborder="0" allowFullScreen></iframe>`,
                     left: box.left + '%',
                     top: box.top + '%',
                 });
-                $element.css({
-                    backgroundImage: `linear-gradient(90deg, rgb(${rect['left-color']}), rgb(${rect['right-color']}))`,
-                });
+                if (!options.disableBackground) {
+                    $element.css({
+                        backgroundImage: `linear-gradient(90deg, rgb(${rect['left-color']}), rgb(${rect['right-color']}))`,
+                    });
+                }
 
                 return $element;
             }
 
             function updateInputLayout(inputElements) {
+                if (options.disableLayout)
+                    return;
                 for (let i = 0; i < inputElements.length && i < input_rects.length; i++) {
                     let box = putElementInBox("#parent-input-"+inputElements[i], input_rects[i], input_colors[i]);
 
@@ -2119,6 +2142,8 @@ frameborder="0" allowFullScreen></iframe>`,
             }
 
             function updateOutputLayout(outputElements) {
+                if (options.disableLayout)
+                    return;
                 for (let i = 0; i < outputElements.length && i < output_rects.length; i++) {
                     putElementInBox("#parent-output-"+outputElements[i], output_rects[i], output_colors[i]);
                     //let box = toWidthHeight(output_rects[i].coordinates);

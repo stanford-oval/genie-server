@@ -42,8 +42,8 @@
   /*border: 3px solid darkgray;*/
   /*background: -webkit-linear-gradient(left, #ffba00 0%, #fc9244 30%, #252d47 100%);*/
   background: white;
-  width: 400px;
-  height: 400px;
+  width: 300px;
+  height: 300px;
   display: block;
 }
 .grid-item:hover {
@@ -402,4 +402,29 @@ input[type=text].program-input, textarea.program-input {
 .grid {
   /*width: 1680px;*/
   margin: auto;
+}
+
+.layoutless {
+  padding-bottom: 1em;
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-top: 1.5em;
+  overflow: auto;
+}
+
+.layoutless .program-input-group, .layoutless .program-output-group {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  text-align: left;
+  font-size: 16px;
+}
+.layoutless .program-output {
+  font-size: unset;
+}
+.layoutless .program-input.form-control {
+  padding: .5rem .75rem;
+}
+.layoutless:not(.grid-item--small) {
+  width: 300px;
+  height: 300px;
 }
