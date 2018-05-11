@@ -566,7 +566,12 @@ $(function() {
 
     if (RUN_TEST_CASES) {
         tileStorageManager.clearAll()
-        const testCases = require('./test_cases.json');
+        let testCases = require('./test_cases.json');
+        let slice = 0;
+        if (params.has('slice')) {
+            slice = parseInt(params.get('slice'));
+            testCases = testCases.slice(8*slice, 8*(slice+1));
+        }
 
         let tiles = $('.grid-item.tile');
         function nextTestCase(i) {
@@ -574,7 +579,10 @@ $(function() {
                 return;
             console.log('processing test case #' + (i+1) + '/' + testCases.length);
 
-            handleCommand(testCases[i], { number: i });
+            handleCommand(testCases[i], { number: i+slice*8,
+                disableLayout: DISABLE_ALL_LAYOUT,
+                disableBackground: DISABLE_ALL_LAYOUT || DISABLE_ALL_BACKGROUND
+            });
             setTimeout(() => { nextTestCase(i+1); }, 1000);
         }
         nextTestCase(0);
@@ -714,7 +722,7 @@ $(function() {
 
             let entities = Array.from(extractEntityValues(program));
             function entityHasLogo(entityType) {
-                return entityType.startsWith('sportradar:') || entityType === 'tt:stock_id' || entityType === 'tt:iso_lang_code';
+                return entityType.startsWith('sportradar:') || entityType === 'tt:stock_id' || entityType === 'tt:iso_lang_code' || entityType === 'tt:country';
             }
             function entityIsContact(entityType) {
                 return entityType === 'tt:contact' || entityType === 'tt:phone_number' || entityType === 'tt:contact_name';
@@ -819,7 +827,8 @@ $(function() {
                 'Entity(imgflip:meme_id)': 'entity-dropdown',
                 'Entity(tt:picture)': 'file',
                 'Entity(tt:username)': 'text',
-                'Entity(tt:hashtag)': 'text'
+                'Entity(tt:hashtag)': 'text',
+                'Entity(tt:path_name)': 'text',
             };
 
             let display_in_params = [];
