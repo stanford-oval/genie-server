@@ -43,8 +43,8 @@ router.get('/widgets', user.redirectLogIn, (req, res, next) => {
     res.render('brassau', { page_title: req._("Almond - Widgets") });
 });
 
-router.get('/friends_hub', user.redirectLogIn, (req, res, next) => {
-    res.render('friends_hub', { page_title: req._("Friends Hub")});
+router.get('/friendhub', user.redirectLogIn, (req, res, next) => {
+    res.render('friendhub', { page_title: req._("FriendHub")});
 });
 
 module.exports = router;

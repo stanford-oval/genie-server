@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node main.js",
-    "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js"
+    "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js",
+    "update-friendhub": "browserify -t babelify ./browser/friendhub.js -o public/javascripts/friendhub.js"
   },
   "dependencies": {
     "almond": "github:Stanford-Mobisocial-IoT-Lab/almond-dialog-agent",

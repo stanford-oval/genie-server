@@ -1,0 +1,39 @@
+extends layout
+
+block styles
+  link(rel='stylesheet', href='/stylesheets/brassau.css')
+  link(rel="stylesheet", href="/stylesheets/bootstrap-switch.css")
+  link(rel="stylesheet", href="/stylesheets/titatoggle-dist.css")
+  link(rel="stylesheet", href="/stylesheets/bootstrap-slider.min.css")
+  link(rel="stylesheet", href="/stylesheets/loading.css")
+
+block scripts
+  script(src='https://maps.googleapis.com/maps/api/js?key=AIzaSyBfQcb5Y9DQDws1O0S9a0B64yPc8LaZfOw')
+  script(src='/javascripts/bootstrap-switch.js')
+  script(src='/javascripts/bootstrap-slider.js')
+  script(src='/javascripts/packery.pkgd.min.js')
+  script(src='/javascripts/draggabilly.pkgd.js')
+  script(src='/javascripts/jquery.mobile-events.min.js')
+  script(src='/javascripts/textFit.min.js')
+  script(src='/javascripts/friendhub.js')
+
+block page_name
+  - var stdlayout = false;
+  | Widgets
+
+block content
+  div#page-body
+    nav.navbar.sticky-top.navbar-dark.bg-dark
+      form(action='#')#input_command_form
+        div.input-group
+          input(type="text", placeholder="start here").form-control#input_command
+          span.input-group-btn
+            button.btn.btn-secondary(type="submit") Go!
+
+    div#loader
+      div#loader-inner
+        span#loader-cell
+          span.loading(aria-hidden="true")
+        span.sr-only Loading
+
+    div.grid

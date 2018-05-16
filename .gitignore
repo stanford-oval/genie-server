@@ -4,3 +4,8 @@ home/
 node_modules/
 
 public/javascripts/brassau.js
+public/javascripts/friendhub.js
+service/platform_config.js
+
+yarn-error.log
+
