@@ -47,24 +47,6 @@ class MainConversationDelegate {
         this._outputs = new Set;
 
         this._speechHandler = speechHandler;
-        this._speechHandler.on('hypothesis', (hypothesis) => {
-            for (let out of this._outputs)
-                out.sendHypothesis(hypothesis);
-        });
-        this._speechHandler.on('hotword', (hotword) => {
-            child_process.spawn('xset', ['dpms', 'force', 'on']);
-            child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
-        });
-        this._speechHandler.on('utterance', (utterance) => {
-            this._conversation.handleCommand(utterance).catch((e) => {
-                console.error(e.stack);
-            });
-        });
-        this._speechHandler.on('error', (error) => {
-            console.log('Error in speech recognition: ' + error.message);
-            this._speechSynth.say("Sorry, I had an error understanding your speech: " + error.message);
-        });
-
         this._history = [];
     }
 
@@ -214,6 +196,21 @@ module.exports = class Assistant extends events.EventEmitter {
         this._mainConversation = new MainConversation(engine, this._speechHandler, {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true
+        });
+
+        this._speechHandler.on('hypothesis', (hypothesis) => {
+            this._api.sendHypothesis(hypothesis);
+        });
+        this._speechHandler.on('hotword', (hotword) => {
+            child_process.spawn('xset', ['dpms', 'force', 'on']);
+            child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
+        });
+        this._speechHandler.on('utterance', (utterance) => {
+            this._api.sendCommand(utterance);
+        });
+        this._speechHandler.on('error', (error) => {
+            console.log('Error in speech recognition: ' + error.message);
+            this._speechSynth.say("Sorry, I had an error understanding your speech: " + error.message);
         });
 
         this._conversations = {

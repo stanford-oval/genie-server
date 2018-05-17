@@ -41,6 +41,17 @@ module.exports = class AlmondApi {
         this._outputs.delete(out);
     }
 
+    sendCommand(command) {
+        this._sendWs({
+            command: command
+        });
+    }
+    sendHypothesis(hyp) {
+        this._sendWs({
+            hypothesis: hyp
+        });
+    }
+
     notify(appId, icon, outputType, outputValue) {
         return this._formatter.formatForType(outputType, outputValue, 'messages').then((messages) => {
             this._sendWs({ result: {

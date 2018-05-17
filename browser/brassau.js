@@ -384,14 +384,19 @@ $(function() {
                 alert('application error: ' + parsed.error.error);
                 return;
             }
-
-            let result = parsed.result;
-            if (this._listeners.has(result.appId))
-                this._listeners.get(result.appId)(result);
-            else if (this._pending.has(result.appId))
-                this._pending.get(result.appId).push(result);
-            else
-                this._pending.set(result.appId, [result]);
+            if (parsed.results) {
+                let result = parsed.result;
+                if (this._listeners.has(result.appId))
+                    this._listeners.get(result.appId)(result);
+                else if (this._pending.has(result.appId))
+                    this._pending.get(result.appId).push(result);
+                else
+                    this._pending.set(result.appId, [result]);
+            } else if (parsed.command) {
+                handleCommand(parsed.command, {});
+            } else if (parsed.hypothesis) {
+                $('#input_command').val(parsed.hypothesis);
+            }
         }
 
         _flushPendingData(appId) {
