@@ -12,23 +12,25 @@
 "use strict";
 
 require('thingengine-core/lib/polyfill');
+const https = require('https');
+const Url = require('url');
 
 const ColorScheme = require('color-scheme');
 const ThingTalk = require('thingtalk');
 
 const ThingpediaClient = require('./thingpediaclient.js');
 const ThingEngineApi = require('./thingengine');
-const thingpedia_icon_base_url = "https://d1ge76rambtuys.cloudfront.net/icons/"
+const thingpedia_icon_base_url = "https://d1ge76rambtuys.cloudfront.net/icons/";
 
-let BACKGROUNDS;
+let DEFAULT_BACKGROUNDS;
 $.holdReady(true);
-$.get('https://almond.stanford.edu/brassau/backgrounds/backgrounds.json').then((data) => {
-    BACKGROUNDS = data;
+$.get('https://almond.stanford.edu/friendhub/backgrounds/backgrounds.json').then((data) => {
+    DEFAULT_BACKGROUNDS = data;
     $.holdReady(false);
 });
 let COLOR_SCHEMES;
 $.holdReady(true);
-$.get('https://almond.stanford.edu/brassau/backgrounds/color_schemes.json').then((data) => {
+$.get('https://almond.stanford.edu/friendhub/backgrounds/color_schemes.json').then((data) => {
     COLOR_SCHEMES = data;
     $.holdReady(false);
 });
@@ -284,11 +286,31 @@ function assignInputOutputsToBoxes(inputOutputParams, boxes) {
                 unassigned.push(boxes[box_label][i]);
         }
     }
-
     return [total_cost, assignment, unassigned];
 }
 
-function chooseBackground(prim, inputOutputParams, color_scheme) {
+function getFriendHubBackground(tags) {
+    return $.get('https://almond.stanford.edu/friendhub/search?tags=' + tags.join('+'));
+}
+
+function chooseBackgroundLibrary(tags) {
+    return getFriendHubBackground(Array.from(tags)).then((bgs) => {
+        let backgrounds;
+        let useDefault = false;
+        let ids = Object.keys(bgs);
+        if (ids.length === 0) {
+            useDefault = true;
+            backgrounds = DEFAULT_BACKGROUNDS;
+        } else {
+            backgrounds = {};
+            for (let id in bgs)
+                backgrounds[bgs[id].hash + '.png'] = bgs[id];
+        }
+        return [useDefault, backgrounds];
+    });
+}
+
+function getConfirmationTokens(prim) {
     let confirmation_tokens = new Set(tokenize(prim.schema.confirmation));
     for (let tag of prim.selector.kind.split(/[-._]/))
         confirmation_tokens.add(tag);
@@ -304,19 +326,21 @@ function chooseBackground(prim, inputOutputParams, color_scheme) {
     confirmation_tokens.delete('with');
     confirmation_tokens.delete('new');
     console.log(Array.from(confirmation_tokens));
+    return confirmation_tokens;
+}
 
+function chooseBackground(tokens, inputOutputParams, color_scheme, backgroundLibrary) {
     let first;
     let choices = [];
     let minCost = Infinity, minCostChoice;
-    for (let candidate in BACKGROUNDS) {
+    for (let candidate in backgroundLibrary) {
         if (!first)
             first = candidate;
-        let meta = BACKGROUNDS[candidate];
+        let meta = backgroundLibrary[candidate];
         let tags = meta.tags || [];
         let brands = meta.brands || [];
         let boxes = {};
-
-        meta.rectangles.forEach(function(box, i) {
+        meta.rectangles.forEach(function (box, i) {
             let label = box.label || 'unknown';
             if (label === 'unknown') {
                 let rect = toWidthHeight(box.coordinates);
@@ -338,19 +362,19 @@ function chooseBackground(prim, inputOutputParams, color_scheme) {
 
         choices.push(candidate);
         let [box_cost, assignment, empty] = assignInputOutputsToBoxes(inputOutputParams, boxes);
-        let color_cost = 0.01 * Math.abs(colorToHue(meta['color-palette'][0])-colorToHue(color_scheme[0]));
+        let color_cost = 0.01 * Math.abs(colorToHue(meta['color-palette'][0]) - colorToHue(color_scheme[0]));
 
         let tag_weights = 0;
         for (let tag of tags) {
-            if (confirmation_tokens.has(tag))
-                tag_weights ++;
+            if (tokens.has(tag))
+                tag_weights++;
         }
         let brand_weights = 0;
         for (let tag of brands) {
-            if (confirmation_tokens.has(tag))
-                brand_weights ++;
+            if (tokens.has(tag))
+                brand_weights++;
             else
-                brand_weights --;
+                brand_weights--;
         }
 
         let total_cost = box_cost + color_cost - 15 * brand_weights - 15.5 * tag_weights;
@@ -1009,7 +1033,7 @@ frameborder="0" allowFullScreen></iframe>`,
             'Entity(tt:picture)': 20,
             'Entity(tt:email_address)': 12,
             'Entity(tt:phone_number)': 12,
-            'Entity': 11.5,
+            'Entity': 9,
             'Measure': 11,
             'String': 10,
             'Date': 9,
@@ -1105,240 +1129,243 @@ frameborder="0" allowFullScreen></iframe>`,
             });
         }
 
-        let background_image, inputOutputAssignment, emptyBoxes;
-        if (data.background_image) {
-            background_image = data.background_image;
-            if (data.input_output_assignment)
-                inputOutputAssignment = data.input_output_assignment;
-            else
-                inputOutputAssignment = {};
-            if (data.empty_boxes)
-                emptyBoxes = data.empty_boxes;
-            else
-                emptyBoxes = [];
-        } else {
-            [background_image, inputOutputAssignment, emptyBoxes] = chooseBackground(display_prim, inputOutputImportance, colors_dominant);
-        }
-        console.log('background_image', background_image);
-        console.log('inputOutputAssignment', inputOutputAssignment);
-        console.log('emptyBoxes', emptyBoxes);
-        data.background_image = background_image;
-        data.input_output_assignment = inputOutputAssignment;
-        data.empty_boxes = emptyBoxes;
+        let confirmation_tokens = getConfirmationTokens(display_prim);
+        return chooseBackgroundLibrary(confirmation_tokens).then(([useDefault, backgroundLibrary]) => {
+            let background_image, inputOutputAssignment, emptyBoxes;
+            if (data.background_image) {
+                background_image = data.background_image;
+                if (data.input_output_assignment)
+                    inputOutputAssignment = data.input_output_assignment;
+                else
+                    inputOutputAssignment = {};
+                if (data.empty_boxes)
+                    emptyBoxes = data.empty_boxes;
+                else
+                    emptyBoxes = [];
+            } else {
+                [background_image, inputOutputAssignment, emptyBoxes] = chooseBackground(confirmation_tokens, inputOutputImportance, colors_dominant, backgroundLibrary);
+            }
 
-        let backgroundMeta = BACKGROUNDS[background_image];
-        if (!backgroundMeta) {
-            backgroundMeta = {
-                rectangles: [],
-                'dominant-colors': [
-                    [0, 0, 0]
-                ],
-                'color-palette': [],
-                'corner-colors': {
-                    'top-right': [255, 255, 255],
-                    'bottom-right': [255, 255, 255],
-                    'top-left': [255, 255, 255]
+            console.log('background_image', background_image);
+            console.log('inputOutputAssignment', inputOutputAssignment);
+            console.log('emptyBoxes', emptyBoxes);
+            data.background_image = background_image;
+            data.input_output_assignment = inputOutputAssignment;
+            data.empty_boxes = emptyBoxes;
+
+            let backgroundMeta = backgroundLibrary[background_image];
+            if (!backgroundMeta) {
+                backgroundMeta = {
+                    rectangles: [],
+                    'dominant-colors': [
+                        [0, 0, 0]
+                    ],
+                    'color-palette': [],
+                    'corner-colors': {
+                        'top-right': [255, 255, 255],
+                        'bottom-right': [255, 255, 255],
+                        'top-left': [255, 255, 255]
+                    }
+                };
+            }
+
+            let input_rects = [];
+            let output_rects = [];
+            display_in_params = display_in_params.filter(function([primId, in_param]) {
+                return !!inputOutputAssignment[primId + ':' + in_param.name];
+            });
+            input_rects = display_in_params.map(function([primId, in_param]) {
+                return inputOutputAssignment[primId + ':' + in_param.name];
+            });
+            display_out_params = display_out_params.filter(function([primId, out_param]) {
+                return !!inputOutputAssignment[primId + ':' + out_param];
+            });
+            output_rects = display_out_params.map(function([primId, out_param]) {
+                return inputOutputAssignment[primId + ':' + out_param];
+            });
+
+            console.log('input_rects', input_rects);
+            console.log('output_rects', output_rects);
+
+            function chooseForegroundColor(background_color) {
+                if(!background_color) {
+                    console.error('ERROR: missing color in rectangle');
+                    return 'black';
                 }
-            };
-        }
-
-        let input_rects = [];
-        let output_rects = [];
-        display_in_params = display_in_params.filter(function([primId, in_param]) {
-            return !!inputOutputAssignment[primId + ':' + in_param.name];
-        });
-        input_rects = display_in_params.map(function([primId, in_param]) {
-            return inputOutputAssignment[primId + ':' + in_param.name];
-        });
-        display_out_params = display_out_params.filter(function([primId, out_param]) {
-            return !!inputOutputAssignment[primId + ':' + out_param];
-        });
-        output_rects = display_out_params.map(function([primId, out_param]) {
-            return inputOutputAssignment[primId + ':' + out_param];
-        });
-
-        console.log('input_rects', input_rects);
-        console.log('output_rects', output_rects);
-
-        function chooseForegroundColor(background_color) {
-            if(!background_color) {
-                console.error('ERROR: missing color in rectangle');
-                return 'black';
-            }
-            let maxContrast = 0;
-            let color_candidate;
-            for (let color of backgroundMeta['color-palette']) {
-                let a = contrast(background_color, color);
-                if (a > maxContrast) {
-                    color_candidate = color;
-                    maxContrast = a;
+                let maxContrast = 0;
+                let color_candidate;
+                for (let color of backgroundMeta['color-palette']) {
+                    let a = contrast(background_color, color);
+                    if (a > maxContrast) {
+                        color_candidate = color;
+                        maxContrast = a;
+                    }
                 }
+                if (maxContrast < 2.5) {
+                    if (background_color[0] >= 253 && background_color[1] >= 253 &&
+                        background_color[2] >= 253)
+                        return '#565656';
+
+                    console.log(`no contrasting colors found for ${color_candidate}`);
+                    let scheme = new ColorScheme();
+                    let colors = scheme.from_hex(rgbToHex(background_color).substr(1))
+                        .scheme('contrast')
+                        .colors()
+                        .map(color => "#" + color);
+                    console.log('fallback to color scheme from ' + rgbToHex(background_color), colors);
+                    return colors[1];
+                }
+
+                return rgbToHex(color_candidate);
             }
-            if (maxContrast < 2.5) {
-                if (background_color[0] >= 253 && background_color[1] >= 253 &&
-                    background_color[2] >= 253)
-                    return '#565656';
+            let input_colors = data.input_colors || input_rects.map(function(rect) {
+                return rect['font-color'] || chooseForegroundColor(rect['left-color']);
+            });
+            data.input_colors = input_colors;
 
-                console.log(`no contrasting colors found for ${color_candidate}`);
-                let scheme = new ColorScheme();
-                let colors = scheme.from_hex(rgbToHex(background_color).substr(1))
-                    .scheme('contrast')
-                    .colors()
-                    .map(color => "#" + color);
-                console.log('fallback to color scheme from ' + rgbToHex(background_color), colors);
-                return colors[1];
-            }
+            let output_colors = data.output_colors || output_rects.map(function(rect) {
+                return rect['font-color'] || chooseForegroundColor(rect['left-color']);
+            });
+            data.output_colors = output_colors;
 
-            return rgbToHex(color_candidate);
-        }
-        let input_colors = data.input_colors || input_rects.map(function(rect) {
-            return rect['font-color'] || chooseForegroundColor(rect['left-color']);
-        });
-        data.input_colors = input_colors;
-
-        let output_colors = data.output_colors || output_rects.map(function(rect) {
-            return rect['font-color'] || chooseForegroundColor(rect['left-color']);
-        });
-        data.output_colors = output_colors;
-
-        let close_button_color = data.close_button_color || chooseForegroundColor(backgroundMeta['corner-colors']['top-right']);
-        data.close_button_color = close_button_color;
-        a += `<button type="button" class="close" style="color:${close_button_color}; -webkit-text-stroke: unset; text-shadow:unset;">
+            let close_button_color = data.close_button_color || chooseForegroundColor(backgroundMeta['corner-colors']['top-right']);
+            data.close_button_color = close_button_color;
+            a += `<button type="button" class="close" style="color:${close_button_color}; -webkit-text-stroke: unset; text-shadow:unset;">
                 <span style='font-size:1.3em'>&times;</span>
             </button>`;
 
-        let action_button_color;
-        if (inputOutputAssignment['__action_button']) {
-            if (data.action_button_color)
-                action_button_color = data.action_button_color;
-            else if (inputOutputAssignment['__action_button']['font-color'])
-                action_button_color = inputOutputAssignment['__action_button']['font-color'];
-            else
-                action_button_color = chooseForegroundColor(inputOutputAssignment['__action_button']['left-color']);
-        } else {
-            action_button_color = data.action_button_color || chooseForegroundColor(backgroundMeta['corner-colors']['bottom-right']);
-        }
-        data.action_button_color = action_button_color;
+            let action_button_color;
+            if (inputOutputAssignment['__action_button']) {
+                if (data.action_button_color)
+                    action_button_color = data.action_button_color;
+                else if (inputOutputAssignment['__action_button']['font-color'])
+                    action_button_color = inputOutputAssignment['__action_button']['font-color'];
+                else
+                    action_button_color = chooseForegroundColor(inputOutputAssignment['__action_button']['left-color']);
+            } else {
+                action_button_color = data.action_button_color || chooseForegroundColor(backgroundMeta['corner-colors']['bottom-right']);
+            }
+            data.action_button_color = action_button_color;
 
-        let title_color;
-        if (inputOutputAssignment['__title']) {
-            if (data.title_color)
-                title_color = data.title_color;
-            else if (inputOutputAssignment['__title']['font-color'])
-                title_color = inputOutputAssignment['__title']['font-color'];
-            else
-                title_color = chooseForegroundColor(inputOutputAssignment['__title']['left-color']);
-        } else {
-            title_color = data.title_color || chooseForegroundColor(backgroundMeta['corner-colors']['top']);
-        }
-        data.title_color = title_color;
+            let title_color;
+            if (inputOutputAssignment['__title']) {
+                if (data.title_color)
+                    title_color = data.title_color;
+                else if (inputOutputAssignment['__title']['font-color'])
+                    title_color = inputOutputAssignment['__title']['font-color'];
+                else
+                    title_color = chooseForegroundColor(inputOutputAssignment['__title']['left-color']);
+            } else {
+                title_color = data.title_color || chooseForegroundColor(backgroundMeta['corner-colors']['top']);
+            }
+            data.title_color = title_color;
 
-        a+=`<div class='palettes'>`;
-        if (options.number !== undefined)
-            data.testCaseNumber = options.number;
-        if (data.testCaseNumber !== undefined)
-            a +=`<div class='test-case-number'>${data.testCaseNumber}</div>`;
-        a += `</div>`;
+            a+=`<div class='palettes'>`;
+            if (options.number !== undefined)
+                data.testCaseNumber = options.number;
+            if (data.testCaseNumber !== undefined)
+                a +=`<div class='test-case-number'>${data.testCaseNumber}</div>`;
+            a += `</div>`;
 
-        display_in_params.forEach(function([primId, in_param]) {
-            let prim = all_prims2[primId];
-            let display_type = in_param_types[primId + ':' + in_param.name];
-            if (!display_type)
-                throw new Error('???');
-            //let label = in_param.name.replace(/_/g, ' ');
-            let tt_type = prim.schema.inReq[in_param.name] || prim.schema.inOpt[in_param.name];
+            display_in_params.forEach(function([primId, in_param]) {
+                let prim = all_prims2[primId];
+                let display_type = in_param_types[primId + ':' + in_param.name];
+                if (!display_type)
+                    throw new Error('???');
+                //let label = in_param.name.replace(/_/g, ' ');
+                let tt_type = prim.schema.inReq[in_param.name] || prim.schema.inOpt[in_param.name];
 
-            let in_param_id = next_in_param_id++;
-            in_param_map[in_param_id] = {
-                prim_id: primId,
-                in_param: in_param,
-                in_param_type: display_type,
-                in_param_tt_type: tt_type,
-                onchange: null
-            };
+                let in_param_id = next_in_param_id++;
+                in_param_map[in_param_id] = {
+                    prim_id: primId,
+                    in_param: in_param,
+                    in_param_type: display_type,
+                    in_param_tt_type: tt_type,
+                    onchange: null
+                };
 
-            a+=`<div id='parent-input-${in_param_id}' class="program-input-group">`;
+                a+=`<div id='parent-input-${in_param_id}' class="program-input-group">`;
 
-            let should_label = false;
-            if (display_type === 'entity' || display_type === 'constant')
-                should_label = num_entities_or_constants > 1;
-            else if (display_type !== 'text' && display_type !== 'file' && display_type !== 'textarea' &&
-                display_type !== 'radio' && display_type !== 'drop-down' && display_type !== 'entity-dropdown')
-                should_label = num_non_constant > 1;
-            if (should_label)
-                a+=`<div id="input-${in_param_id}-label">${in_param.name.replace(/_/g, ' ')}</div>`;
+                let should_label = false;
+                if (display_type === 'entity' || display_type === 'constant')
+                    should_label = num_entities_or_constants > 1;
+                else if (display_type !== 'text' && display_type !== 'file' && display_type !== 'textarea' &&
+                    display_type !== 'radio' && display_type !== 'drop-down' && display_type !== 'entity-dropdown')
+                    should_label = num_non_constant > 1;
+                if (should_label)
+                    a+=`<div id="input-${in_param_id}-label">${in_param.name.replace(/_/g, ' ')}</div>`;
 
-            switch(display_type) {
-                case 'entity-dropdown':
-                    a += `<div class="input-group">`;
-                    if (primId !== display_prim_id)
-                        a += `<span class="input-group-addon"><img src="${thingpedia_icon_base_url + prim.selector.kind}.png" style="width:24px;max-height:24px"></span>`;
-                    a += `<select id="input-${in_param_id}" class="program-input form-control drop-down entity-drop-down" data-entity-type="${tt_type.type}" size=1></select>`;
-                    a += `</div>`;
-                    in_param_map[in_param_id].onchange = function(element, event) {
-                        let $el = $(element);
-                        let opt = $('option[value=' + element.value + ']', $el);
-                        this.in_param.value = ThingTalk.Ast.Value.Entity(element.value, tt_type.type, opt.text().trim());
-                    };
-                    break;
+                switch(display_type) {
+                    case 'entity-dropdown':
+                        a += `<div class="input-group">`;
+                        if (primId !== display_prim_id)
+                            a += `<span class="input-group-addon"><img src="${thingpedia_icon_base_url + prim.selector.kind}.png" style="width:24px;max-height:24px"></span>`;
+                        a += `<select id="input-${in_param_id}" class="program-input form-control drop-down entity-drop-down" data-entity-type="${tt_type.type}" size=1></select>`;
+                        a += `</div>`;
+                        in_param_map[in_param_id].onchange = function(element, event) {
+                            let $el = $(element);
+                            let opt = $('option[value=' + element.value + ']', $el);
+                            this.in_param.value = ThingTalk.Ast.Value.Entity(element.value, tt_type.type, opt.text().trim());
+                        };
+                        break;
 
-                case 'radio':
-                    a += `<div class="program-radio-input" id="input-${in_param_id}">`;
-                    for (let entry of tt_type.entries)
-                        a += `<label><input type="radio" name="input-${in_param_id}" id="input-${in_param_id}-${entry}" class="program-input checkbox" value="${entry}" ${in_param.value.value === entry ? 'checked' : ''}>${entry.replace(/_/g, ' ')}</label>`;
-                    in_param_map[in_param_id].onchange = function(element, event) {
-                        this.in_param.value = ThingTalk.Ast.Value.Enum(element.value);
-                    };
-                    a += `</div>`;
-                    break;
+                    case 'radio':
+                        a += `<div class="program-radio-input" id="input-${in_param_id}">`;
+                        for (let entry of tt_type.entries)
+                            a += `<label><input type="radio" name="input-${in_param_id}" id="input-${in_param_id}-${entry}" class="program-input checkbox" value="${entry}" ${in_param.value.value === entry ? 'checked' : ''}>${entry.replace(/_/g, ' ')}</label>`;
+                        in_param_map[in_param_id].onchange = function(element, event) {
+                            this.in_param.value = ThingTalk.Ast.Value.Enum(element.value);
+                        };
+                        a += `</div>`;
+                        break;
 
-                case 'drop-down':
-                    a += `<div class="input-group">`;
-                    if (primId !== display_prim_id)
-                        a += `<span class="input-group-addon"><img src="${thingpedia_icon_base_url + prim.selector.kind}.png" style="width:24px;max-height:24px"></span>`;
-                    a += `<select id="input-${in_param_id}" class="program-input form-control drop-down" size=1>`;
-                    for (let entry of tt_type.entries)
-                        a += `<option value="${entry}" ${in_param.value.value === entry ? 'selected' : ''}>${entry.replace(/_/g, ' ')}</option>`;
-                    a += `</select>`;
-                    a += `</div>`;
-                    in_param_map[in_param_id].onchange = function(element, event) {
-                        this.in_param.value = ThingTalk.Ast.Value.Enum(element.value);
-                    };
-                    break;
+                    case 'drop-down':
+                        a += `<div class="input-group">`;
+                        if (primId !== display_prim_id)
+                            a += `<span class="input-group-addon"><img src="${thingpedia_icon_base_url + prim.selector.kind}.png" style="width:24px;max-height:24px"></span>`;
+                        a += `<select id="input-${in_param_id}" class="program-input form-control drop-down" size=1>`;
+                        for (let entry of tt_type.entries)
+                            a += `<option value="${entry}" ${in_param.value.value === entry ? 'selected' : ''}>${entry.replace(/_/g, ' ')}</option>`;
+                        a += `</select>`;
+                        a += `</div>`;
+                        in_param_map[in_param_id].onchange = function(element, event) {
+                            this.in_param.value = ThingTalk.Ast.Value.Enum(element.value);
+                        };
+                        break;
 
-                case 'entity':
-                    a += `<span id="input-${in_param_id}" class="program-input program-constant-input">
+                    case 'entity':
+                        a += `<span id="input-${in_param_id}" class="program-input program-constant-input">
                             <img src="https://thingpedia.stanford.edu/thingpedia/api/entities/icon?entity_type=${in_param.value.type}&entity_value=${encodeURIComponent(in_param.value.value)}&entity_display=${encodeURIComponent(in_param.value.display || '')}" style="width:32px; height:32px; object-fit: contain; margin-right:6px">${in_param.value.display || in_param.value.value /*"*/}
                             </span>`;
-                    break;
+                        break;
 
-                case "constant":
-                    a += `<span id="input-${in_param_id}" class="program-input program-constant-input">${in_param.value.isMeasure ? in_param.value.value + ' ' + in_param.value.unit : in_param.value.toJS()}</span>`;
-                    break;
+                    case "constant":
+                        a += `<span id="input-${in_param_id}" class="program-input program-constant-input">${in_param.value.isMeasure ? in_param.value.value + ' ' + in_param.value.unit : in_param.value.toJS()}</span>`;
+                        break;
 
-                case "slider": {
-                    let slider_max, slider_min;
-                    if (prim.channel === 'get_comic') {
-                        slider_max = 1890;
-                        slider_min = 1;
-                    } else if (in_param.name === 'percent') {
-                        slider_max = 100;
-                        slider_min = 0;
-                    } else if (in_param.name === 'count') {
-                        slider_min = 1;
-                        slider_max = 10;
-                    } else if (tt_type.unit === 'C' && in_param.value.unit === 'F') {
-                        slider_min = 50;
-                        slider_max = 110;
-                    } else if (tt_type.unit === 'C') {
-                        slider_min = -5;
-                        slider_max = 30;
-                    } else {
-                        slider_min = 0;
-                        slider_max = 20;
-                    }
-                    console.log('value', in_param.value.value);
-                    a += `<input id="input-${in_param_id}"
+                    case "slider": {
+                        let slider_max, slider_min;
+                        if (prim.channel === 'get_comic') {
+                            slider_max = 1890;
+                            slider_min = 1;
+                        } else if (in_param.name === 'percent') {
+                            slider_max = 100;
+                            slider_min = 0;
+                        } else if (in_param.name === 'count') {
+                            slider_min = 1;
+                            slider_max = 10;
+                        } else if (tt_type.unit === 'C' && in_param.value.unit === 'F') {
+                            slider_min = 50;
+                            slider_max = 110;
+                        } else if (tt_type.unit === 'C') {
+                            slider_min = -5;
+                            slider_max = 30;
+                        } else {
+                            slider_min = 0;
+                            slider_max = 20;
+                        }
+                        console.log('value', in_param.value.value);
+                        a += `<input id="input-${in_param_id}"
                             class="program-input slider ${in_param.value.isUndefined ? 'incomplete' : ''}"
                             type="text"
                             data-slider-min="${slider_min}"
@@ -1347,87 +1374,87 @@ frameborder="0" allowFullScreen></iframe>`,
                             data-slider-reversed="${tt_type.unit === 'C'}"
                             data-slider-value="${in_param.value.isUndefined ? slider_min : in_param.value.value}"
                             value="${in_param.value.isUndefined ? slider_min : in_param.value.value}"/>`;
-                    in_param_map[in_param_id].onchange = function(element, event) {
-                        if (tt_type.isNumber)
-                            this.in_param.value = ThingTalk.Ast.Value.Number(parseFloat(element.value));
+                        in_param_map[in_param_id].onchange = function(element, event) {
+                            if (tt_type.isNumber)
+                                this.in_param.value = ThingTalk.Ast.Value.Number(parseFloat(element.value));
+                            else
+                                this.in_param.value = ThingTalk.Ast.Value.Measure(parseFloat(element.value), this.in_param.value.unit || tt_type.unit);
+                        };
+                        break;
+                    }
+
+                    case "on-off-switch":
+                        a += `<input id="input-${in_param_id}" type="checkbox" data-size='' class="program-input checkbox-switch ${in_param.value.isUndefined ? 'incomplete' : ''}" ${in_param.value.value === 'on' ? 'checked' :''} >`;
+                        in_param_map[in_param_id].onchange = function(element, event, state) {
+                            this.in_param.value = ThingTalk.Ast.Value.Enum(state ? 'on' : 'off');
+                        };
+                        break;
+
+                    case 'bool-switch':
+                        a += `<input id="input-${in_param_id}" type="checkbox" class="program-input checkbox-switch ${in_param.value.isUndefined ? 'incomplete' : ''}" ${in_param.value.value === true ? 'checked' :''}>`;
+                        in_param_map[in_param_id].onchange = function(element, event, state) {
+                            this.in_param.value = ThingTalk.Ast.Value.Boolean(!!state);
+                        };
+                        break;
+
+                    case "text":
+                        a += `<div class="input-group">`;
+                        if (primId !== display_prim_id)
+                            a += `<span class="input-group-addon"><img src="${thingpedia_icon_base_url + prim.selector.kind}.png" style="width:24px;max-height:24px"></span>`;
+                        if (tt_type.isEntity && tt_type.type === 'tt:username')
+                            a += `<span class="input-group-addon">@</span>`;
+                        else if (tt_type.isEntity && tt_type.type === 'tt:hashtag')
+                            a += `<span class="input-group-addon">#</span>`;
+                        a += `<input id="input-${in_param_id}" type="text" placeholder="${in_param.name.replace(/_/g, ' ')}" class="program-input form-control ${in_param.value.isUndefined ? 'incomplete' : ''}" value="${escapeHTML(in_param.value.value || '')}" >`;//"
+                        if (tt_type.isMeasure)
+                            a += `<span class="input-group-addon">${in_param.value.unit || tt_type.unit}</span>`;
+                        a += `</div>`;
+                        in_param_map[in_param_id].onchange = function(element, event) {
+                            let in_param = this.in_param;
+                            let tt_type = prim.schema.inReq[in_param.name] || prim.schema.inOpt[in_param.name];
+                            if (tt_type.isNumber)
+                                this.in_param.value = ThingTalk.Ast.Value.Number(parseFloat(element.value));
+                            else if (tt_type.isMeasure)
+                                this.in_param.value = ThingTalk.Ast.Value.Measure(parseFloat(element.value), this.in_param.value.unit || tt_type.unit);
+                            else
+                                this.in_param.value = ThingTalk.Ast.Value.fromJS(tt_type, element.value);
+                        };
+                        break;
+
+                    case "file":
+                        // a += `<input id="input-${in_param_id}" type="file" placeholder="${in_param.name.replace(/_/g, ' ')}" class="program-input form-control ${in_param.value.isUndefined ? 'incomplete' : ''}" value="${in_param.value.value || ''}" >`
+                        // in_param_map[in_param_id].onchange = function(element, event) {
+                        //     alert('Sorry, uploading files is not implemented yet...')
+                        // }
+                        a += `<i id="input-${in_param_id}" class="program-input fa fa-cloud-upload" ></i>`;
+                        break;
+
+                    case "textarea":
+                        a += `<textarea id="input-${in_param_id}" placeholder="${in_param.name.replace(/_/g, ' ')}" class="program-input form-control ${in_param.value.isUndefined ? 'incomplete' : ''}" rows="5" >${escapeHTML(in_param.value.value || '')}</textarea>`;//"
+                        in_param_map[in_param_id].onchange = function(element, event) {
+                            this.in_param.value = ThingTalk.Ast.Value.String(element.value);
+                        };
+                        break;
+
+                    case 'location':
+                        if (in_param.value.isUndefined)
+                        {a += `<div id="input-${in_param_id}" class="program-input location-widget incomplete" data-lat="57.7408248"
+                                data-lng="12.9392933"></div>`;}
+                        else if (in_param.value.value.isRelative)
+                        {a += `<div id="input-${in_param_id}" class="program-input location-widget" data-lat="37.4299195"
+                                data-lng="-122.173239"></div>`;}
                         else
-                            this.in_param.value = ThingTalk.Ast.Value.Measure(parseFloat(element.value), this.in_param.value.unit || tt_type.unit);
-                    };
-                    break;
+                        {a += `<div id="input-${in_param_id}" class="program-input location-widget" data-lat="${in_param.value.value.lat}" data-lng="${in_param.value.value.lon}"></div>`;}
                 }
 
-                case "on-off-switch":
-                    a += `<input id="input-${in_param_id}" type="checkbox" data-size='' class="program-input checkbox-switch ${in_param.value.isUndefined ? 'incomplete' : ''}" ${in_param.value.value === 'on' ? 'checked' :''} >`;
-                    in_param_map[in_param_id].onchange = function(element, event, state) {
-                        this.in_param.value = ThingTalk.Ast.Value.Enum(state ? 'on' : 'off');
-                    };
-                    break;
+                a+=`</div>`;
+            });
 
-                case 'bool-switch':
-                    a += `<input id="input-${in_param_id}" type="checkbox" class="program-input checkbox-switch ${in_param.value.isUndefined ? 'incomplete' : ''}" ${in_param.value.value === true ? 'checked' :''}>`;
-                    in_param_map[in_param_id].onchange = function(element, event, state) {
-                        this.in_param.value = ThingTalk.Ast.Value.Boolean(!!state);
-                    };
-                    break;
+            if (display_out_params.length > 0)
+                a += `<div class="program-results"></div>`;
 
-                case "text":
-                    a += `<div class="input-group">`;
-                    if (primId !== display_prim_id)
-                        a += `<span class="input-group-addon"><img src="${thingpedia_icon_base_url + prim.selector.kind}.png" style="width:24px;max-height:24px"></span>`;
-                    if (tt_type.isEntity && tt_type.type === 'tt:username')
-                        a += `<span class="input-group-addon">@</span>`;
-                    else if (tt_type.isEntity && tt_type.type === 'tt:hashtag')
-                        a += `<span class="input-group-addon">#</span>`;
-                    a += `<input id="input-${in_param_id}" type="text" placeholder="${in_param.name.replace(/_/g, ' ')}" class="program-input form-control ${in_param.value.isUndefined ? 'incomplete' : ''}" value="${escapeHTML(in_param.value.value || '')}" >`;//"
-                    if (tt_type.isMeasure)
-                        a += `<span class="input-group-addon">${in_param.value.unit || tt_type.unit}</span>`;
-                    a += `</div>`;
-                    in_param_map[in_param_id].onchange = function(element, event) {
-                        let in_param = this.in_param;
-                        let tt_type = prim.schema.inReq[in_param.name] || prim.schema.inOpt[in_param.name];
-                        if (tt_type.isNumber)
-                            this.in_param.value = ThingTalk.Ast.Value.Number(parseFloat(element.value));
-                        else if (tt_type.isMeasure)
-                            this.in_param.value = ThingTalk.Ast.Value.Measure(parseFloat(element.value), this.in_param.value.unit || tt_type.unit);
-                        else
-                            this.in_param.value = ThingTalk.Ast.Value.fromJS(tt_type, element.value);
-                    };
-                    break;
-
-                case "file":
-                    // a += `<input id="input-${in_param_id}" type="file" placeholder="${in_param.name.replace(/_/g, ' ')}" class="program-input form-control ${in_param.value.isUndefined ? 'incomplete' : ''}" value="${in_param.value.value || ''}" >`
-                    // in_param_map[in_param_id].onchange = function(element, event) {
-                    //     alert('Sorry, uploading files is not implemented yet...')
-                    // }
-                    a += `<i id="input-${in_param_id}" class="program-input fa fa-cloud-upload" ></i>`;
-                    break;
-
-                case "textarea":
-                    a += `<textarea id="input-${in_param_id}" placeholder="${in_param.name.replace(/_/g, ' ')}" class="program-input form-control ${in_param.value.isUndefined ? 'incomplete' : ''}" rows="5" >${escapeHTML(in_param.value.value || '')}</textarea>`;//"
-                    in_param_map[in_param_id].onchange = function(element, event) {
-                        this.in_param.value = ThingTalk.Ast.Value.String(element.value);
-                    };
-                    break;
-
-                case 'location':
-                    if (in_param.value.isUndefined)
-                    {a += `<div id="input-${in_param_id}" class="program-input location-widget incomplete" data-lat="57.7408248"
-                                data-lng="12.9392933"></div>`;}
-                    else if (in_param.value.value.isRelative)
-                    {a += `<div id="input-${in_param_id}" class="program-input location-widget" data-lat="37.4299195"
-                                data-lng="-122.173239"></div>`;}
-                    else
-                    {a += `<div id="input-${in_param_id}" class="program-input location-widget" data-lat="${in_param.value.value.lat}" data-lng="${in_param.value.value.lon}"></div>`;}
-            }
-
-            a+=`</div>`;
-        });
-
-        if (display_out_params.length > 0)
-            a += `<div class="program-results"></div>`;
-
-        if (is_list) {
-            a += `<div class="arrow-container">
+            if (is_list) {
+                a += `<div class="arrow-container">
                 <button type="button" class="btn btn-default arrow arrow-prev">
                     <i class="fa fa-chevron-left" aria-hidden="true"></i>
                 </button>
@@ -1436,390 +1463,330 @@ frameborder="0" allowFullScreen></iframe>`,
                 </button>
                 </div>
                 `;
-        }
-
-        function createOneProgramResult(result, outputElements) {
-            let alt_text ='';
-            if (has_alt_text)
-                alt_text = `title="${escapeHTML(String(result.raw.alt_text))}"`;
-
-            let a = `<div class="program-result-item" ${alt_text}>`;
-
-            if (has_link) {
-                let link = result.raw.link;
-                a += `<a href="${escapeHTML(link.value || link)}" target="_blank">`;
             }
 
-            display_out_params.forEach(function([primId, out_param]) {
-                let prim = all_prims2[primId];
-                let ptype = out_param_types[out_param];
-                let out_param_id = next_out_param_id++;
+            function createOneProgramResult(result, outputElements) {
+                let alt_text ='';
+                if (has_alt_text)
+                    alt_text = `title="${escapeHTML(String(result.raw.alt_text))}"`;
 
-                let key = prim.selector.kind + ':' + prim.channel + ':' + out_param;
-                let format = MORE_HARDCODED_OUTPUT_PARAMS[key] || HARDCODED_OUTPUT_PARAMS[out_param] || OUTPUT_PARAM_BY_TYPES[String(ptype)];
-                let param_value = result.raw[out_param];
-                let is_long = false;
-                if (ptype.isString && param_value.length >= 100)
-                    is_long = true;
+                let a = `<div class="program-result-item" ${alt_text}>`;
 
-                outputElements.push(out_param_id);
-                let is_picture = ptype.isEntity && ptype.type === 'tt:picture';
-                if (out_param.value === 'video_id')
-                    is_picture = true;
-                a += `<div id="parent-output-${out_param_id}" class="program-output-group output-param-${out_param.value}">`;
-                let show_label = shouldShowLabel(out_param);
-                if (show_label === 'before')
-                    a += `<div id="output-label-${out_param_id}" class="program-output-label">${out_param.value.replace(/_/g, ' ')}</div>`;
-                a +=     `<div id="output-${out_param_id}" class="program-output ${is_picture ? 'picture': ''} ${is_long ? 'long-output':''}">${format.display(param_value)}</div>`;
-                if (show_label === 'after')
-                    a += `<div id="output-label-${out_param_id}" class="program-output-label">${out_param.value.replace(/_/g, ' ')}</div>`;
-                a += `</div>`;
-            });
-            if (has_link)
-                a += `</a>`;
-            a += '</div>';//'
+                if (has_link) {
+                    let link = result.raw.link;
+                    a += `<a href="${escapeHTML(link.value || link)}" target="_blank">`;
+                }
 
-            return $(a);
-        }
-        // console.log("output_show_count: " + output_show_count)
-        function replaceOutputs(result, pos) {
-            $('.program-temporary-box', $item).remove();
-            data.lastResult = result;
-            data.lastResultPos = pos;
-            let $placeholder = $('.program-results', $item);
-            $placeholder.empty();
-            let outputElements = [];
-            $placeholder.append(createOneProgramResult(result, outputElements));
-            updateOutputLayout(outputElements);
-        }
-        function updateArrows() {
-            $('.arrow', $item).show();
-            $('.arrow-next', $item).prop('disabled', data.lastResultPos >= data.resultList.length-1);
-            $('.arrow-prev', $item).prop('disabled', data.lastResultPos <= 0);
-        }
+                display_out_params.forEach(function([primId, out_param]) {
+                    let prim = all_prims2[primId];
+                    let ptype = out_param_types[out_param];
+                    let out_param_id = next_out_param_id++;
 
-        let MAX_LIST_ITEMS = 30;
-        function appendOutputs(result) {
-            if (!data.resultList) {
-                data.resultList = [];
-                data.isUnreadList = [];
+                    let key = prim.selector.kind + ':' + prim.channel + ':' + out_param;
+                    let format = MORE_HARDCODED_OUTPUT_PARAMS[key] || HARDCODED_OUTPUT_PARAMS[out_param] || OUTPUT_PARAM_BY_TYPES[String(ptype)];
+                    let param_value = result.raw[out_param];
+                    let is_long = false;
+                    if (ptype.isString && param_value.length >= 100)
+                        is_long = true;
+
+                    outputElements.push(out_param_id);
+                    let is_picture = ptype.isEntity && ptype.type === 'tt:picture';
+                    if (out_param.value === 'video_id')
+                        is_picture = true;
+                    a += `<div id="parent-output-${out_param_id}" class="program-output-group output-param-${out_param.value}">`;
+                    let show_label = shouldShowLabel(out_param);
+                    if (show_label === 'before')
+                        a += `<div id="output-label-${out_param_id}" class="program-output-label">${out_param.value.replace(/_/g, ' ')}</div>`;
+                    a +=     `<div id="output-${out_param_id}" class="program-output ${is_picture ? 'picture': ''} ${is_long ? 'long-output':''}">${format.display(param_value)}</div>`;
+                    if (show_label === 'after')
+                        a += `<div id="output-label-${out_param_id}" class="program-output-label">${out_param.value.replace(/_/g, ' ')}</div>`;
+                    a += `</div>`;
+                });
+                if (has_link)
+                    a += `</a>`;
+                a += '</div>';//'
+
+                return $(a);
             }
-            data.resultList.push(result);
-            data.isUnreadList.push(true);
-            data.unreadItems ++;
-            if (data.resultList.length > MAX_LIST_ITEMS) {
-                if (data.lastResultPos !== undefined)
-                    data.lastResultPos --;
-                data.resultList.shift();
-
-                if (data.isUnreadList[0])
-                    data.unreadItems --;
-                data.isUnreadList.shift();
+            // console.log("output_show_count: " + output_show_count)
+            function replaceOutputs(result, pos) {
+                $('.program-temporary-box', $item).remove();
+                data.lastResult = result;
+                data.lastResultPos = pos;
+                let $placeholder = $('.program-results', $item);
+                $placeholder.empty();
+                let outputElements = [];
+                $placeholder.append(createOneProgramResult(result, outputElements));
+                updateOutputLayout(outputElements);
             }
-            if (!data.lastResult)
-                replaceOutputs(result, 0);
-            updateArrows();
-            $(".program-notification-count", $item).text(data.unreadItems);
-            $(".program-notification-badge", $item).show();
-        }
-        function replaceOutputList(resultList) {
-            data.resultList = resultList;
-            data.isUnreadList = resultList.map(function() { return true; });
-            data.lastResultPos = 0;
-            data.unreadItems = resultList.length;
-            replaceOutputs(resultList[0], 0);
-            updateArrows();
-            $(".program-notification-count", $item).text(data.unreadItems);
-            $(".program-notification-badge", $item).show();
-        }
-        function markItemRead() {
-            if (data.isUnreadList[data.lastResultPos]) {
-                data.isUnreadList[data.lastResultPos] = false;
-                data.unreadItems--;
+            function updateArrows() {
+                $('.arrow', $item).show();
+                $('.arrow-next', $item).prop('disabled', data.lastResultPos >= data.resultList.length-1);
+                $('.arrow-prev', $item).prop('disabled', data.lastResultPos <= 0);
             }
 
-            $(".program-notification-count", $item).text(data.unreadItems);
-            if (data.unreadItems === 0)
-                $(".program-notification-badge", $item).hide();
-        }
+            let MAX_LIST_ITEMS = 30;
+            function appendOutputs(result) {
+                if (!data.resultList) {
+                    data.resultList = [];
+                    data.isUnreadList = [];
+                }
+                data.resultList.push(result);
+                data.isUnreadList.push(true);
+                data.unreadItems ++;
+                if (data.resultList.length > MAX_LIST_ITEMS) {
+                    if (data.lastResultPos !== undefined)
+                        data.lastResultPos --;
+                    data.resultList.shift();
 
-        function selectOutput(movement) {
-            if (data.lastResultPos === undefined) {
-                alert("How did you get here?");
-                return;
+                    if (data.isUnreadList[0])
+                        data.unreadItems --;
+                    data.isUnreadList.shift();
+                }
+                if (!data.lastResult)
+                    replaceOutputs(result, 0);
+                updateArrows();
+                $(".program-notification-count", $item).text(data.unreadItems);
+                $(".program-notification-badge", $item).show();
+            }
+            function replaceOutputList(resultList) {
+                data.resultList = resultList;
+                data.isUnreadList = resultList.map(function() { return true; });
+                data.lastResultPos = 0;
+                data.unreadItems = resultList.length;
+                replaceOutputs(resultList[0], 0);
+                updateArrows();
+                $(".program-notification-count", $item).text(data.unreadItems);
+                $(".program-notification-badge", $item).show();
+            }
+            function markItemRead() {
+                if (data.isUnreadList[data.lastResultPos]) {
+                    data.isUnreadList[data.lastResultPos] = false;
+                    data.unreadItems--;
+                }
+
+                $(".program-notification-count", $item).text(data.unreadItems);
+                if (data.unreadItems === 0)
+                    $(".program-notification-badge", $item).hide();
             }
 
-            let next = data.lastResultPos + movement;
-            if (next >= data.resultList.length)
-                next = data.resultList.length -1;
-            if (next < 0)
-                next = 0;
-            replaceOutputs(data.resultList[next], next);
-            updateArrows();
-            markItemRead();
-        }
+            function selectOutput(movement) {
+                if (data.lastResultPos === undefined) {
+                    alert("How did you get here?");
+                    return;
+                }
 
-        let button;
-        if (!has_trigger) {
-            if (!has_action && input_rects.length === 0) {
-                button = '<i class="fa fa-repeat fa-lg"></i>';
-                title = '';
-            } else {
-                button = first_two_words;
+                let next = data.lastResultPos + movement;
+                if (next >= data.resultList.length)
+                    next = data.resultList.length -1;
+                if (next < 0)
+                    next = 0;
+                replaceOutputs(data.resultList[next], next);
+                updateArrows();
+                markItemRead();
             }
 
-            a += `<a
+            let button;
+            if (!has_trigger) {
+                if (!has_action && input_rects.length === 0) {
+                    button = '<i class="fa fa-repeat fa-lg"></i>';
+                    title = '';
+                } else {
+                    button = first_two_words;
+                }
+
+                a += `<a
                     class="btn btn-secondary btn-sm button-execute"
                     href="#">${button}</a>`;
-        } else {
-            a += `<div class="switch-when-container"><div class="checkbox checkbox-slider--b switch-when">
+            } else {
+                a += `<div class="switch-when-container"><div class="checkbox checkbox-slider--b switch-when">
                         <label>
                             <input type="checkbox" class="checkbox-activate-program" ${data.currentAppId ? 'checked' : ''}><span class="checkbox-activate-program-label indicator-success"></span>
                         </label>
                     </div></div>`;
-        }
+            }
 
-        if (title === button ||
-            (all_prims2.length === 1 && (button === 'send' || button === 'post' || button === 'search')))
-            title = '';
-        if (title === 'set minimum maximum temperature')
-            title = 'set min max temperature';
-        if (title)
-            a += `<div class="program-title">${title}</div>`;
-        else if (inputOutputAssignment['__title'])
-            emptyBoxes.push(inputOutputAssignment['__title']);
+            if (title === button ||
+                (all_prims2.length === 1 && (button === 'send' || button === 'post' || button === 'search')))
+                title = '';
+            if (title === 'set minimum maximum temperature')
+                title = 'set min max temperature';
+            if (title)
+                a += `<div class="program-title">${title}</div>`;
+            else if (inputOutputAssignment['__title'])
+                emptyBoxes.push(inputOutputAssignment['__title']);
 
-        // a += `<div class='color_background' style='position: absolute; top: 0px; left: 0px; background-color: ${randomColor()}; width: 89px; height: 89px'></div>`
+            // a += `<div class='color_background' style='position: absolute; top: 0px; left: 0px; background-color: ${randomColor()}; width: 89px; height: 89px'></div>`
 
 
-        a += '</div>';
+            a += '</div>';
 
-        let $item = $(a);
-        $item.attr('data-tile-id', data.uniqueId);
-        function escapeBackgroundImage(url) {
-            return encodeURIComponent(url).replace(/[!'()*]/g, function(c) {
-                return '%' + c.charCodeAt(0).toString(16);
+            let $item = $(a);
+            $item.attr('data-tile-id', data.uniqueId);
+            function escapeBackgroundImage(url) {
+                return encodeURIComponent(url).replace(/[!'()*]/g, function(c) {
+                    return '%' + c.charCodeAt(0).toString(16);
+                });
+            }
+            let backgroundImageUrlBase = useDefault ? 'https://thingpedia.stanford.edu/brassau/backgrounds/' : 'https://d1ge76rambtuys.cloudfront.net/backgrounds/';
+            $item.css({
+                backgroundImage: 'url(' + backgroundImageUrlBase + escapeBackgroundImage(background_image) + ')',
+                backgroundSize: 'contain',
+                //backgroundColor: rgbToHex(backgroundMeta['color-palette'][0])
             });
-        }
-        $item.css({
-            backgroundImage: 'url(https://thingpedia.stanford.edu/brassau/backgrounds/' + escapeBackgroundImage(background_image) + ')',
-            backgroundSize: 'contain',
-            //backgroundColor: rgbToHex(backgroundMeta['color-palette'][0])
-        });
-        $grid.prepend( $item ).packery( 'prepended', $item);
-        //$item.draggabilly()
-        //let draggie = $item.data('draggabilly')
-        //$grid.packery( 'bindDraggabillyEvents', draggie )
+            $grid.prepend( $item ).packery( 'prepended', $item);
+            //$item.draggabilly()
+            //let draggie = $item.data('draggabilly')
+            //$grid.packery( 'bindDraggabillyEvents', draggie )
 
 
-        $item.css({
-            border: `2.5px solid gray`
-        });
+            $item.css({
+                border: `2.5px solid gray`
+            });
 
-        $(".program-notification-badge", $item).hide();
-        $(".arrow", $item).hide();
-        $(".arrow-next", $item).on('tap', function() { selectOutput(1); });
-        $(".arrow-prev", $item).on('tap', function() { selectOutput(-1); });
-        $(".checkbox-switch", $item).bootstrapSwitch();
-        /*$(".location-widget", $item).each(function(i, element) {
-            let $element = $(element)
-            let lat = parseFloat($element.attr('data-lat'))
-            let lng = parseFloat($element.attr('data-lng'))
-            let map = new google.maps.Map(element, {
-                zoom: 10,
-                center: { lat: lat, lng: lng }
-            })
-            let marker = new google.maps.Marker({
-                position: { lat: lat, lng: lng },
-                map: map
-            })
-        })*/
+            $(".program-notification-badge", $item).hide();
+            $(".arrow", $item).hide();
+            $(".arrow-next", $item).on('tap', function() { selectOutput(1); });
+            $(".arrow-prev", $item).on('tap', function() { selectOutput(-1); });
+            $(".checkbox-switch", $item).bootstrapSwitch();
+            /*$(".location-widget", $item).each(function(i, element) {
+                let $element = $(element)
+                let lat = parseFloat($element.attr('data-lat'))
+                let lng = parseFloat($element.attr('data-lng'))
+                let map = new google.maps.Map(element, {
+                    zoom: 10,
+                    center: { lat: lat, lng: lng }
+                })
+                let marker = new google.maps.Marker({
+                    position: { lat: lat, lng: lng },
+                    map: map
+                })
+            })*/
 
-        $("input.program-input, textarea.program-input, select.program-input, .program-input.location-widget", $item).on('mousedown', (event) => {
-            event.stopPropagation();
-        });
-        $("input.program-input, textarea.program-input, select.program-input, .program-input.location-widget", $item).on('touchstart', (event) => {
-            event.stopPropagation();
-        });
+            $("input.program-input, textarea.program-input, select.program-input, .program-input.location-widget", $item).on('mousedown', (event) => {
+                event.stopPropagation();
+            });
+            $("input.program-input, textarea.program-input, select.program-input, .program-input.location-widget", $item).on('touchstart', (event) => {
+                event.stopPropagation();
+            });
 
-        function bindInputParamChange(event, state) {
-            let element = this;
-            $(element).removeClass('incomplete');
-            let in_param_handler;
-            if (element.name)
-                in_param_handler = in_param_map[element.name.substr('input-'.length)];
-            else
-                in_param_handler = in_param_map[element.id.substr('input-'.length)];
-            in_param_handler.onchange(element, event, state);
-            candidate.description = describe_program(program);
-            $('#input_command').val(candidate.description);
-        }
-        $("input.program-input, select.program-input, textarea.program-input", $item).on('change', bindInputParamChange);
-        $(".program-input.checkbox-switch", $item).on('switchChange.bootstrapSwitch', bindInputParamChange);
-        $(".program-input.entity-drop-down", $item).each(function(i, element) {
-            let $el = $(element);
-            let entityType = $el.attr('data-entity-type');
-            let in_param_handler;
-            if (element.name)
-                in_param_handler = in_param_map[element.name.substr('input-'.length)];
-            else
-                in_param_handler = in_param_map[element.id.substr('input-'.length)];
+            function bindInputParamChange(event, state) {
+                let element = this;
+                $(element).removeClass('incomplete');
+                let in_param_handler;
+                if (element.name)
+                    in_param_handler = in_param_map[element.name.substr('input-'.length)];
+                else
+                    in_param_handler = in_param_map[element.id.substr('input-'.length)];
+                in_param_handler.onchange(element, event, state);
+                candidate.description = describe_program(program);
+                $('#input_command').val(candidate.description);
+            }
+            $("input.program-input, select.program-input, textarea.program-input", $item).on('change', bindInputParamChange);
+            $(".program-input.checkbox-switch", $item).on('switchChange.bootstrapSwitch', bindInputParamChange);
+            $(".program-input.entity-drop-down", $item).each(function(i, element) {
+                let $el = $(element);
+                let entityType = $el.attr('data-entity-type');
+                let in_param_handler;
+                if (element.name)
+                    in_param_handler = in_param_map[element.name.substr('input-'.length)];
+                else
+                    in_param_handler = in_param_map[element.id.substr('input-'.length)];
 
-            $.ajax('https://thingpedia.stanford.edu/thingpedia/api/entities/list/' + entityType).then(function(res) {
-                let data = res.data || [];
-                data.forEach(function(item) {
-                    let $option = $('<option>').attr('value', item.id).text(item.name);
-                    if (item.id === in_param_handler.in_param.value.value)
-                        $option.attr('selected', 'selected');
+                $.ajax('https://thingpedia.stanford.edu/thingpedia/api/entities/list/' + entityType).then(function(res) {
+                    let data = res.data || [];
+                    data.forEach(function(item) {
+                        let $option = $('<option>').attr('value', item.id).text(item.name);
+                        if (item.id === in_param_handler.in_param.value.value)
+                            $option.attr('selected', 'selected');
 
-                    $el.append($option);
+                        $el.append($option);
+                    });
                 });
             });
-        });
 
-        updateInputLayout(Object.keys(in_param_map));
-        if (inputOutputAssignment['__action_button']) {
-            let button_rect = inputOutputAssignment['__action_button'];
-            putElementInBox('.button-execute', button_rect, action_button_color);
-            putElementInBox('.switch-when-container', button_rect, action_button_color, true);
-            if (!button_rect.cover) {
-                $('.button-execute', $item).css({
-                    background: 'none',
-                    border: 'none',
-                }).text('');
+            updateInputLayout(Object.keys(in_param_map));
+            if (inputOutputAssignment['__action_button']) {
+                let button_rect = inputOutputAssignment['__action_button'];
+                putElementInBox('.button-execute', button_rect, action_button_color);
+                putElementInBox('.switch-when-container', button_rect, action_button_color, true);
+                if (!button_rect.cover) {
+                    $('.button-execute', $item).css({
+                        background: 'none',
+                        border: 'none',
+                    }).text('');
+                } else {
+                    $('.button-execute', $item).css({
+                        /*borderTopColor: button_rect['top-color'],
+                        borderLeftColor: button_rect['left-color'],
+                        borderRightColor: button_rect['right-color'],
+                        borderBottomColor: button_rect['bottom-color']*/
+                        border: 'none'
+                    });
+                }
             } else {
                 $('.button-execute', $item).css({
-                    /*borderTopColor: button_rect['top-color'],
-                    borderLeftColor: button_rect['left-color'],
-                    borderRightColor: button_rect['right-color'],
-                    borderBottomColor: button_rect['bottom-color']*/
-                    border: 'none'
+                    position: 'absolute',
+                    bottom: 3,
+                    right: 3,
                 });
             }
-        } else {
-            $('.button-execute', $item).css({
-                position: 'absolute',
-                bottom: 3,
-                right: 3,
-            });
-        }
-        if (inputOutputAssignment['__logo']) {
-            let logo_rect = inputOutputAssignment['__logo'];
-            putElementInBox('.program-logo', logo_rect, colors_dominant[0]);
-        } else {
-            $('.program-logo', $item).css({
-                'opacity': .75,
-                '-webkit-filter': 'drop-shadow(0px 0px 10px rgba(255,255,255,0.5))',
-            });
-        }
-        if (inputOutputAssignment['__title']) {
-            let title_rect = inputOutputAssignment['__title'];
-            putElementInBox('.program-title', title_rect, title_color);
-            if (!title_rect.cover) {
+            if (inputOutputAssignment['__logo']) {
+                let logo_rect = inputOutputAssignment['__logo'];
+                putElementInBox('.program-logo', logo_rect, colors_dominant[0]);
+            } else {
+                $('.program-logo', $item).css({
+                    'opacity': .75,
+                    '-webkit-filter': 'drop-shadow(0px 0px 10px rgba(255,255,255,0.5))',
+                });
+            }
+            if (inputOutputAssignment['__title']) {
+                let title_rect = inputOutputAssignment['__title'];
+                putElementInBox('.program-title', title_rect, title_color);
+                if (!title_rect.cover) {
+                    $('.program-title', $item).css({
+                        background: 'none',
+                        border: 'none',
+                    }).text('');
+                }
+            } else {
                 $('.program-title', $item).css({
-                    background: 'none',
-                    border: 'none',
-                }).text('');
+                    position: 'absolute',
+                    top: 5,
+                    right: '12%',
+                    left: (10 * all_prims2.length) + '%',
+                    height: '1.2em',
+                    margin: 'auto',
+                    textAlign: 'center'
+                }).addClass('autofontsize');
+                $('.program-title', $item).css({
+                    color: title_color
+                });
             }
-        } else {
-            $('.program-title', $item).css({
-                position: 'absolute',
-                top: 5,
-                right: '12%',
-                left: (10 * all_prims2.length) + '%',
-                height: '1.2em',
-                margin: 'auto',
-                textAlign: 'center'
-            }).addClass('autofontsize');
-            $('.program-title', $item).css({
-                color: title_color
+            emptyBoxes.forEach(createEmptyBox);
+            output_rects.forEach(function(rect) {
+                let box = createEmptyBox(rect);
+                if (box)
+                    box.addClass('program-temporary-box');
             });
-        }
-        emptyBoxes.forEach(createEmptyBox);
-        output_rects.forEach(function(rect) {
-            let box = createEmptyBox(rect);
-            if (box)
-                box.addClass('program-temporary-box');
-        });
 
-        function executeGetOrDo(event) {
-            console.log('executeGetOrDo');
-            if (event)
-                event.preventDefault();
-            if (!isProgramComplete(program)) {
-                console.log('program is incomplete');
-                $('.incomplete', $item).focus();
-                return;
-            }
-            let code = ThingTalk.Ast.prettyprint(program);
-            // console.log('new code', code);
-            if (code !== candidate.code) {
-                candidate.code = code;
-                tileStorageManager.storeTile(data);
-            }
-
-            ThingEngineApi.createApp({
-                code: code,
-                locations: {
-                    current_location: {
-                        x: -122.173239,
-                        y: 37.4299195
-                    }
-                }
-            }).then(function(response) {
-                console.log("executeGetOrDo callback");
-                console.log(response);
-                let results = response.results;
-                if (results.length === 0) {
-                    console.log("no output results");
-                    return;
-                }
-                replaceOutputList(results);
-                if (!$item.hasClass('grid-item--small'))
-                    markItemRead();
-                tileStorageManager.storeTile(data);
-                // the item might have changed size, reflow it
-                $grid.packery('fit', $item);
-                $grid.packery('layout');
-            });
-        }
-
-        let whenListener;
-        if (has_trigger) {
-            whenListener = function(result) {
-                if (is_list)
-                    appendOutputs(result);
-                else
-                    replaceOutputList([result]);
-                if (!$item.hasClass('grid-item--small'))
-                    markItemRead();
-                tileStorageManager.storeTile(data);
-                // the item might have changed size, reflow it
-                $grid.packery('fit', $item);
-                $grid.packery('layout');
-            };
-        }
-        function executeWhen(event) {
-            let state = this.checked;
-            let code = ThingTalk.Ast.prettyprint(program);
-            if (code !== candidate.code) {
-                candidate.code = code;
-                tileStorageManager.storeTile(data);
-            }
-            //$('.checkbox-activate-program-label', $item).text('\xa0\xa0' + (state ? 'active' : 'inactive'))
-
-            if (state) {
-                if (data.currentAppId !== null)
-                    return;
-
+            function executeGetOrDo(event) {
+                console.log('executeGetOrDo');
+                if (event)
+                    event.preventDefault();
                 if (!isProgramComplete(program)) {
+                    console.log('program is incomplete');
                     $('.incomplete', $item).focus();
-                    this.checked = false;
-                    $('.checkbox-activate-program-label', $item).text('\xa0\xa0inactive');
                     return;
                 }
-                console.log('starting app', code);
-                let params = {
+                let code = ThingTalk.Ast.prettyprint(program);
+                // console.log('new code', code);
+                if (code !== candidate.code) {
+                    candidate.code = code;
+                    tileStorageManager.storeTile(data);
+                }
+
+                ThingEngineApi.createApp({
                     code: code,
                     locations: {
                         current_location: {
@@ -1827,182 +1794,245 @@ frameborder="0" allowFullScreen></iframe>`,
                             y: 37.4299195
                         }
                     }
-                };
-
-                appManager.startApp(params, whenListener).then((appId) => {
-                    data.currentAppId = appId;
+                }).then(function(response) {
+                    console.log("executeGetOrDo callback");
+                    console.log(response);
+                    let results = response.results;
+                    if (results.length === 0) {
+                        console.log("no output results");
+                        return;
+                    }
+                    replaceOutputList(results);
+                    if (!$item.hasClass('grid-item--small'))
+                        markItemRead();
                     tileStorageManager.storeTile(data);
-                }, (err) => {
-                    alert('error: ' + err);
+                    // the item might have changed size, reflow it
+                    $grid.packery('fit', $item);
+                    $grid.packery('layout');
                 });
+            }
+
+            let whenListener;
+            if (has_trigger) {
+                whenListener = function(result) {
+                    if (is_list)
+                        appendOutputs(result);
+                    else
+                        replaceOutputList([result]);
+                    if (!$item.hasClass('grid-item--small'))
+                        markItemRead();
+                    tileStorageManager.storeTile(data);
+                    // the item might have changed size, reflow it
+                    $grid.packery('fit', $item);
+                    $grid.packery('layout');
+                };
+            }
+            function executeWhen(event) {
+                let state = this.checked;
+                let code = ThingTalk.Ast.prettyprint(program);
+                if (code !== candidate.code) {
+                    candidate.code = code;
+                    tileStorageManager.storeTile(data);
+                }
+                //$('.checkbox-activate-program-label', $item).text('\xa0\xa0' + (state ? 'active' : 'inactive'))
+
+                if (state) {
+                    if (data.currentAppId !== null)
+                        return;
+
+                    if (!isProgramComplete(program)) {
+                        $('.incomplete', $item).focus();
+                        this.checked = false;
+                        $('.checkbox-activate-program-label', $item).text('\xa0\xa0inactive');
+                        return;
+                    }
+                    console.log('starting app', code);
+                    let params = {
+                        code: code,
+                        locations: {
+                            current_location: {
+                                x: -122.173239,
+                                y: 37.4299195
+                            }
+                        }
+                    };
+
+                    appManager.startApp(params, whenListener).then((appId) => {
+                        data.currentAppId = appId;
+                        tileStorageManager.storeTile(data);
+                    }, (err) => {
+                        alert('error: ' + err);
+                    });
+                } else {
+                    if (data.currentAppId === null)
+                        return;
+                    console.log('stopping app', data.currentAppId);
+                    let appId = data.currentAppId;
+                    data.currentAppId = null;
+                    tileStorageManager.storeTile(data);
+                    appManager.stopApp(appId).catch((err) => {
+                        alert('error: ' + err);
+                    });
+                }
+            }
+
+            if (has_trigger) {
+                $(".checkbox-activate-program", $item).on('change', executeWhen);
+                if (data.currentAppId)
+                    appManager.addAppListener(data.currentAppId, whenListener);
             } else {
-                if (data.currentAppId === null)
-                    return;
-                console.log('stopping app', data.currentAppId);
-                let appId = data.currentAppId;
-                data.currentAppId = null;
-                tileStorageManager.storeTile(data);
-                appManager.stopApp(appId).catch((err) => {
-                    alert('error: ' + err);
-                });
+                $(".button-execute", $item).on('tap', executeGetOrDo);
+                if (!has_action) {
+                    if (!data.lastResult && isProgramComplete(program))
+                        executeGetOrDo();
+                }
             }
-        }
-
-        if (has_trigger) {
-            $(".checkbox-activate-program", $item).on('change', executeWhen);
-            if (data.currentAppId)
-                appManager.addAppListener(data.currentAppId, whenListener);
-        } else {
-            $(".button-execute", $item).on('tap', executeGetOrDo);
-            if (!has_action) {
-                if (!data.lastResult && isProgramComplete(program))
-                    executeGetOrDo();
+            if (data.lastResult) {
+                replaceOutputs(data.lastResult, data.lastResultPos);
+                updateArrows();
             }
-        }
-        if (data.lastResult) {
-            replaceOutputs(data.lastResult, data.lastResultPos);
-            updateArrows();
-        }
-        if (data.unreadItems === undefined)
-            data.unreadItems = 0;
-        $(".program-notification-count", $item).text(data.unreadItems);
-        if (data.unreadItems > 0)
-            $(".program-notification-badge", $item).show();
-        data.onexpand = function() {
-            textFit($('.autofontsize .program-constant-input', $item), { minFontSize: 12 });
-            textFit($('.autofontsize .program-output:not(.picture)', $item), { alignVert: true, multiLine: true, minFontSize: 10, maxFontSize: 16 });
-            textFit($('.program-title.autofontsize', $item), { multiLine: false, minFontSize: 12, maxFontSize: 30 });
-            textFit($('.button-execute.autofontsize', $item), { multiLine: false, minFontSize: 12, maxFontSize: 30 });
+            if (data.unreadItems === undefined)
+                data.unreadItems = 0;
+            $(".program-notification-count", $item).text(data.unreadItems);
+            if (data.unreadItems > 0)
+                $(".program-notification-badge", $item).show();
+            data.onexpand = function() {
+                textFit($('.autofontsize .program-constant-input', $item), { minFontSize: 12 });
+                textFit($('.autofontsize .program-output:not(.picture)', $item), { alignVert: true, multiLine: true, minFontSize: 10, maxFontSize: 16 });
+                textFit($('.program-title.autofontsize', $item), { multiLine: false, minFontSize: 12, maxFontSize: 30 });
+                textFit($('.button-execute.autofontsize', $item), { multiLine: false, minFontSize: 12, maxFontSize: 30 });
 
-            if (has_trigger || is_list) {
-                if (data.lastResult)
-                    markItemRead();
-                tileStorageManager.storeTile(data);
-            }
-        };
-
-        $('.close', $item).on('tap', function() {
-            if (data.currentAppId) {
-                console.log('deleting and stopping app', data.currentAppId);
-                let appId = data.currentAppId;
-                data.currentAppId = null;
-                appManager.stopApp(appId).catch((err) => {
-                    alert('error: ' + err);
-                });
-            } else {
-                console.log('deleting tile ' + data.uniqueId);
-            }
-            tileStorageManager.deleteTile(data);
-            $grid.packery('remove', $item);
-        });
-
-        function putElementInBox(selector, rect, color, forceCover) {
-            let FONT_FAMILIES = {
-                'sans': '"Montserrat", sans-serif',
-                'serif': '"Source Serif Pro", serif',
-                'display': '"Comfortaa", sans-serif',
-                'handwriting': '"Indie Flower", cursive',
-                'monospace': '"Space Mono", monospace'
+                if (has_trigger || is_list) {
+                    if (data.lastResult)
+                        markItemRead();
+                    tileStorageManager.storeTile(data);
+                }
             };
-            let box = toWidthHeight(rect.coordinates);
 
-            let $element = $(selector, $item);
-            $element.addClass('box-' + rect.label);
-            $element.css({
-                zIndex: 1,
-                position: 'absolute',
-                width: box.width + '%',
-                height: box.height + '%',
-                left: box.left + '%',
-                top: box.top + '%',
+            $('.close', $item).on('tap', function() {
+                if (data.currentAppId) {
+                    console.log('deleting and stopping app', data.currentAppId);
+                    let appId = data.currentAppId;
+                    data.currentAppId = null;
+                    appManager.stopApp(appId).catch((err) => {
+                        alert('error: ' + err);
+                    });
+                } else {
+                    console.log('deleting tile ' + data.uniqueId);
+                }
+                tileStorageManager.deleteTile(data);
+                $grid.packery('remove', $item);
             });
-            if (rect['font-size']) {
-                $element.css({
-                    fontSize: (rect['font-size']/2) + 'px',
-                });
-            } else {
-                $element.addClass('autofontsize');
-            }
-            if (rect['text-align']) {
-                $element.css({
-                    textAlign: rect['text-align']
-                });
-            }
-            if (rect['font-family']) {
-                $element.css({
-                    fontFamily: FONT_FAMILIES[rect['font-family']]
-                });
-            }
 
-            if (color) {
+            function putElementInBox(selector, rect, color, forceCover) {
+                let FONT_FAMILIES = {
+                    'sans': '"Montserrat", sans-serif',
+                    'serif': '"Source Serif Pro", serif',
+                    'display': '"Comfortaa", sans-serif',
+                    'handwriting': '"Indie Flower", cursive',
+                    'monospace': '"Space Mono", monospace'
+                };
+                let box = toWidthHeight(rect.coordinates);
+
+                let $element = $(selector, $item);
+                $element.addClass('box-' + rect.label);
                 $element.css({
-                    color: color
+                    zIndex: 1,
+                    position: 'absolute',
+                    width: box.width + '%',
+                    height: box.height + '%',
+                    left: box.left + '%',
+                    top: box.top + '%',
                 });
+                if (rect['font-size']) {
+                    $element.css({
+                        fontSize: (rect['font-size']/2) + 'px',
+                    });
+                } else {
+                    $element.addClass('autofontsize');
+                }
+                if (rect['text-align']) {
+                    $element.css({
+                        textAlign: rect['text-align']
+                    });
+                }
+                if (rect['font-family']) {
+                    $element.css({
+                        fontFamily: FONT_FAMILIES[rect['font-family']]
+                    });
+                }
+
+                if (color) {
+                    $element.css({
+                        color: color
+                    });
+                }
+                if (rect.cover || forceCover) {
+                    $element.css({
+                        backgroundImage: `linear-gradient(90deg, rgb(${rect['left-color']}), rgb(${rect['right-color']}))`,
+                    });
+                }
+
+                return box;
             }
-            if (rect.cover || forceCover) {
+            function createEmptyBox(rect) {
+                if (!rect.cover)
+                    return null;
+
+                let $element = $('<div>');
+                $item.append($element);
+                let box = toWidthHeight(rect.coordinates);
+
+                $element.attr('role', 'presentation');
+                $element.css({
+                    zIndex: 0,
+                    position: 'absolute',
+                    width: box.width + '%',
+                    height: box.height + '%',
+                    left: box.left + '%',
+                    top: box.top + '%',
+                });
                 $element.css({
                     backgroundImage: `linear-gradient(90deg, rgb(${rect['left-color']}), rgb(${rect['right-color']}))`,
                 });
+
+                return $element;
             }
 
-            return box;
-        }
-        function createEmptyBox(rect) {
-            if (!rect.cover)
-                return null;
+            function updateInputLayout(inputElements) {
+                for (let i = 0; i < inputElements.length && i < input_rects.length; i++) {
+                    let box = putElementInBox("#parent-input-"+inputElements[i], input_rects[i], input_colors[i]);
 
-            let $element = $('<div>');
-            $item.append($element);
-            let box = toWidthHeight(rect.coordinates);
-
-            $element.attr('role', 'presentation');
-            $element.css({
-                zIndex: 0,
-                position: 'absolute',
-                width: box.width + '%',
-                height: box.height + '%',
-                left: box.left + '%',
-                top: box.top + '%',
-            });
-            $element.css({
-                backgroundImage: `linear-gradient(90deg, rgb(${rect['left-color']}), rgb(${rect['right-color']}))`,
-            });
-
-            return $element;
-        }
-
-        function updateInputLayout(inputElements) {
-            for (let i = 0; i < inputElements.length && i < input_rects.length; i++) {
-                let box = putElementInBox("#parent-input-"+inputElements[i], input_rects[i], input_colors[i]);
-
-                let in_param_handler = in_param_map[inputElements[i]];
-                if (in_param_handler.in_param_type === 'slider') {
-                    let orientation = 'horizontal';
-                    if (box.height > box.width)
-                        orientation = 'vertical';
-                    $('#input-' + inputElements[i]).slider({ orientation });
+                    let in_param_handler = in_param_map[inputElements[i]];
+                    if (in_param_handler.in_param_type === 'slider') {
+                        let orientation = 'horizontal';
+                        if (box.height > box.width)
+                            orientation = 'vertical';
+                        $('#input-' + inputElements[i]).slider({ orientation });
+                    }
                 }
             }
-        }
 
-        function updateOutputLayout(outputElements) {
-            for (let i = 0; i < outputElements.length && i < output_rects.length; i++) {
-                putElementInBox("#parent-output-"+outputElements[i], output_rects[i], output_colors[i]);
-                //let box = toWidthHeight(output_rects[i].coordinates);
+            function updateOutputLayout(outputElements) {
+                for (let i = 0; i < outputElements.length && i < output_rects.length; i++) {
+                    putElementInBox("#parent-output-"+outputElements[i], output_rects[i], output_colors[i]);
+                    //let box = toWidthHeight(output_rects[i].coordinates);
 
-                $('#parent-output-'+outputElements[i] + ' img', $item).css({
-                    boxShadow: '0px 0px 5px ' + output_colors[i]
-                });
+                    $('#parent-output-'+outputElements[i] + ' img', $item).css({
+                        boxShadow: '0px 0px 5px ' + output_colors[i]
+                    });
+                }
+
+                //if (!$item.hasClass('grid-item--small'))
+                textFit($('.autofontsize .program-output:not(.picture)', $item), { alignVert: true, multiLine: true, minFontSize: 10, maxFontSize: 16 });
+
             }
 
-            //if (!$item.hasClass('grid-item--small'))
-            textFit($('.autofontsize .program-output:not(.picture)', $item), { alignVert: true, multiLine: true, minFontSize: 10, maxFontSize: 16 });
-
-        }
-
-        return $item;
+            return $item;
+        });
     });
 }
+
 function expandTile($item, tile) {
     $item.removeClass('grid-item--small');//.draggabilly('disable')
     if (tile.onexpand)
@@ -2027,14 +2057,19 @@ class AppManager {
             alert('application error: ' + parsed.error.error);
             return;
         }
-
-        let result = parsed.result;
-        if (this._listeners.has(result.appId))
-            this._listeners.get(result.appId)(result);
-        else if (this._pending.has(result.appId))
-            this._pending.get(result.appId).push(result);
-        else
-            this._pending.set(result.appId, [result]);
+        if (parsed.results) {
+            let result = parsed.result;
+            if (this._listeners.has(result.appId))
+                this._listeners.get(result.appId)(result);
+            else if (this._pending.has(result.appId))
+                this._pending.get(result.appId).push(result);
+            else
+                this._pending.set(result.appId, [result]);
+        } else if (parsed.command) {
+            handleCommand(parsed.command, {});
+        } else if (parsed.hypothesis) {
+            $('#input_command').val(parsed.hypothesis);
+        }
     }
 
     _flushPendingData(appId) {
@@ -2109,7 +2144,7 @@ $(function() {
     });
 
     tileStorageManager = new TileStorageManager();
-    //tileStorageManager.clearAll();
+    tileStorageManager.clearAll();
     window.tileStorageManager = tileStorageManager;
 
     next_in_param_id = 0;
@@ -2117,7 +2152,7 @@ $(function() {
 
     Promise.all(tileStorageManager.getTiles().map(function (tile) {
         console.log('restoring tile ' + tile.uniqueId + ': ' + tile.json.description);
-        console.log(tile)
+        console.log(tile);
         return createTile(tile, {});
     })).then(() => {
         $('#loader').hide();
