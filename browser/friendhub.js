@@ -12,8 +12,6 @@
 "use strict";
 
 require('thingengine-core/lib/polyfill');
-const https = require('https');
-const Url = require('url');
 
 const ColorScheme = require('color-scheme');
 const ThingTalk = require('thingtalk');
@@ -681,7 +679,8 @@ function createTile(data, options) {
             'Entity(imgflip:meme_id)': 'entity-dropdown',
             'Entity(tt:picture)': 'file',
             'Entity(tt:username)': 'text',
-            'Entity(tt:hashtag)': 'text'
+            'Entity(tt:hashtag)': 'text',
+            'Date': 'datetime'
         };
 
         let display_in_params = [];
@@ -692,6 +691,7 @@ function createTile(data, options) {
             let display_type = HARDCODED_INPUT_PARAM_TYPES[in_param.name];
             if (!display_type)
                 display_type = INPUT_PARAM_TYPES_BY_TT_TYPES[String(tt_type)];
+
             if (!display_type) {
                 if (tt_type.isEntity && entityHasLogo(tt_type.type)) {
                     if (!in_param.value.isUndefined)
@@ -1382,6 +1382,13 @@ frameborder="0" allowFullScreen></iframe>`,
                         };
                         break;
                     }
+
+                    case "datetime":
+                        a += `<input id="input-${in_param_id}" type="datetime-local" class="program-input datetime-selector">`;
+                        in_param_map[in_param_id].onchange = function(element, event) {
+                            this.in_param.value = new ThingTalk.Ast.Value.Date(new Date(element.value), '+', null);
+                        };
+                        break;
 
                     case "on-off-switch":
                         a += `<input id="input-${in_param_id}" type="checkbox" data-size='' class="program-input checkbox-switch ${in_param.value.isUndefined ? 'incomplete' : ''}" ${in_param.value.value === 'on' ? 'checked' :''} >`;
