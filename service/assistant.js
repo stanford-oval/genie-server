@@ -3,32 +3,19 @@
 // This file is part of ThingEngine
 //
 // Copyright 2016 The Board of Trustees of the Leland Stanford Junior University
+//           2018 Google LLC
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 //
 // See COPYING for details
 "use strict";
 
-const Q = require('q');
+const path = require('path');
 const events = require('events');
-const posix = require('posix');
 const child_process = require('child_process');
 
-const Almond = require('almond');
 const SpeechHandler = require('./speech_handler');
-const AlmondApi = require('./almond_api');
-
-const Config = require('../config');
-
-class LocalUser {
-    constructor() {
-        var pwnam = posix.getpwnam(process.getuid());
-
-        this.id = process.getuid();
-        this.account = pwnam.name;
-        this.name = pwnam.gecos;
-    }
-}
+const SpeechSynthesizer = require('./speech_synthesizer');
 
 const MessageType = {
     TEXT: 0,
@@ -42,19 +29,22 @@ const MessageType = {
 };
 
 class MainConversationDelegate {
-    constructor(platform, speechHandler) {
-        this._speechSynth = platform.getCapability('text-to-speech');
+    constructor(speechSynth, speechHandler) {
+        this._speechSynth = speechSynth;
         this._outputs = new Set;
 
         this._speechHandler = speechHandler;
         this._history = [];
     }
 
-    clearSpeechQueue() {
-        this._speechSynth.clearQueue();
+    sendHypothesis(hypothesis) {
+        for (let out of this._outputs)
+            out.sendHypothesis(hypothesis);
     }
-    setConversation(conversation) {
-        this._conversation = conversation;
+
+    clearSpeechQueue() {
+        if (this._speechSynth)
+            this._speechSynth.clearQueue();
     }
 
     addOutput(out) {
@@ -93,7 +83,8 @@ class MainConversationDelegate {
     }
 
     send(text, icon) {
-        this._speechSynth.say(text);
+        if (this._speechSynth)
+            this._speechSynth.say(text);
         this._addMessage(MessageType.TEXT, (out) => out.send(text, icon));
     }
 
@@ -102,7 +93,8 @@ class MainConversationDelegate {
     }
 
     sendChoice(idx, what, title, text) {
-        this._speechSynth.say(title);
+        if (this._speechSynth)
+            this._speechSynth.say(title);
         this._addMessage(MessageType.CHOICE, (out) => out.sendChoice(idx, what, title, text));
     }
 
@@ -111,7 +103,8 @@ class MainConversationDelegate {
     }
 
     sendButton(title, json) {
-        this._speechSynth.say(title);
+        if (this._speechSynth)
+            this._speechSynth.say(title);
         this._addMessage(MessageType.BUTTON, (out) => out.sendButton(title, json));
     }
 
@@ -120,104 +113,52 @@ class MainConversationDelegate {
     }
 
     sendRDL(rdl, icon) {
-        this._speechSynth.say(rdl.displayTitle);
+        if (this._speechSynth)
+            this._speechSynth.say(rdl.displayTitle);
         this._addMessage(MessageType.RDL, (out) => out.sendRDL(rdl, icon));
     }
 }
-
-class MainConversation extends Almond {
-    constructor(engine, speechHandler, options) {
-        super(engine, 'main', new LocalUser(), new MainConversationDelegate(engine.platform, speechHandler), options);
-        this._delegate.setConversation(this);
-    }
-
-    addOutput(out) {
-        this._delegate.addOutput(out);
-    }
-    removeOutput(out) {
-        this._delegate.removeOutput(out);
-    }
-
-    handleCommand(command) {
-        this._delegate.clearSpeechQueue();
-        this._delegate.collapseButtons();
-        this._delegate.addCommandToHistory(command);
-        return super.handleCommand.apply(this, arguments);
-    }
-
-    handleParsedCommand(json, title) {
-        this._delegate.clearSpeechQueue();
-        this._delegate.collapseButtons();
-        this._delegate.addCommandToHistory(title);
-        return super.handleParsedCommand.apply(this, arguments);
-    }
-
-    handleThingTalk(code) {
-        this._delegate.clearSpeechQueue();
-        this._delegate.collapseButtons();
-        this._delegate.addCommandToHistory("Code: " + code);
-        return super.handleThingTalk.apply(this, arguments);
-    }
-
-    presentExample() {
-        this._delegate.clearSpeechQueue();
-        this._delegate.collapseButtons();
-        return super.presentExample.apply(this, arguments);
-    }
-}
-
-class OtherConversation extends Almond {
-
-    handleCommand(command) {
-        this._delegate.sendCommand(command);
-        return super.handleCommand(command);
-    }
-
-    handleParsedCommand(json, title) {
-        this._delegate.sendCommand(title);
-        return super.handleParsedCommand(json);
-    }
-
-    handleThingTalk(code) {
-        this._delegate.sendCommand("Code: " + code);
-        return super.handleThingTalk(code);
-    }
-}
+MainConversationDelegate.prototype.$rpcMethods = [
+    'send', 'sendPicture', 'sendChoice', 'sendLink', 'sendButton',
+    'sendAskSpecial', 'sendRDL',
+    'addCommandToHistory', 'sendCommand',
+    'clearSpeechQueue', 'collapseButtons'
+];
 
 module.exports = class Assistant extends events.EventEmitter {
-    constructor(engine) {
+    constructor(enginemanager) {
         super();
 
-        this._engine = engine;
-        this._api = new AlmondApi(this._engine);
+        this._enginemanager = enginemanager;
+        this._children = new Map;
 
-        this._speechHandler = new SpeechHandler(engine.platform);
-        this._speechSynth = platform.getCapability('text-to-speech');
-        this._mainConversation = new MainConversation(engine, this._speechHandler, {
-            sempreUrl: Config.SEMPRE_URL,
-            showWelcome: true
-        });
+        this._pulse = platform.getCapability('pulseaudio');
+        if (this._pulse !== null) {
+            this._speechSynth = new SpeechSynthesizer(this._pulse,
+                path.resolve(module.filename, '../../data/cmu_us_slt.flitevox'));
+            this._speechHandler = new SpeechHandler(this._pulse, this._locale);
 
-        this._speechHandler.on('hypothesis', (hypothesis) => {
-            this._api.sendHypothesis(hypothesis);
-        });
-        this._speechHandler.on('hotword', (hotword) => {
-            child_process.spawn('xset', ['dpms', 'force', 'on']);
-            child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
-        });
-        this._speechHandler.on('utterance', (utterance) => {
-            this._api.sendCommand(utterance);
-        });
-        this._speechHandler.on('error', (error) => {
-            console.log('Error in speech recognition: ' + error.message);
-            this._speechSynth.say("Sorry, I had an error understanding your speech: " + error.message);
-        });
+            this._speechHandler.on('hypothesis', (hypothesis) => {
+                this._mainConvDelegate.sendHypothesis(hypothesis);
+            });
+            this._speechHandler.on('hotword', (hotword) => {
+                child_process.spawn('xset', ['dpms', 'force', 'on']);
+                child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
+            });
+            this._speechHandler.on('utterance', (utterance) => {
+                console.log('FIXME dispatch utterance ' + utterance);
+                //this._api.sendCommand(utterance);
+            });
+            this._speechHandler.on('error', (error) => {
+                console.log('Error in speech recognition: ' + error.message);
+                this._speechSynth.say("Sorry, I had an error understanding your speech: " + error.message);
+            });
+        } else {
+            this._speechSynth = null;
+            this._speechHandler = null;
+        }
 
-        this._conversations = {
-            api: this._api,
-            main: this._mainConversation
-        };
-        this._lastConversation = this._mainConversation;
+        this._mainConvDelegate = new MainConversationDelegate(this._speechSynth, this._speechHandler);
     }
 
     parse(sentence, target) {
@@ -235,58 +176,45 @@ module.exports = class Assistant extends events.EventEmitter {
 
     start() {
         return Promise.all([
-            this._speechSynth.start(),
-            this._speechHandler.start(),
-            this._mainConversation.start()
+            this._speechSynth ? this._speechSynth.start() : null,
+            this._speechHandler ? this._speechHandler.start() : null,
         ]);
     }
 
     stop() {
-        this._speechSynth.stop();
-        this._speechHandler.stop();
+        if (this._speechSynth)
+            this._speechSynth.stop();
+        if (this._speechHandler)
+            this._speechHandler.stop();
     }
 
-    notifyAll(...data) {
-        return Q.all(Object.keys(this._conversations).map((id) => {
-            return this._conversations[id].notify(...data);
-        }));
+    async getConversation(userId, id) {
+        const [assistant,] = await this._ensureAssitantForUser(userId);
+        return assistant.getConversation(id);
     }
 
-    notifyErrorAll(...data) {
-        return Q.all(Object.keys(this._conversations).map((id) => {
-            return this._conversations[id].notifyError(...data);
-        }));
+    async _ensureAssitantForUser(userId) {
+        if (this._children.has(userId))
+            return this._children.get(userId);
+
+        const engine = await this._enginemanager.getEngine(userId);
+        await engine.assistant.getOrOpenConversation('main', engine.user,
+                                                     this._mainConvDelegate,
+                                                     { showWelcome: false });
+
+        this._children.set(userId, [engine.assistant, engine.user]);
+        return [engine.assitant, engine.user];
     }
 
-    getMainConversation() {
-        return this._mainConversation;
+    async openConversation(userId, convId, delegate) {
+        const [assistant, user] = await this._ensureAssitantForUser(userId);
+        return assistant.openConversation(convId, user, delegate);
     }
 
-    getConversation(id) {
-        if (id !== undefined && this._conversations[id])
-            return this._conversations[id];
-        else if (this._lastConversation)
-            return this._lastConversation;
-        else
-            return this._mainConversation;
-    }
-
-    openConversation(feedId, delegate) {
-        if (this._conversations[feedId])
-            delete this._conversations[feedId];
-        var conv = new OtherConversation(this._engine, feedId, new LocalUser(), delegate, {
-            sempreUrl: Config.SEMPRE_URL,
-            showWelcome: true
-        });
-        conv.on('active', () => this._lastConversation = conv);
-        this._lastConversation = conv;
-        this._conversations[feedId] = conv;
-        return conv;
-    }
-
-    closeConversation(feedId) {
-        if (this._conversations[feedId] === this._lastConversation)
-            this._lastConversation = null;
-        delete this._conversations[feedId];
+    closeConversation(userId, feedId) {
+        if (!this._children.has(userId))
+            return Promise.resolve();
+        const [assistant,] = this._children.get(userId);
+        return assistant.closeConversation(feedId);
     }
 };

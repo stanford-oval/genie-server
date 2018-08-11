@@ -58,12 +58,11 @@ class DetectorStream extends stream.Transform {
 }
 
 module.exports = class SpeechHandler extends events.EventEmitter {
-    constructor(platform) {
+    constructor(pulseaudio, locale) {
         super();
-        this._platform = platform;
-        this._pulse = platform.getCapability('pulseaudio');
+        this._pulse = pulseaudio;
 
-        this._recognizer = new SpeechRecognizer({ locale: this._platform.locale });
+        this._recognizer = new SpeechRecognizer({ locale });
         this._recognizer.on('error', (e) => {
             this._detector.finishRequest();
             this.emit('error', e);

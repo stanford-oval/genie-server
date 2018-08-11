@@ -7,6 +7,7 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 //
 // See COPYING for details
+"use strict";
 
 // Server platform implementation of Bluetooth API, using BlueZ
 // over DBus
@@ -69,6 +70,9 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
             }.bind(this)).catch(function(e) {
                 console.log('Failed to start BlueZ service: ' + e.message);
             });
+    }
+
+    stop() {
     }
 
     startDiscovery() {

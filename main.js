@@ -11,38 +11,40 @@
 
 const Q = require('q');
 Q.longStackSupport = true;
+process.on('unhandledRejection', (up) => { throw up; });
 
-const Engine = require('thingengine-core');
 const WebFrontend = require('./service/frontend');
+const EngineManager = require('./service/enginemanager');
 const AssistantDispatcher = require('./service/assistant');
 
-const Config = require('./config');
+let _enginemanager, _frontend, _ad;
 
-let _waitReady;
-let _stopped = false;
-let _engine, _frontend, _ad;
+function handleSignal() {
+    _frontend.close().then(() => {
+        _enginemanager.stop();
+        _ad.stop();
+        process.exit();
+    });
+}
 
-const DEBUG = false;
 
 function main() {
     global.platform = require('./service/platform');
+    platform.init();
 
-    global.platform.init();
+    process.on('SIGINT', handleSignal);
+    process.on('SIGTERM', handleSignal);
 
-    _frontend = new WebFrontend(global.platform);
+    _frontend = new WebFrontend();
+    _frontend.open();
 
-    function init() {
-        _engine = new Engine(global.platform, { thingpediaUrl: Config.THINGPEDIA_URL });
-        _frontend.setEngine(_engine);
+    _enginemanager = new EngineManager();
+    _enginemanager.start();
 
-        _ad = new AssistantDispatcher(_engine);
-        global.platform.setAssistant(_ad);
-        return _engine.open().then(() => {
-            return _ad.start();
-        });
-    }
+    _ad = new AssistantDispatcher(_enginemanager);
+    _ad.start();
 
-    if (Config.ENABLE_DB_ENCRYPTION) {
+    /*if (Config.ENABLE_DB_ENCRYPTION) {
         _waitReady = new Promise((callback, errback) => {
             _frontend.on('unlock', (key) => {
                 console.log('Attempting unlock...');
@@ -55,7 +57,7 @@ function main() {
     } else {
         _waitReady = init();
     }
-    _frontend.open();
+
 
     Q(_waitReady).then(() => {
         if (_stopped)
@@ -73,7 +75,7 @@ function main() {
     }).finally(() => {
         console.log('Cleaning up');
         platform.exit();
-    });
+    });*/
 }
 
 main();

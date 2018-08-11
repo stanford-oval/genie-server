@@ -14,7 +14,8 @@ const Ast = ThingTalk.Ast;
 const Describe = ThingTalk.Describe;
 const Type = ThingTalk.Type;
 const Generate = ThingTalk.Generate;
-const { ParserClient, Intent, Formatter } = require('almond');
+const { ParserClient, Intent } = require('almond-dialog-agent');
+const Formatter = ThingTalk.Formatter;
 
 const Config = require('../config');
 
@@ -23,8 +24,11 @@ const FACTORING_IMPLEMENTED = false; // FIXME
 module.exports = class AlmondApi {
     constructor(engine) {
         this._engine = engine;
-        this._parser = new ParserClient(undefined, engine.platform.locale, engine.platform.getSharedPreferences());
-        this._formatter = new Formatter(this._engine);
+        this._parser = new ParserClient(Config.NL_SERVER_URL,
+                                        engine.platform.locale,
+                                        engine.platform.getSharedPreferences());
+        this._formatter = new Formatter(engine.platform.locale, engine.platform.timezone,
+                                        engine.schemas);
 
         this._outputs = new Set;
     }
