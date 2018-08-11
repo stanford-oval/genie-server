@@ -8,7 +8,7 @@
     "update-friendhub": "browserify -t babelify ./browser/friendhub.js -o public/javascripts/friendhub.js"
   },
   "dependencies": {
-    "almond": "github:Stanford-Mobisocial-IoT-Lab/almond-dialog-agent",
+    "almond-dialog-agent": "^1.0.3",
     "babel-core": "^6.26.0",
     "babelify": "^8.0.0",
     "body-parser": "^1.17.2",
@@ -37,10 +37,10 @@
     "serve-favicon": "^2.4.3",
     "snowboy": "^1.2.0",
     "sqlite3": "^3.1.8",
-    "thingengine-core": "github:Stanford-Mobisocial-IoT-Lab/thingengine-core",
-    "thingpedia": "github:Stanford-Mobisocial-IoT-Lab/thingpedia-api",
-    "thingpedia-discovery": "github:Stanford-Mobisocial-IoT-Lab/thingpedia-discovery",
-    "thingtalk": "github:Stanford-Mobisocial-IoT-Lab/ThingTalk",
+    "thingengine-core": "^1.0.2",
+    "thingpedia": "^2.2.2",
+    "thingpedia-discovery": "^1.0.0",
+    "thingtalk": "^1.1.1",
     "uuid": "^3.1.0",
     "ws": "^3.0.0"
   },
