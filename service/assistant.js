@@ -15,6 +15,7 @@ const posix = require('posix');
 const child_process = require('child_process');
 
 const Almond = require('almond');
+
 const SpeechHandler = require('./speech_handler');
 const AlmondApi = require('./almond_api');
 
@@ -48,6 +49,11 @@ class MainConversationDelegate {
 
         this._speechHandler = speechHandler;
         this._history = [];
+    }
+
+    sendHypothesis(hypothesis) {
+        for (let out of this._outputs)
+            out.sendHypothesis(hypothesis);
     }
 
     clearSpeechQueue() {
@@ -126,18 +132,6 @@ class MainConversationDelegate {
 }
 
 class MainConversation extends Almond {
-    constructor(engine, speechHandler, options) {
-        super(engine, 'main', new LocalUser(), new MainConversationDelegate(engine.platform, speechHandler), options);
-        this._delegate.setConversation(this);
-    }
-
-    addOutput(out) {
-        this._delegate.addOutput(out);
-    }
-    removeOutput(out) {
-        this._delegate.removeOutput(out);
-    }
-
     handleCommand(command) {
         this._delegate.clearSpeechQueue();
         this._delegate.collapseButtons();
@@ -191,26 +185,34 @@ module.exports = class Assistant extends events.EventEmitter {
         this._engine = engine;
         this._api = new AlmondApi(this._engine);
 
-        this._speechHandler = new SpeechHandler(engine.platform);
-        this._speechSynth = platform.getCapability('text-to-speech');
-        this._mainConversation = new MainConversation(engine, this._speechHandler, {
+        this._pulse = engine.platform.getCapability('pulseaudio');
+
+        if (this._pulse !== null) {
+           this._speechHandler = new SpeechHandler(engine.platform);
+
+            this._speechHandler.on('hypothesis', (hypothesis) => {
+                this._mainConvDelegate.sendHypothesis(hypothesis);
+            });
+            this._speechHandler.on('hotword', (hotword) => {
+                child_process.spawn('xset', ['dpms', 'force', 'on']);
+                child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
+            });
+            this._speechHandler.on('utterance', (utterance, speaker) => {
+                this._dispatchUtteranceForSpeaker(utterance, speaker);
+            });
+            this._speechHandler.on('error', (error) => {
+                console.log('Error in speech recognition: ' + error.message);
+                this._mainConvDelegate.send("Sorry, I had an error understanding your speech: " + error.message, null);
+            });
+        } else {
+            this._speechSynth = null;
+            this._speechHandler = null;
+        }
+
+        this._mainConvDelegate = new MainConversationDelegate(engine.platform, this._speechHandler);
+        this._mainConversation = new MainConversation(engine, this._mainConvDelegate, {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true
-        });
-
-        this._speechHandler.on('hypothesis', (hypothesis) => {
-            this._api.sendHypothesis(hypothesis);
-        });
-        this._speechHandler.on('hotword', (hotword) => {
-            child_process.spawn('xset', ['dpms', 'force', 'on']);
-            child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
-        });
-        this._speechHandler.on('utterance', (utterance) => {
-            this._api.sendCommand(utterance);
-        });
-        this._speechHandler.on('error', (error) => {
-            console.log('Error in speech recognition: ' + error.message);
-            this._speechSynth.say("Sorry, I had an error understanding your speech: " + error.message);
         });
 
         this._conversations = {
