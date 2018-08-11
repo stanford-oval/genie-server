@@ -11,25 +11,14 @@
 
 const Q = require('q');
 const events = require('events');
-const posix = require('posix');
 const child_process = require('child_process');
 
-const Almond = require('almond');
+const Almond = require('almond-dialog-agent');
 
 const SpeechHandler = require('./speech_handler');
 const AlmondApi = require('./almond_api');
 
 const Config = require('../config');
-
-class LocalUser {
-    constructor() {
-        var pwnam = posix.getpwnam(process.getuid());
-
-        this.id = process.getuid();
-        this.account = pwnam.name;
-        this.name = pwnam.gecos;
-    }
-}
 
 const MessageType = {
     TEXT: 0,
@@ -48,7 +37,29 @@ class MainConversationDelegate {
         this._outputs = new Set;
 
         this._speechHandler = speechHandler;
+        if (speechHandler) {
+            this._speechHandler.on('hypothesis', (hypothesis) => {
+                this.sendHypothesis(hypothesis);
+            });
+            this._speechHandler.on('hotword', (hotword) => {
+                this.playHotwordAlert();
+            });
+            this._speechHandler.on('error', (error) => {
+                console.log('Error in speech recognition: ' + error.message);
+                this.playRecognitionError();
+            });
+        }
+
         this._history = [];
+    }
+
+    playHotwordAlert() {
+        child_process.spawn('xset', ['dpms', 'force', 'on']);
+        child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
+    }
+
+    playRecognitionError() {
+        child_process.spawn('canberra-gtk-play', ['-i', 'message-error']);
     }
 
     sendHypothesis(hypothesis) {
@@ -57,7 +68,8 @@ class MainConversationDelegate {
     }
 
     clearSpeechQueue() {
-        this._speechSynth.clearQueue();
+        if (this._speechSynth)
+            this._speechSynth.clearQueue();
     }
     setConversation(conversation) {
         this._conversation = conversation;
@@ -99,7 +111,8 @@ class MainConversationDelegate {
     }
 
     send(text, icon) {
-        this._speechSynth.say(text);
+        if (this._speechSynth)
+            this._speechSynth.say(text);
         this._addMessage(MessageType.TEXT, (out) => out.send(text, icon));
     }
 
@@ -108,7 +121,8 @@ class MainConversationDelegate {
     }
 
     sendChoice(idx, what, title, text) {
-        this._speechSynth.say(title);
+        if (this._speechSynth)
+            this._speechSynth.say(title);
         this._addMessage(MessageType.CHOICE, (out) => out.sendChoice(idx, what, title, text));
     }
 
@@ -117,7 +131,8 @@ class MainConversationDelegate {
     }
 
     sendButton(title, json) {
-        this._speechSynth.say(title);
+        if (this._speechSynth)
+            this._speechSynth.say(title);
         this._addMessage(MessageType.BUTTON, (out) => out.sendButton(title, json));
     }
 
@@ -126,7 +141,8 @@ class MainConversationDelegate {
     }
 
     sendRDL(rdl, icon) {
-        this._speechSynth.say(rdl.displayTitle);
+        if (this._speechSynth)
+            this._speechSynth.say(rdl.displayTitle);
         this._addMessage(MessageType.RDL, (out) => out.sendRDL(rdl, icon));
     }
 }
@@ -185,24 +201,15 @@ module.exports = class Assistant extends events.EventEmitter {
         this._engine = engine;
         this._api = new AlmondApi(this._engine);
 
+        this._contacts = engine.platform.getCapability('contacts');
         this._pulse = engine.platform.getCapability('pulseaudio');
 
         if (this._pulse !== null) {
-           this._speechHandler = new SpeechHandler(engine.platform);
+            this._speechSynth = engine.platform.getCapability('text-to-speech');
 
-            this._speechHandler.on('hypothesis', (hypothesis) => {
-                this._mainConvDelegate.sendHypothesis(hypothesis);
-            });
-            this._speechHandler.on('hotword', (hotword) => {
-                child_process.spawn('xset', ['dpms', 'force', 'on']);
-                child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
-            });
+            this._speechHandler = new SpeechHandler(engine.platform);
             this._speechHandler.on('utterance', (utterance, speaker) => {
                 this._dispatchUtteranceForSpeaker(utterance, speaker);
-            });
-            this._speechHandler.on('error', (error) => {
-                console.log('Error in speech recognition: ' + error.message);
-                this._mainConvDelegate.send("Sorry, I had an error understanding your speech: " + error.message, null);
             });
         } else {
             this._speechSynth = null;
@@ -210,16 +217,70 @@ module.exports = class Assistant extends events.EventEmitter {
         }
 
         this._mainConvDelegate = new MainConversationDelegate(engine.platform, this._speechHandler);
-        this._mainConversation = new MainConversation(engine, this._mainConvDelegate, {
+        this._mainConversation = new MainConversation(engine, 'main',
+            this._contactToUser(this._contacts.getOwnerContact()), this._mainConvDelegate, {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true
         });
 
-        this._conversations = {
-            api: this._api,
-            main: this._mainConversation
-        };
+        this._speechConversations = new Map;
+
+        const owner = this._contacts.getOwnerContact();
+        if (owner.speakerId)
+            this._speechConversations.set(owner.speakerId, this._mainConversation);
+
+        this._conversations = new Map;
+        this._conversations.set('api', this._api);
+        this._conversations.set('main', this._mainConversation);
+
         this._lastConversation = this._mainConversation;
+    }
+
+    _contactToUser(contact) {
+        return {
+            name: contact.displayName,
+            anonymous: false,
+            isOwner: true,
+            speakerId: contact.speakerId,
+        };
+    }
+
+    async _dispatchUtteranceForSpeaker(utterance, speaker) {
+        if (speaker.confidence < 0) {
+            if (this._speechSynth)
+                this._speechSynth.say("Sorry, I'm not sure who is speaking.");
+            else
+                this._mainConvDelegate.playRecognitionError();
+            return;
+        }
+
+        if (!this._speechConversations.has(speaker.id)) {
+            let user, convId;
+            if (speaker.id !== null) {
+                convId = 'main-' + speaker.id;
+                user = this._contactToUser(this._contacts.lookupPrincipal('speaker:' + speaker.id));
+                user.isOwner = false;
+                // the owner already has a conversation created so it never goes down
+                // this path
+                console.log('Identified as ' + user.name);
+            } else {
+                convId = 'main-anonymous';
+                user = {
+                    name: "Anonymous",
+                    anonymous: true,
+                    isOwner: false,
+                    speakerId: null,
+                };
+                console.log('Identified as anonymous user');
+            }
+
+            const conv = this.openConversation(convId, this._mainConvDelegate, user, { showWelcome: false });
+            this._speechConversations.set(speaker.id, conv);
+            await conv.start();
+        }
+
+        const conv = this._speechConversations.get(speaker.id);
+        await conv.handleCommand(utterance);
     }
 
     parse(sentence, target) {
@@ -228,8 +289,15 @@ module.exports = class Assistant extends events.EventEmitter {
     createApp(data) {
         return this._api.createApp(data);
     }
+
+    addMainOutput(out) {
+        this._mainConvDelegate.addOutput(out);
+    }
     addOutput(out) {
         this._api.addOutput(out);
+    }
+    removeMainOutput(out) {
+        this._mainConvDelegate.removeOutput(out);
     }
     removeOutput(out) {
         this._api.removeOutput(out);
@@ -249,14 +317,14 @@ module.exports = class Assistant extends events.EventEmitter {
     }
 
     notifyAll(...data) {
-        return Q.all(Object.keys(this._conversations).map((id) => {
-            return this._conversations[id].notify(...data);
+        return Promise.all(Array.from(this._conversations.values()).map((conv) => {
+            return conv.notify(...data);
         }));
     }
 
     notifyErrorAll(...data) {
-        return Q.all(Object.keys(this._conversations).map((id) => {
-            return this._conversations[id].notifyError(...data);
+        return Promise.all(Array.from(this._conversations.values()).map((conv) => {
+            return conv.notifyError(...data);
         }));
     }
 
@@ -265,30 +333,35 @@ module.exports = class Assistant extends events.EventEmitter {
     }
 
     getConversation(id) {
-        if (id !== undefined && this._conversations[id])
-            return this._conversations[id];
+        if (id !== undefined && this._conversations.has(id))
+            return this._conversations.get(id);
         else if (this._lastConversation)
             return this._lastConversation;
         else
             return this._mainConversation;
     }
 
-    openConversation(feedId, delegate) {
-        if (this._conversations[feedId])
-            delete this._conversations[feedId];
-        var conv = new OtherConversation(this._engine, feedId, new LocalUser(), delegate, {
-            sempreUrl: Config.SEMPRE_URL,
-            showWelcome: true
-        });
+    openConversation(feedId, delegate, user, options = { showWelcome: true }) {
+        if (this._conversations.has(feedId))
+            this._conversations.delete(feedId);
+
+        if (!user)
+            user = this._contactToUser(this._contacts.getOwnerContact());
+        const convClass = delegate === this._mainConvDelegate ?
+            MainConversation : OtherConversation;
+
+        options.sempreUrl = Config.SEMPRE_URL;
+        var conv = new convClass(this._engine, feedId, user, delegate, options);
         conv.on('active', () => this._lastConversation = conv);
-        this._lastConversation = conv;
-        this._conversations[feedId] = conv;
+        if (user.primary)
+            this._lastConversation = conv;
+        this._conversations.set(feedId, conv);
         return conv;
     }
 
     closeConversation(feedId) {
-        if (this._conversations[feedId] === this._lastConversation)
+        if (this._conversations.get(feedId) === this._lastConversation)
             this._lastConversation = null;
-        delete this._conversations[feedId];
+        delete this._conversations.get(feedId);
     }
 };

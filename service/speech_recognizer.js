@@ -31,7 +31,7 @@ function encodeHeaders(path, contentType, requestId) {
     return str;
 }
 
-const SAVE_TO_FILE = true;
+const SAVE_TO_FILE = false;
 let i = 0;
 
 class SpeechRequest extends events.EventEmitter {

@@ -20,6 +20,9 @@ const Gettext = require('node-gettext');
 const DBus = require('dbus-native');
 const PulseAudio = require('pulseaudio');
 
+const graphics = require('./graphics');
+const Contacts = require('./contacts');
+
 const prefs = require('thingengine-core/lib/util/prefs');
 
 var _unzipApi = {
@@ -113,7 +116,7 @@ function getUserCacheDir() {
 module.exports = {
     // Initialize the platform code
     // Will be called before instantiating the engine
-    init: function() {
+    init() {
         this._assistant = null;
 
         this._gettext = new Gettext();
@@ -138,6 +141,8 @@ module.exports = {
         });
         this._tts = new SpeechSynthesizer(this._pulse, path.resolve(module.filename, '../../data/cmu_us_slt.flitevox'));
         this._media = new MediaPlayer();
+
+        this._users = new Contacts();
 
         this._sqliteKey = null;
         this._origin = null;
@@ -211,13 +216,13 @@ module.exports = {
         case 'bluetooth':
         case 'audio-router':
         case 'system-apps':
-        case 'graphics-api':
-        case 'contacts':
         case 'telephone':
         // for compat
         case 'notify-api':
             return true;
 */
+        case 'graphics-api':
+        case 'contacts':
         case 'content-api':
         case 'assistant':
             return true;
@@ -256,6 +261,10 @@ module.exports = {
             return this._media;
         case 'content-api':
             return _contentApi;
+        case 'graphics':
+            return graphics;
+        case 'contacts':
+            return this._users;
 
 /*
         case 'notify-api':
@@ -277,14 +286,8 @@ module.exports = {
         case 'system-apps':
             return _systemAppsApi;
 
-        case 'graphics-api':
-            return _graphicsApi;
-
         case 'content-api':
             return _contentApi;
-
-        case 'contacts':
-            return _contactApi;
 
         case 'telephone':
             return _telephoneApi;

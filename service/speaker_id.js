@@ -54,7 +54,7 @@ class SpeakerIdRequest extends events.EventEmitter {
     }
 
     async _start() {
-        const userSpeakerIds = this._userRegistry.getAllSpeakerIds();
+        const userSpeakerIds = await this._userRegistry.getAllSpeakerIds();
 
         // the start request is weird because it returns a 202 + a
         // Location header that we need to get to
@@ -127,11 +127,11 @@ class SpeakerIdRequest extends events.EventEmitter {
 }
 
 module.exports = class SpeakerIdentifier {
-    constructor(locale) {
-        this._locale = locale;
+    constructor(userRegistry) {
+        this._userRegistry = userRegistry;
     }
 
     request(stream) {
-        return new SpeakerIdRequest(stream);
+        return new SpeakerIdRequest(this._userRegistry, stream);
     }
 };

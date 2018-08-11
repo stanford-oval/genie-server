@@ -205,7 +205,7 @@ router.ws('/conversation', (ws, req, next) => {
     ws.on('close', () => {
         if (opened) {
             if (isMain)
-                conversation.removeOutput(delegate);
+                assistant.removeMainOutput(delegate);
             else
                 assistant.closeConversation(id);
         }
@@ -215,7 +215,7 @@ router.ws('/conversation', (ws, req, next) => {
     let conversation;
     if (isMain) {
         conversation = assistant.getConversation('main');
-        conversation.addOutput(delegate);
+        assistant.addMainOutput(delegate);
         opened = true;
     } else {
         conversation = assistant.openConversation(id, delegate);
