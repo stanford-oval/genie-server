@@ -31,6 +31,9 @@ module.exports = {
     get(client, id) {
         return db.selectOne(client, "select * from users where id = ?", [id]);
     },
+    getBySpeakerGUID(client, id) {
+        return db.selectOne(client, "select * from users where speaker_guid = ?", [id]);
+    },
 
     getByName(client, username) {
         return db.selectAll(client, "select * from users where username = ?", [username]);

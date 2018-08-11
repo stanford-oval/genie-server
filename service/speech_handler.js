@@ -14,6 +14,7 @@ const path = require('path');
 const snowboy = require('snowboy');
 
 const SpeechRecognizer = require('./speech_recognizer');
+const SpeakerIdentifier = require('./speaker_id');
 
 class DetectorStream extends stream.Transform {
     constructor() {
@@ -57,11 +58,13 @@ class DetectorStream extends stream.Transform {
     }
 }
 
+
 module.exports = class SpeechHandler extends events.EventEmitter {
     constructor(pulseaudio, locale) {
         super();
         this._pulse = pulseaudio;
 
+        this._speakerId = new SpeakerIdentifier({ locale });
         this._recognizer = new SpeechRecognizer({ locale });
         this._recognizer.on('error', (e) => {
             this._detector.finishRequest();
@@ -83,14 +86,21 @@ module.exports = class SpeechHandler extends events.EventEmitter {
         this._detector.on('hotword', (hotword) => {
             console.log('Hotword ' + hotword + ' detected');
             this.emit('hotword', hotword);
-            let req = this._recognizer.request(this._detector);
-            req.on('hypothesis', (hypothesis) => this.emit('hypothesis', hypothesis));
-            req.on('done', (status, utterance) => {
+
+            const speakerIdReq = this._speakerId.request(this._detector);
+            const recognizerReq = this._recognizer.request(this._detector);
+            recognizerReq.on('hypothesis', (hypothesis) => this.emit('hypothesis', hypothesis));
+            recognizerReq.on('done', (status, utterance) => {
                 if (status === 'Success') {
                     console.log('Recognized as "' + utterance + '"');
-                    this.emit('utterance', utterance);
+
+                    Promise.resolve(speakerIdReq.complete()).then((speaker) => {
+                        this.emit('utterance', utterance, speaker);
+                    }).catch((e) => {
+                        this.emit('error', e);
+                    });
                 } else {
-                    console.log('Recognition error: ' + status);
+                    this.emit('error', new Error(status));
                 }
                 this._detector.finishRequest();
             });
@@ -105,4 +115,4 @@ module.exports = class SpeechHandler extends events.EventEmitter {
         this._stream = null;
         this._recognizer.close();
     }
-}
+};

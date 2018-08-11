@@ -7,16 +7,14 @@
 // See COPYING for details
 "use strict";
 
-const stream = require('stream');
-const os = require('os');
+const fs = require('fs');
 const events = require('events');
 const https = require('https');
-const fs = require('fs');
 const Url = require('url');
-
 const uuid = require('uuid');
 const WebSocket = require('ws');
 
+const WavUtils = require('../util/wav');
 const Config = require('../config');
 
 function encodeHeaders(path, contentType, requestId) {
@@ -33,7 +31,9 @@ function encodeHeaders(path, contentType, requestId) {
     return str;
 }
 
+const SAVE_TO_FILE = true;
 let i = 0;
+
 class SpeechRequest extends events.EventEmitter {
     constructor() {
         super();
@@ -43,7 +43,8 @@ class SpeechRequest extends events.EventEmitter {
         this._ended = false;
         this._sentRIFFHeader = false;
 
-        //this._debugFile = fs.createWriteStream('out_' + process.pid + '_' + (i++) + '.wav');
+        if (SAVE_TO_FILE)
+            this._debugFile = fs.createWriteStream('out_' + process.pid + '_' + (i++) + '.wav');
     }
 
     start(stream, connection, connectionTelemetry) {
@@ -98,7 +99,8 @@ class SpeechRequest extends events.EventEmitter {
         }));
         this._ended = true;
 
-        //this._debugFile.end();
+        if (SAVE_TO_FILE)
+            this._debugFile.end();
     }
 
     _handleMessage(msg) {
@@ -156,28 +158,17 @@ class SpeechRequest extends events.EventEmitter {
         message.writeInt16BE(header.length, 0);
         header.copy(message, 2);
         if (!this._sentRIFFHeader) {
-            let riffHeader = Buffer.alloc(44);
-            // the size of the chunks are chosen based on what GStreamer produces by default
-            riffHeader.write('RIFF', 0);
-            riffHeader.writeInt32LE(0x7fff0024, 4);
-            riffHeader.write('WAVE', 8);
-            riffHeader.write('fmt ', 12);
-            riffHeader.writeInt32LE(16, 16); // fmt pkt size
-            riffHeader.writeInt16LE(1, 20); // format (1 = PCM)
-            riffHeader.writeInt16LE(1, 22); // number of channels
-            riffHeader.writeInt32LE(16000, 24); // sample rate
-            riffHeader.writeInt32LE((16000 * 16 * 1)/8, 28); // byterate
-            riffHeader.writeInt16LE((16 * 1)/8, 32); // byte per sample
-            riffHeader.writeInt16LE(16, 34); // bits per sample
-            riffHeader.write('data', 36);
-            riffHeader.writeInt32LE(0x7fff0000, 40);
-            //this._debugFile.write(riffHeader);
+            let riffHeader = WavUtils.getRIFFHeader();
+            if (SAVE_TO_FILE)
+                this._debugFile.write(riffHeader);
             riffHeader.copy(message, 2 + header.length);
-            //this._debugFile.write(chunk);
+            if (SAVE_TO_FILE)
+                this._debugFile.write(chunk);
             chunk.copy(message, 2 + 44 + header.length);
             this._sentRIFFHeader = true;
         } else {
-            //this._debugFile.write(chunk);
+            if (SAVE_TO_FILE)
+                this._debugFile.write(chunk);
             chunk.copy(message, 2 + header.length);
         }
         if (this._connection.readyState === 1) // OPEN

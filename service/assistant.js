@@ -14,6 +14,9 @@ const path = require('path');
 const events = require('events');
 const child_process = require('child_process');
 
+const db = require('../util/db');
+const users = require('../model/user');
+
 const SpeechHandler = require('./speech_handler');
 const SpeechSynthesizer = require('./speech_synthesizer');
 
@@ -145,13 +148,12 @@ module.exports = class Assistant extends events.EventEmitter {
                 child_process.spawn('xset', ['dpms', 'force', 'on']);
                 child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
             });
-            this._speechHandler.on('utterance', (utterance) => {
-                console.log('FIXME dispatch utterance ' + utterance);
-                //this._api.sendCommand(utterance);
+            this._speechHandler.on('utterance', (utterance, speaker) => {
+                this._dispatchUtteranceForSpeaker(utterance, speaker);
             });
             this._speechHandler.on('error', (error) => {
                 console.log('Error in speech recognition: ' + error.message);
-                this._speechSynth.say("Sorry, I had an error understanding your speech: " + error.message);
+                this._mainConvDelegate.send("Sorry, I had an error understanding your speech: " + error.message, null);
             });
         } else {
             this._speechSynth = null;
@@ -188,26 +190,46 @@ module.exports = class Assistant extends events.EventEmitter {
             this._speechHandler.stop();
     }
 
+    async _dispatchUtteranceForSpeaker(utterance, speaker) {
+        if (speaker.id === null || speaker.confidence < 0) {
+            this._mainConvDelegate.send("Sorry, I am not sure who is speaking.", null);
+            return;
+        }
+
+        const user = await db.withClient((client) => {
+            return users.getBySpeakerGUID(client, speaker.id);
+        });
+        console.log('Identified as ' + user.username);
+        const [assistant,] = await this._ensureAssistantForUser(user.id);
+        const mainConv = await assistant.getConversation('main');
+        await mainConv.handleCommand(utterance);
+    }
+
     async getConversation(userId, id) {
-        const [assistant,] = await this._ensureAssitantForUser(userId);
+        const [assistant,] = await this._ensureAssistantForUser(userId);
         return assistant.getConversation(id);
     }
 
-    async _ensureAssitantForUser(userId) {
+    async _initNewUser(userId) {
+        const engine = await this._enginemanager.getEngine(userId);
+        const conv = await engine.assistant.openConversation('main', engine.user,
+                                                             this._mainConvDelegate,
+                                                             { showWelcome: false });
+        await conv.start();
+        return [engine.assistant, engine.user];
+    }
+
+    _ensureAssistantForUser(userId) {
         if (this._children.has(userId))
             return this._children.get(userId);
 
-        const engine = await this._enginemanager.getEngine(userId);
-        await engine.assistant.getOrOpenConversation('main', engine.user,
-                                                     this._mainConvDelegate,
-                                                     { showWelcome: false });
-
-        this._children.set(userId, [engine.assistant, engine.user]);
-        return [engine.assitant, engine.user];
+        const promise = this._initNewUser(userId);
+        this._children.set(userId, promise);
+        return promise;
     }
 
     async openConversation(userId, convId, delegate) {
-        const [assistant, user] = await this._ensureAssitantForUser(userId);
+        const [assistant, user] = await this._ensureAssistantForUser(userId);
         return assistant.openConversation(convId, user, delegate);
     }
 

@@ -199,7 +199,8 @@ class EngineManager extends events.EventEmitter {
                 apps: apps,
                 devices: devices,
                 messaging: messaging,
-                assistant: wrapper.assistant
+                assistant: wrapper.assistant,
+                user: wrapper.user,
             };
         });
     }
@@ -245,7 +246,7 @@ class EngineManager extends events.EventEmitter {
             child.on('engine-removed', onRemoved);
             child.on('exit', die);
             return child.runEngine();
-        }).then((engine, assistant) => {
+        }).then(([engine, assistant]) => {
             obj.engine = engine;
             obj.assistant = assistant;
         });

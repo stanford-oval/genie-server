@@ -37,7 +37,7 @@ var _stopped = false;
 
 function handleSignal() {
     for (let obj of _engines.values()) {
-        console.log('Stopping engine of ' + obj.cloudId);
+        console.log('Stopping engine of ' + obj.userId);
         if (obj.running)
             obj.engine.stop();
 
