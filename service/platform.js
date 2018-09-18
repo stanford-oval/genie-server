@@ -19,6 +19,8 @@ const child_process = require('child_process');
 const Gettext = require('node-gettext');
 const DBus = require('dbus-native');
 const PulseAudio = require('pulseaudio');
+//const CVC4Solver = require('cvc4');
+const CVC4Solver = require('smtlib').LocalCVC4Solver;
 
 const graphics = require('./graphics');
 const Contacts = require('./contacts');
@@ -230,6 +232,9 @@ module.exports = {
         case 'gettext':
             return true;
 
+        case 'smt-solver':
+            return true;
+
         default:
             return false;
         }
@@ -265,6 +270,9 @@ module.exports = {
             return graphics;
         case 'contacts':
             return this._users;
+
+        case 'smt-solver':
+            return CVC4Solver;
 
 /*
         case 'notify-api':

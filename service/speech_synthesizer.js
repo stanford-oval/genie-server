@@ -9,12 +9,13 @@
 
 const Q = require('q');
 const mimic = require('node-mimic');
+const AsyncQueue = require('consumer-queue');
 
 module.exports = class SpeechSynthesizer {
     constructor(pulseCtx, voiceFile) {
         this._pulseCtx = pulseCtx;
         this._voiceFile = voiceFile;
-        this._queue = [];
+        this._queue = new AsyncQueue();
         this._load = Q();
 
         this._outputStream = null;
@@ -23,9 +24,13 @@ module.exports = class SpeechSynthesizer {
     }
 
     start() {
-        return this._load = Q.nfcall(mimic.loadVoice, this._voiceFile).then((voice) => {
+        this._load = Q.nfcall(mimic.loadVoice, this._voiceFile).then((voice) => {
             this._voice = voice;
         });
+
+        // start the speech "thread" asynchronously
+        this._sayNext();
+        return this._load;
     }
     stop() {
     }
@@ -36,52 +41,57 @@ module.exports = class SpeechSynthesizer {
 
     say(text) {
         this._queue.push(text);
-        this._sayNext();
+    }
+    whenDone(callback) {
+        this._queue.push(callback);
     }
 
     _silence() {
         if (!this._outputStream)
-            return Q();
+            return 0;
 
-        // force flush the buffer with 0.5 seconds of silence
-        let bufferLength = 0.5 * this._sampleRate * this._numChannels * 2;
+        // force flush the buffer with 1 second of silence
+        let bufferLength = 1 * this._sampleRate * this._numChannels * 2;
         this._outputStream.write(Buffer.alloc(bufferLength));
-        return Q.delay(500);
+        return 1000;
     }
 
     _sayNext() {
-        if (this._queue.length === 0)
-            return this._silence();
-        let text = this._queue.shift();
-        return this._load.then(() => {
-            return Q.ninvoke(this._voice, 'textToSpeech', text);
-        }).then((result) => {
-            if (!this._outputStream) {
-                this._outputStream = this._pulseCtx.createPlaybackStream({
-                    format: 'S16NE', // signed 16 bit native endian
-                    rate: result.sampleRate,
-                    channels: result.numChannels,
-                    stream: 'thingengine-voice-output',
-                    latency: 100000, // us (= 0.1 s)
-                });
-                this._sampleRate = result.sampleRate;
-                this._numChannels = result.numChannels;
-            }
-            if (this._closeTimeout)
-                clearTimeout(this._closeTimeout);
-            this._closeTimeout = setTimeout(() => {
-                this._outputStream.end();
-                this._outputStream = null;
-                this._closeTimeout = null;
-            }, 60000);
+        this._load.then(() => {
+            return this._queue.pop();
+        }).then((text) => {
+            if (typeof text === 'function')
+                return text();
 
-            let duration = result.buffer.length /2 /
-                result.sampleRate / result.numChannels * 1000;
-            console.log('outputstream write for ' + text + ', delay of ' + duration);
-            this._outputStream.write(result.buffer);
-            return Q.delay(duration).then(() => this._sayNext());
+            return Q.ninvoke(this._voice, 'textToSpeech', text).then((result) => {
+                if (!this._outputStream) {
+                    this._outputStream = this._pulseCtx.createPlaybackStream({
+                        format: 'S16NE', // signed 16 bit native endian
+                        rate: result.sampleRate,
+                        channels: result.numChannels,
+                        stream: 'thingengine-voice-output',
+                        latency: 100000, // us (= 0.1 s)
+                    });
+                    this._sampleRate = result.sampleRate;
+                    this._numChannels = result.numChannels;
+                }
+                if (this._closeTimeout)
+                    clearTimeout(this._closeTimeout);
+                this._closeTimeout = setTimeout(() => {
+                    this._outputStream.end();
+                    this._outputStream = null;
+                    this._closeTimeout = null;
+                }, 60000);
+
+                let duration = result.buffer.length /2 /
+                    result.sampleRate / result.numChannels * 1000;
+                console.log('outputstream write for ' + text + ', delay of ' + duration);
+                this._outputStream.write(result.buffer);
+                duration += this._silence();
+                return Q.delay(duration);
+            });
         }).catch((e) => {
             console.error('Failed to speak: ' + e);
-        });
+        }).then(() => this._sayNext());
     }
 };

@@ -19,7 +19,7 @@ $(function() {
     function almondMessage(icon) {
         var msg = $('<span>').addClass('message-container from-almond');
         icon = icon || 'org.thingpedia.builtin.thingengine.builtin';
-        var src = 'https://crowdie.stanford.edu/thingpedia/api/devices/icon/' + icon;
+        var src = 'https://thingpedia.stanford.edu/thingpedia/api/devices/icon/' + icon;
         msg.append($('<img>').addClass('icon').attr('src', src));
         container.append(msg);
         return msg;

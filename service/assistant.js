@@ -137,6 +137,15 @@ class MainConversationDelegate {
     }
 
     sendAskSpecial(what) {
+        if (this._speechSynth && this._speechHandler) {
+            this._speechSynth.whenDone(() => {
+                if (what === null)
+                    this._speechHandler.setAutoTrigger(false);
+                else
+                    this._speechHandler.setAutoTrigger(true);
+            });
+        }
+
         this._addMessage(MessageType.ASK_SPECIAL, (out) => out.sendAskSpecial(what));
     }
 
@@ -258,8 +267,9 @@ module.exports = class Assistant extends events.EventEmitter {
             let user, convId;
             if (speaker.id !== null) {
                 convId = 'main-' + speaker.id;
-                user = this._contactToUser(this._contacts.lookupPrincipal('speaker:' + speaker.id));
+                user = this._contactToUser(await this._contacts.lookupPrincipal('speaker:' + speaker.id));
                 user.isOwner = false;
+                console.log(user);
                 // the owner already has a conversation created so it never goes down
                 // this path
                 console.log('Identified as ' + user.name);

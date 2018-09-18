@@ -158,7 +158,7 @@ class SpeechRequest extends events.EventEmitter {
         message.writeInt16BE(header.length, 0);
         header.copy(message, 2);
         if (!this._sentRIFFHeader) {
-            let riffHeader = WavUtils.getRIFFHeader();
+            let riffHeader = WavUtils.getRIFFHeader(5 * 60);
             if (SAVE_TO_FILE)
                 this._debugFile.write(riffHeader);
             riffHeader.copy(message, 2 + header.length);
