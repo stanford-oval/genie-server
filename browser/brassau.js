@@ -484,7 +484,7 @@ $(function() {
     window.tileStorageManager = tileStorageManager;
 
     function isProgramComplete(program) {
-        for (let [,slot] of ThingTalk.Generate.iterateSlots(program)) {
+        for (let [,slot] of program.iterateSlots()) {
             if (slot instanceof ThingTalk.Ast.Selector) {
                 if (slot.isBuiltin)
                     continue;
@@ -499,7 +499,7 @@ $(function() {
     }
 
     function* extractEntityValues(program) {
-        for (let [,slot] of ThingTalk.Generate.iterateSlots(program)) {
+        for (let [,slot] of program.iterateSlots()) {
             if (slot instanceof ThingTalk.Ast.Selector)
                 continue;
             if (slot.value.isEntity)
@@ -629,7 +629,7 @@ $(function() {
             if (rule.isRule)
                 has_trigger = true;
             for (let action of rule.actions) {
-                if (!action.selector.isBuiltin) {
+                if (action.isInvocation && !action.invocation.selector.isBuiltin) {
                     has_action = true;
                     break;
                 }
@@ -639,7 +639,7 @@ $(function() {
             let display_prim_type;
             let all_prims2 = [];
             let prim_map = new Map;
-            for (let [primType, prim] of ThingTalk.Generate.iteratePrimitives(program)) {
+            for (let [primType, prim] of program.iteratePrimitives()) {
                 if (prim.selector.isBuiltin)
                     continue;
                 display_prim = prim;
@@ -656,7 +656,7 @@ $(function() {
             console.log('has_action', has_action);
 
             let in_params = [];
-            for (let [,slot,prim,] of ThingTalk.Generate.iterateSlots(program)) {
+            for (let [,slot,prim,] of program.iterateSlots()) {
                 if (!(slot instanceof ThingTalk.Ast.InputParam))
                     continue;
                 if (slot.value.isVarRef || slot.value.isEvent)
@@ -765,7 +765,7 @@ $(function() {
                 if (display_prim.selector.kind === 'org.thingpedia.builtin.thingengine.phone' &&
                     display_prim.channel === 'gps')
                     is_list = false;
-            } else if (display_prim_type === 'table') {
+            } else if (display_prim_type === 'query') {
                 let has_count = false;
                 display_prim.in_params.forEach(function(in_param) {
                     if (in_param.name === 'count')
@@ -1933,7 +1933,7 @@ frameborder="0" allowFullScreen></iframe>`,
                     $('.incomplete', $item).focus();
                     return;
                 }
-                let code = ThingTalk.Ast.prettyprint(program);
+                let code = program.prettyprint();
                 // console.log('new code', code);
                 if (code !== candidate.code) {
                     candidate.code = code;
@@ -1983,7 +1983,7 @@ frameborder="0" allowFullScreen></iframe>`,
             }
             function executeWhen(event) {
                 let state = this.checked;
-                let code = ThingTalk.Ast.prettyprint(program);
+                let code = program.prettyprint();
                 if (code !== candidate.code) {
                     candidate.code = code;
                     tileStorageManager.storeTile(data);

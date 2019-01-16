@@ -9,23 +9,13 @@
 // See COPYING for details
 "use strict";
 
-const Config = require('../config');
+const ThingTalk = require('thingtalk');
 
+const Config = require('../config');
 const THINGPEDIA_URL = Config.THINGPEDIA_URL;
 
 function httpRequest(url) {
-    var req = new XMLHttpRequest();
-    req.open('GET', url);
-    req.responseType = 'json';
-    return new Promise(function(callback, errback) {
-        req.onerror = function() {
-            errback(new Error('Failed to contact SEMPRE server'));
-        };
-        req.onload = function() {
-            callback(req.response);
-        };
-        req.send();
-    });
+    return Promise.resolve($.ajax(url));
 }
 
 module.exports = class ThingpediaClientBrowser {
@@ -37,6 +27,7 @@ module.exports = class ThingpediaClientBrowser {
     _simpleRequest(to, noAppend) {
         if (!noAppend) {
             to += '?locale=' + this.locale;
+            to += '&thingtalk_version=' + ThingTalk.version;
             if (this.developerKey)
                 to += '&developer_key=' + this.developerKey;
         }
@@ -45,27 +36,26 @@ module.exports = class ThingpediaClientBrowser {
     }
 
     getDeviceCode(id) {
-        var to = THINGPEDIA_URL + '/api/code/devices/' + id;
+        var to = THINGPEDIA_URL + '/api/v3/devices/code/' + id;
         return this._simpleRequest(to);
     }
 
-    getSchemas(kinds) {
-        var to = THINGPEDIA_URL + '/api/schema/' + kinds.join(',');
-        to += '?version=2&locale=' + this.locale;
+    getSchemas(kinds, withMetadata) {
+        var to = THINGPEDIA_URL + '/api/v3/schema/' + kinds.join(',');
+        to += '?locale=' + this.locale;
+        to += '&thingtalk_version=' + ThingTalk.version;
+        if (withMetadata)
+            to += '&meta=1';
         if (this.developerKey)
             to += '&developer_key=' + this.developerKey;
         return this._simpleRequest(to, true);
     }
 
-    getMetas(kinds) {
-        var to = THINGPEDIA_URL + '/api/schema-metadata/' + kinds.join(',');
-        return this._simpleRequest(to);
-    }
-
     getDeviceFactories(klass) {
-        var to = THINGPEDIA_URL + '/api/devices';
+        var to = THINGPEDIA_URL + '/api/v3/devices/setup';
         if (klass) {
             to += '?class=' + klass;
+            to += '&thingtalk_version=' + ThingTalk.version;
             if (this.developerKey)
                 to += '&developer_key=' + this.developerKey;
             return this._simpleRequest(to, true);
@@ -75,21 +65,23 @@ module.exports = class ThingpediaClientBrowser {
     }
 
     getDeviceSetup(kinds) {
-        var to = THINGPEDIA_URL + '/api/devices/setup/' + kinds.join(',');
+        var to = THINGPEDIA_URL + '/api/v3/devices/setup/' + kinds.join(',');
         return this._simpleRequest(to);
     }
 
     getExamplesByKey(key, isBase) {
-        var to = THINGPEDIA_URL + '/api/examples?locale=' + this.locale + '&key=' + encodeURIComponent(key)
+        var to = THINGPEDIA_URL + '/api/v3/examples/search?locale=' + this.locale + '&q=' + encodeURIComponent(key)
             + '&base=' + (isBase ? '1' : '0');
+        to += '&thingtalk_version=' + ThingTalk.version;
         if (this.developerKey)
             to += '&developer_key=' + this.developerKey;
         return this._simpleRequest(to, true);
     }
 
     getExamplesByKinds(kinds, isBase) {
-        var to = THINGPEDIA_URL + '/api/examples/by-kinds/' + kinds.join(',') + '?locale=' + this.locale
+        var to = THINGPEDIA_URL + '/api/v3/examples/by-kinds/' + kinds.join(',') + '?locale=' + this.locale
             + '&base=' + (isBase ? '1' : '0');
+        to += '&thingtalk_version=' + ThingTalk.version;
         if (this.developerKey)
             to += '&developer_key=' + this.developerKey;
         return this._simpleRequest(to, true);

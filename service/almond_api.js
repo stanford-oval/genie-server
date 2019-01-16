@@ -12,20 +12,16 @@
 const ThingTalk = require('thingtalk');
 const Ast = ThingTalk.Ast;
 const Describe = ThingTalk.Describe;
-const Type = ThingTalk.Type;
-const Generate = ThingTalk.Generate;
-const { ParserClient, Intent } = require('almond-dialog-agent');
 const Formatter = ThingTalk.Formatter;
+const { ParserClient } = require('almond-dialog-agent');
 
 const Config = require('../config');
-
-const FACTORING_IMPLEMENTED = false; // FIXME
 
 module.exports = class AlmondApi {
     constructor(engine) {
         this._engine = engine;
-        this._parser = new ParserClient(undefined, engine.platform.locale, engine.platform.getSharedPreferences());
-        this._formatter = new Formatter(engine.platform.locale, engine.platform.timezone, engine.schemas, engine.platform.getCapability('gettext'));
+        this._parser = new ParserClient(Config.SEMPRE_URL, engine.platform.locale, engine.platform.getSharedPreferences());
+        this._formatter = new Formatter(this._engine.platform.locale, this._engine.platform.timezone, this._engine.schemas);
 
         this._outputs = new Set;
     }
@@ -54,7 +50,7 @@ module.exports = class AlmondApi {
     }
 
     notify(appId, icon, outputType, outputValue) {
-        return this._formatter.formatForType(outputType, outputValue, 'messages').then((messages) => {
+        return Promise.resolve(this._formatter.formatForType(outputType, outputValue, 'messages')).then((messages) => {
             this._sendWs({ result: {
                 appId: appId,
                 icon: icon ? Config.THINGPEDIA_URL + '/api/devices/icon/' + icon : null,
@@ -73,35 +69,9 @@ module.exports = class AlmondApi {
         }});
     }
 
-    _findPrimaryIdentity() {
-        if (!this._engine.messaging.isAvailable)
-            return null;
-        let identities = this._engine.messaging.getIdentities();
-        var omletId = null;
-        var email = null;
-        var phone = null;
-        for (var i = 0; i < identities.length; i++) {
-            var id = identities[i];
-            if (id.startsWith('omlet:') && omletId === null)
-                omletId = id;
-            else if (id.startsWith('email:') && email === null)
-                email = id;
-            else if (id.startsWith('phone:') && phone === null)
-                phone = id;
-        }
-        if (phone !== null)
-            return phone;
-        if (email !== null)
-            return email;
-        if (omletId !== null)
-            return omletId;
-        return null;
-    }
-
     createApp(data) {
         let code = data.code;
         let locations = data.locations || {};
-        let devices = data.devices || {};
 
         let sharedPrefs = this._engine.platform.getSharedPreferences();
         for (let loc in locations) {
@@ -114,153 +84,99 @@ module.exports = class AlmondApi {
             return { error: 'Missing program' };
 
         return ThingTalk.Grammar.parseAndTypecheck(code, this._engine.schemas, true).then((program) => {
-            let i = 0;
-            return Promise.all(Array.from(Generate.iteratePrimitives(program)).map(([,prim]) => {
+            if (program.principal !== null)
+                throw new TypeError(`Cannot use this API to send remote programs`);
+
+            for (let [,prim] of program.iteratePrimitives()) {
                 if (prim.selector.isBuiltin)
+                    continue;
+                if (prim.selector.id === null || typeof prim.selector.id !== 'string')
+                    throw new TypeError(`must select a device for primitive ${prim.selector.kind}.${prim.channel}`);
+            }
+            for (let [, slot, ,] of program.iterateSlots()) {
+                if (slot instanceof Ast.Selector)
+                    continue;
+                if (slot.value.isUndefined || (slot.value.isVarRef && slot.value.name.startsWith('__const_')))
+                    throw new TypeError(`cannot have slots in this API, parse and modify the program instead`);
+
+                if (slot.value.isLocation && slot.value.value.isRelative) {
+                    let relativeTag = slot.value.value.relativeTag;
+                    if (relativeTag === 'current_location')
+                        slot.value = locations['current_location'] ? Ast.Value.fromJSON(ThingTalk.Type.Location, locations['current_location']) : null;
+                    else
+                        slot.value = this._resolveUserContext('$context.location.' + relativeTag);
+                    if (!slot.value)
+                        throw new TypeError(`missing location ${relativeTag}`);
+                }
+            }
+
+            const gettext = this._engine.platform.getCapability('gettext');
+            const description = Describe.describeProgram(gettext, program);
+            const name = Describe.getProgramName(gettext, program);
+
+            let icon = null;
+            for (let [, prim] of program.iteratePrimitives()) {
+                if (prim.selector.isBuiltin)
+                    continue;
+                if (prim.selector.kind !== 'org.thingpedia.builtin.thingengine.remote' &&
+                    !prim.selector.kind.startsWith('__dyn')
+                    && prim.selector.id) {
+                    let device = this._engine.devices.getDevice(prim.selector.id);
+                    icon = device ? device.kind : null;
+                    if (icon) break;
+                }
+            }
+
+            let appMeta = {
+                $icon: icon
+            };
+
+            let code = program.prettyprint();
+            return this._engine.apps.loadOneApp(code, appMeta, undefined, undefined,
+                                                name, description, true);
+        }).then((app) => {
+            // drain the queue of results from the app
+            let results = [];
+            let errors = [];
+
+            function loop() {
+                if (!app)
                     return Promise.resolve();
-
-                const primId = `p_${i}`;
-                i++;
-
-                if (prim.selector.principal) {
-                    let messaging = this._engine.messaging;
-                    let principal = prim.selector.principal;
-                    if (!principal.isEntity || principal.type !== 'tt:contact')
-                        throw new TypeError(`invalid principal ${principal}`);
-                    if (principal.value.startsWith(messaging.type + '-account:'))
+                return app.mainOutput.next().then(({ item: next, resolve, reject }) => {
+                    if (next.isDone) {
+                        resolve();
                         return Promise.resolve();
-                    return messaging.getAccountForIdentity(principal.value).then((account) => {
-                        if (account) {
-                            let accountPrincipal = messaging.type + '-account:' + account;
-                            console.log('Converted ' + principal.value + ' to ' + accountPrincipal);
-                            prim.selector.principal = Ast.Value.Entity(accountPrincipal, 'tt:contact', principal.display);
-                        }
-                    });
-                } else {
-                    if (prim.selector.id === null)
-                        prim.selector.id = devices[primId];
-                    if (typeof prim.selector.id !== 'string')
-                        throw new TypeError(`must select a device for primitive ${primId}`);
-                    return Promise.resolve();
-                }
-            })).then(() => {
-                return Promise.all(Array.from(Generate.iterateSlots(program)).map(([schema, slot, prim, scope]) => {
-                    if (slot instanceof Ast.Selector)
-                        return;
-                    if (slot.value.isUndefined)
-                        throw new TypeError(`cannot have slots in this API, call /parse first`);
-
-                    if (slot.value.isLocation && slot.value.value.isRelative) {
-                        let relativeTag = slot.value.value.relativeTag;
-                        if (relativeTag === 'current_location')
-                            slot.value = locations['current_location'] ? Ast.Value.fromJSON(ThingTalk.Type.Location, locations['current_location']) : null;
-                        else
-                            slot.value = this._resolveUserContext('$context.location.' + relativeTag);
-                        if (!slot.value)
-                            throw new TypeError(`missing location ${relativeTag}`);
-                    }
-                }));
-            }).then(() => {
-                const gettext = this._engine.platform.getCapability('gettext');
-                const description = Describe.describeProgram(gettext, program);
-                const name = Describe.getProgramName(gettext, program);
-
-                let icon = null;
-                for (let [, prim] of Generate.iteratePrimitives(program)) {
-                    if (prim.selector.isBuiltin)
-                        continue;
-                    if (prim.selector.kind !== 'org.thingpedia.builtin.thingengine.remote' &&
-                        !prim.selector.kind.startsWith('__dyn')
-                        && prim.selector.id) {
-                        let device = this._engine.devices.getDevice(prim.selector.id);
-                        icon = device ? device.kind : null;
-                        if (icon) break;
-                    }
-                }
-
-                let appMeta = {
-                    $icon: icon
-                };
-
-                let newprogram, sendprograms;
-                if (FACTORING_IMPLEMENTED) {
-                    [newprogram, sendprograms] = Generate.factorProgram(this._engine.messaging, program);
-                } else {
-                    newprogram = program;
-                    sendprograms = [];
-                }
-                if (sendprograms.length > 0 && !this._engine.messaging.isAvailable)
-                    throw new TypeError('Must configure a Matrix account before using remote programs');
-
-                let app;
-                if (newprogram !== null) {
-                    let code = Ast.prettyprint(newprogram);
-                    app = this._engine.apps.loadOneApp(code, appMeta, undefined, undefined,
-                                                       name, description, true);
-                } else {
-                    app = Promise.resolve(null);
-                }
-
-                return app.then((app) => {
-                    let identity = this._findPrimaryIdentity();
-                    for (let [principal, program] of sendprograms) {
-                        //console.log('program: ' + Ast.prettyprint(program));
-                        this._engine.remote.installProgramRemote(principal.value, identity, program).catch((e) => {
-                            if (app) {
-                                app.reportError(e);
-                                // destroy the app if the user denied it
-                                this._engine.apps.removeApp(app);
-                            } else {
-                                console.log('Ignored error from permission control request: ' + e.code + ': ' + e.message);
-                                console.log(e.stack);
-                            }
-                        });
                     }
 
-                    // drain the queue of results from the app
-                    let results = [];
-                    let errors = [];
-
-                    function loop() {
-                        if (!app)
-                            return Promise.resolve();
-                        return app.mainOutput.next().then(({ item: next, resolve, reject }) => {
-                            if (next.isDone) {
-                                resolve();
-                                return Promise.resolve();
-                            }
-
-                            if (next.isNotification) {
-                                return this._formatter.formatForType(next.outputType, next.outputValue, 'messages').then((messages) => {
-                                    results.push({ raw: next.outputValue, type: next.outputType, formatted: messages });
-                                    resolve();
-                                    return loop.call(this);
-                                }).catch((e) => {
-                                    reject(e);
-                                    return loop.call(this);
-                                });
-                            } else if (next.isError) {
-                                errors.push(next.error);
-                            } else if (next.isQuestion) {
-                                let e = new Error('User cancelled');
-                                e.code = 'ECANCELLED';
-                                reject(e);
-                            }
+                    if (next.isNotification) {
+                        return Promise.resolve(this._formatter.formatForType(next.outputType, next.outputValue, 'messages')).then((messages) => {
+                            results.push({ raw: next.outputValue, type: next.outputType, formatted: messages });
                             resolve();
                             return loop.call(this);
+                        }).catch((e) => {
+                            reject(e);
+                            return loop.call(this);
                         });
+                    } else if (next.isError) {
+                        errors.push(next.error);
+                    } else if (next.isQuestion) {
+                        let e = new Error('User cancelled');
+                        e.code = 'ECANCELLED';
+                        reject(e);
                     }
-
-                    return loop.call(this).then(() => {
-                        return {
-                            uniqueId: app.uniqueId,
-                            description: app.description,
-                            code: app.code,
-                            icon: Config.THINGPEDIA_URL + '/api/devices/icon/' + app.icon,
-                            results, errors
-                        };
-                    });
+                    resolve();
+                    return loop.call(this);
                 });
+            }
+
+            return loop.call(this).then(() => {
+                return {
+                    uniqueId: app.uniqueId,
+                    description: app.description,
+                    code: app.code,
+                    icon: app.icon ? Config.THINGPEDIA_URL + '/api/devices/icon/' + app.icon : null,
+                    results, errors
+                };
             });
         }).catch((e) => {
             console.error(e.stack);
@@ -310,19 +226,9 @@ module.exports = class AlmondApi {
                 return this._engine.devices.loadOneDevice({ kind: factory.kind }, true).then((device) => {
                     return [device, null];
                 });
-            } else if (factory.type === 'link' || factory.type === 'oauth2') {
-                let copy = {};
-                copy.factoryType = 'link';
-                copy.name = factory.text;
-                copy.kind = factory.kind;
-                copy.href = factory.type === 'link' ? factory.href : '/me/devices/oauth2/' + factory.kind;
-                return [null, copy];
             } else {
                 let copy = {};
-                copy.factoryType = 'other';
-                copy.kind = kind;
-                copy.fields = factory.fields;
-                copy.choices = factory.choices;
+                Object.assign(copy, factory);
                 return [null, copy];
             }
         });
@@ -376,26 +282,6 @@ module.exports = class AlmondApi {
         }
     }
 
-    _choosePrincipal(prim, primId) {
-        let principal = prim.selector.principal;
-        if (principal.type === 'tt:contact_name')
-            return true;
-
-        let messaging = this._engine.messaging;
-        if (!messaging.isAvailable)
-            return false;
-        if (principal.value.startsWith(messaging.type + '-account:'))
-            return true;
-        return messaging.getAccountForIdentity(principal.value).then((account) => {
-            if (account) {
-                let accountPrincipal = messaging.type + '-account:' + account;
-                console.log('Converted ' + principal.value + ' to ' + accountPrincipal);
-                prim.selector.principal = Ast.Value.Entity(accountPrincipal, 'tt:contact', principal.display);
-            }
-            return true;
-        });
-    }
-
     _resolveUserContext(variable) {
         let sharedPrefs = this._engine.platform.getSharedPreferences();
 
@@ -406,7 +292,7 @@ module.exports = class AlmondApi {
             case '$context.location.work': {
                 let value = sharedPrefs.get('context-' + variable);
                 if (value !== undefined)
-                    return Ast.Value.fromJSON(Type.Location, value);
+                    return Ast.Value.fromJSON(ThingTalk.Type.Location, value);
                 else
                     return null;
             }
@@ -416,30 +302,14 @@ module.exports = class AlmondApi {
     }
 
     _processPrimitives(program, primMap, result) {
-        let primitives = Array.from(Generate.iteratePrimitives(program));
+        let primitives = Array.from(program.iteratePrimitives());
         return Promise.all(primitives.map(([, prim]) => {
             if (prim.selector.isBuiltin)
                 return true;
             const primId = `p_${primMap.size}`;
-            result.primitives[primId] = prim.selector.kind + ':' + prim.channel;
             primMap.set(prim, primId);
 
-            if (prim.selector.principal !== null) {
-                return this._choosePrincipal(prim, primId);
-            } else {
-                return this._chooseDevice(prim.selector, primId, result.devices).then((ok) => {
-                    if (!ok)
-                        return false;
-                    if (result.icon === null &&
-                        prim.selector.kind !== 'org.thingpedia.builtin.thingengine.remote' &&
-                        !prim.selector.kind.startsWith('__dyn')
-                        && prim.selector.id) {
-                        let device = prim.selector.device;
-                        result.icon = Config.THINGPEDIA_URL + '/api/devices/icon/' + device.kind;
-                    }
-                    return true;
-                });
-            }
+            return this._chooseDevice(prim.selector, primId, result.devices);
         })).then((res) => {
             if (primMap.size === 1) {
                 let rule = program.rules[0];
@@ -455,16 +325,13 @@ module.exports = class AlmondApi {
         });
     }
 
-    _slotFill(program, primitives, entityValues, result) {
-        let slots = Array.from(Generate.iterateSlots(program));
-        return Promise.all((slots.map(([schema, slot, prim, scope]) => {
+    _slotFill(program, result) {
+        for (const [, slot, ,] of program.iterateSlots()) {
             if (slot instanceof Ast.Selector)
-                return;
-            if (slot.value.isUndefined)
-                return;
-            if (slot.value.isEntity) {
-                entityValues.push(slot.value);
-            } else if (slot.value.isLocation && slot.value.value.isRelative) {
+                continue;
+            if (slot.value.isUndefined && slot.value.local)
+                continue;
+            if (slot.value.isLocation && slot.value.value.isRelative) {
                 let value = this._resolveUserContext('$context.location.' + slot.value.value.relativeTag);
                 if (value !== null) {
                     slot.value.value = value;
@@ -473,100 +340,38 @@ module.exports = class AlmondApi {
                     result.locations[slot.value.value.relativeTag] = false;
                 }
             }
-        })));
+        }
     }
 
-    _resolveContacts(contacts) {
-        if (!this._engine.messaging.isAvailable) {
-            return Promise.resolve(contacts.map(([contact, display]) => ({
-                contact: contact,
-                omletAccount: null,
-                omletName: null,
-                display: display,
-                profileUrl: 'https://openclipart.org/image/2400px/svg_to_png/202776/pawn.png',
-            })));
-        }
-        const messagingType = this._engine.messaging.type + '-account:';
-        return Promise.all(contacts.map(([contact, display]) => {
-            return Promise.resolve().then(() => {
-                if (contact.startsWith(messagingType))
-                    return contact.split(':')[1];
-                else
-                    return this._engine.messaging.getAccountForIdentity(contact);
-            }).then((account) => {
-                return this._engine.messaging.getUserByAccount(account);
-            }).then((user) => {
-                return Promise.resolve().then(() => {
-                    return this._engine.messaging.getBlobDownloadLink(user.thumbnail);
-                }).then((thumbnail) => ({
-                    contact: contact,
-                    omletAccount: user.account,
-                    omletName: user.name,
-                    display: display,
-                    profileUrl: thumbnail
-                })).catch((e) => ({
-                    contact: contact,
-                    omletAccount: user.account,
-                    omletName: user.name,
-                    display: display,
-                    profileUrl: 'https://openclipart.org/image/2400px/svg_to_png/202776/pawn.png'
-                }));
-            });
-        }));
+    _toProgram(code, entities) {
+        if (code[0] === 'bookkeeping')
+            return Promise.reject(new Error('Not a ThingTalk program'));
+        return Promise.resolve(ThingTalk.NNSyntax.fromNN(code, entities));
     }
 
     _processCandidate(candidate, analyzed) {
-        return Intent.parse({ code: candidate.code, entities: analyzed.entities }, this._engine.schemas, null, null, null).catch((e) => {
+        return this._toProgram(candidate.code, analyzed.entities).then((program) => program.typecheck(this._engine.schemas, true)).catch((e) => {
             console.error('Failed to analyze ' + candidate.code.join(' ') + ' : ' + e.message);
             return null;
-        }).then((intent) => {
-            if (!intent || !intent.isProgram)
+        }).then((program) => {
+            if (!program || !program.isProgram)
                 return null;
-
-            const program = intent.program;
-
-            const gettext = this._engine.platform.getCapability('gettext');
-            const description = Describe.describeProgram(gettext, program);
 
             const primitives = new Map;
 
             const result = {
                 score: candidate.score,
                 code: null,
-                description: description,
-                icon: null,
                 commandClass: 'rule',
-                primitives: {},
                 devices: {},
                 locations: {},
-                contacts: []
             };
-            const entityValues = [];
-
             return this._processPrimitives(program, primitives, result).then((ok) => {
                 if (!ok)
-                    return false;
-
-                return this._slotFill(program, primitives, entityValues, result);
-            }).then((ok) => {
-                if (!ok)
                     return null;
-
-                let contacts = new Map;
-                for (let entity of entityValues) {
-                    if (entity.type === 'tt:contact')
-                        contacts.set(entity.value, entity.display);
-                    else if (entity.type === 'tt:email_address')
-                        contacts.set('email:' + entity.value, entity.display);
-                    else if (entity.type === 'tt:phone_number')
-                        contacts.set('phone:' + entity.value, entity.display);
-                }
-
-                return this._resolveContacts(Array.from(contacts.entries()), result).then((contacts) => {
-                    result.contacts = contacts;
-                    result.code = Ast.prettyprint(program, true);
-                    return result;
-                });
+                this._slotFill(program, primitives, result);
+                result.code = program.prettyprint(true);
+                return result;
             });
         });
     }
