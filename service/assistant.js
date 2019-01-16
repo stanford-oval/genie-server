@@ -14,7 +14,7 @@ const events = require('events');
 const posix = require('posix');
 const child_process = require('child_process');
 
-const Almond = require('almond');
+const Almond = require('almond-dialog-agent');
 const SpeechHandler = require('./speech_handler');
 const AlmondApi = require('./almond_api');
 
