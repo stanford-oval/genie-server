@@ -1,5 +1,6 @@
 "use strict";
 $(function() {
+    var thingpediaUrl = document.body.dataset.thingpediaUrl;
     var url = (location.protocol === 'https' ? 'wss' : 'ws') + '://' + location.host
         + '/api/conversation';
     console.log(url);
@@ -19,7 +20,7 @@ $(function() {
     function almondMessage(icon) {
         var msg = $('<span>').addClass('message-container from-almond');
         icon = icon || 'org.thingpedia.builtin.thingengine.builtin';
-        var src = 'https://crowdie.stanford.edu/thingpedia/api/devices/icon/' + icon;
+        var src = thingpediaUrl + '/api/devices/icon/' + icon;
         msg.append($('<img>').addClass('icon').attr('src', src));
         container.append(msg);
         return msg;

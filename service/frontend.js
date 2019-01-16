@@ -93,6 +93,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
                 res.locals.user = { isConfigured: user.isConfigured() };
             }
 
+            res.locals.Config = Config;
             res.locals.THINGPEDIA_URL = Config.THINGPEDIA_URL;
             res.locals.developerKey = (this._app.engine ? this._app.engine.platform.getSharedPreferences().get('developer-key') : '') || '';
 
