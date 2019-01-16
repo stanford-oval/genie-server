@@ -7,7 +7,7 @@
 // See COPYING for details
 "use strict";
 
-const PulseAudio = require('pulseaudio');
+const PulseAudio = require('pulseaudio2');
 
 const SpeechRecognizer = require('../service/speech_recognizer');
 const readline = require('readline');

@@ -1,6 +1,6 @@
 
 const fs = require('fs');
-const PulseAudio = require('pulseaudio');
+const PulseAudio = require('pulseaudio2');
 
 function main() {
     let pulseCtx = new PulseAudio();

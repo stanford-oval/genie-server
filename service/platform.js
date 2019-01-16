@@ -18,7 +18,7 @@ const path = require('path');
 const child_process = require('child_process');
 const Gettext = require('node-gettext');
 const DBus = require('dbus-native');
-const PulseAudio = require('pulseaudio');
+const PulseAudio = require('pulseaudio2');
 
 const prefs = require('thingengine-core/lib/util/prefs');
 
