@@ -106,4 +106,4 @@ module.exports = class SpeechHandler extends events.EventEmitter {
         this._stream = null;
         this._recognizer.close();
     }
-}
+};

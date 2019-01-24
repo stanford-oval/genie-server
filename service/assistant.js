@@ -15,7 +15,12 @@ const posix = require('posix');
 const child_process = require('child_process');
 
 const Almond = require('almond-dialog-agent');
-const SpeechHandler = require('./speech_handler');
+let SpeechHandler;
+try {
+    SpeechHandler = require('./speech_handler');
+} catch(e) {
+    SpeechHandler = null;
+}
 const AlmondApi = require('./almond_api');
 
 const Config = require('../config');
@@ -51,7 +56,8 @@ class MainConversationDelegate {
     }
 
     clearSpeechQueue() {
-        this._speechSynth.clearQueue();
+        if (this._speechSynth)
+            this._speechSynth.clearQueue();
     }
     setConversation(conversation) {
         this._conversation = conversation;
@@ -93,7 +99,8 @@ class MainConversationDelegate {
     }
 
     send(text, icon) {
-        this._speechSynth.say(text);
+        if (this._speechSynth)
+            this._speechSynth.say(text);
         this._addMessage(MessageType.TEXT, (out) => out.send(text, icon));
     }
 
@@ -102,7 +109,8 @@ class MainConversationDelegate {
     }
 
     sendChoice(idx, what, title, text) {
-        this._speechSynth.say(title);
+        if (this._speechSynth)
+            this._speechSynth.say(title);
         this._addMessage(MessageType.CHOICE, (out) => out.sendChoice(idx, what, title, text));
     }
 
@@ -111,7 +119,8 @@ class MainConversationDelegate {
     }
 
     sendButton(title, json) {
-        this._speechSynth.say(title);
+        if (this._speechSynth)
+            this._speechSynth.say(title);
         this._addMessage(MessageType.BUTTON, (out) => out.sendButton(title, json));
     }
 
@@ -120,7 +129,8 @@ class MainConversationDelegate {
     }
 
     sendRDL(rdl, icon) {
-        this._speechSynth.say(rdl.displayTitle);
+        if (this._speechSynth)
+            this._speechSynth.say(rdl.displayTitle);
         this._addMessage(MessageType.RDL, (out) => out.sendRDL(rdl, icon));
     }
 }
@@ -191,27 +201,32 @@ module.exports = class Assistant extends events.EventEmitter {
         this._engine = engine;
         this._api = new AlmondApi(this._engine);
 
-        this._speechHandler = new SpeechHandler(engine.platform);
+        if (SpeechHandler && platform.hasCapability('pulseaudio'))
+            this._speechHandler = new SpeechHandler(engine.platform);
+        else
+            this._speechHandler = null;
         this._speechSynth = platform.getCapability('text-to-speech');
         this._mainConversation = new MainConversation(engine, this._speechHandler, {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true
         });
 
-        this._speechHandler.on('hypothesis', (hypothesis) => {
-            this._api.sendHypothesis(hypothesis);
-        });
-        this._speechHandler.on('hotword', (hotword) => {
-            child_process.spawn('xset', ['dpms', 'force', 'on']);
-            child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
-        });
-        this._speechHandler.on('utterance', (utterance) => {
-            this._api.sendCommand(utterance);
-        });
-        this._speechHandler.on('error', (error) => {
-            console.log('Error in speech recognition: ' + error.message);
-            this._speechSynth.say("Sorry, I had an error understanding your speech: " + error.message);
-        });
+        if (this._speechHandler) {
+            this._speechHandler.on('hypothesis', (hypothesis) => {
+                this._api.sendHypothesis(hypothesis);
+            });
+            this._speechHandler.on('hotword', (hotword) => {
+                child_process.spawn('xset', ['dpms', 'force', 'on']);
+                child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
+            });
+            this._speechHandler.on('utterance', (utterance) => {
+                this._api.sendCommand(utterance);
+            });
+            this._speechHandler.on('error', (error) => {
+                console.log('Error in speech recognition: ' + error.message);
+                this._speechSynth.say("Sorry, I had an error understanding your speech: " + error.message);
+            });
+        }
 
         this._conversations = {
             api: this._api,
@@ -235,15 +250,17 @@ module.exports = class Assistant extends events.EventEmitter {
 
     start() {
         return Promise.all([
-            this._speechSynth.start(),
-            this._speechHandler.start(),
+            this._speechSynth ? this._speechSynth.start() : Promise.resolve(),
+            this._speechHandler ? this._speechHandler.start() : Promise.resolve(),
             this._mainConversation.start()
         ]);
     }
 
     stop() {
-        this._speechSynth.stop();
-        this._speechHandler.stop();
+        if (this._speechSynth)
+            this._speechSynth.stop();
+        if (this._speechHandler)
+            this._speechHandler.stop();
     }
 
     notifyAll(...data) {

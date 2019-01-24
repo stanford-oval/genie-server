@@ -7,6 +7,7 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 //
 // See COPYING for details
+"use strict";
 
 // Server platform implementation of Bluetooth API, using BlueZ
 // over DBus

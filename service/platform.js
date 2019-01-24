@@ -18,9 +18,23 @@ const path = require('path');
 const child_process = require('child_process');
 const Gettext = require('node-gettext');
 const DBus = require('dbus-native');
-const PulseAudio = require('pulseaudio2');
+let PulseAudio;
+try {
+    PulseAudio = require('pulseaudio2');
+} catch(e) {
+    PulseAudio = null;
+}
 
 const prefs = require('thingengine-core/lib/util/prefs');
+
+const BluezBluetooth = require('./bluez');
+let SpeechSynthesizer;
+try {
+    SpeechSynthesizer = require('./speech_synthesizer');
+} catch(e) {
+    SpeechSynthesizer = null;
+}
+const MediaPlayer = require('./media_player');
 
 var _unzipApi = {
     unzip(zipPath, dir) {
@@ -65,9 +79,6 @@ const _contentApi = {
 const _contactApi = JavaAPI.makeJavaAPI('Contacts', ['lookup'], [], []);
 const _telephoneApi = JavaAPI.makeJavaAPI('Telephone', ['call', 'callEmergency'], [], []);
 */
-const BluezBluetooth = require('./bluez');
-const SpeechSynthesizer = require('./speech_synthesizer');
-const MediaPlayer = require('./media_player');
 
 const _contentApi = {
     getStream(url) {
@@ -133,10 +144,19 @@ module.exports = {
         this._dbusSession = null;//DBus.sessionBus();
         this._dbusSystem = DBus.systemBus();
         this._btApi = null;
-        this._pulse = new PulseAudio({
-            client: "thingengine-platform-server"
-        });
-        this._tts = new SpeechSynthesizer(this._pulse, path.resolve(module.filename, '../../data/cmu_us_slt.flitevox'));
+        if (PulseAudio) {
+            this._pulse = new PulseAudio({
+                client: "thingengine-platform-server"
+            });
+            if (SpeechSynthesizer)
+                this._tts = new SpeechSynthesizer(this._pulse, path.resolve(module.filename, '../../data/cmu_us_slt.flitevox'));
+            else
+                this._tts = null;
+        } else {
+            this._pulse = null;
+            this._tts = null;
+        }
+        
         this._media = new MediaPlayer();
 
         this._sqliteKey = null;
@@ -196,12 +216,14 @@ module.exports = {
         case 'dbus-system':
             return true;
         case 'text-to-speech':
-            return true;
+            return this._tts !== null;
 
         case 'bluetooth':
-        case 'pulseaudio':
         case 'media-player':
             return true;
+
+        case'pulseaudio':
+            return this._pulse !== null;
 /*
         // We can use the phone capabilities
         case 'notify':
