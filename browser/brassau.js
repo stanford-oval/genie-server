@@ -972,6 +972,7 @@ $(function() {
                 'String': 15,
                 'Enum': 15,
                 'Measure': 8,
+                'Currency': 8,
                 'Number': 1,
                 'Entity(sportradar:eu_soccer_team)': -20,
                 'Entity(sportradar:us_soccer_team)': -20,
@@ -1040,6 +1041,12 @@ $(function() {
                             unit = 'cm';
                         }
                         return `${value.toFixed(2)} ${unit}`;
+                    },
+                    show: true,
+                },
+                'Currency': {
+                    display: value => {
+                        return (new ThingTalk.Builtin.Currency(value.value, value.code)).toLocaleString();
                     },
                     show: true,
                 },
@@ -1262,6 +1269,7 @@ frameborder="0" allowFullScreen></iframe>`,
                 'Entity(tt:phone_number)': 12,
                 'Entity': 11.5,
                 'Measure': 11,
+                'Currency': 11,
                 'String': 10,
                 'Date': 9,
                 'Location': 5,
