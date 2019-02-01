@@ -86,4 +86,12 @@ module.exports = class ThingpediaClientBrowser {
             to += '&developer_key=' + this.developerKey;
         return this._simpleRequest(to, true);
     }
+
+    lookupEntity(entityType, searchTerm) {
+        var to = THINGPEDIA_URL + '/api/v3/entities/lookup/' + encodeURIComponent(entityType) +
+            '?q=' + encodeURIComponent(searchTerm) + '&locale=' + this.locale + '&thingtalk_version=' + ThingTalk.version;
+        if (this.developerKey)
+            to += '&developer_key=' + this.developerKey;
+        return this._simpleRequest(to, true);
+    }
 };

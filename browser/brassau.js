@@ -570,7 +570,7 @@ $(function() {
     }
 
     if (RUN_TEST_CASES) {
-        tileStorageManager.clearAll()
+        tileStorageManager.clearAll();
         let testCases = require('./test_cases.json');
         let slice = 0;
         if (params.has('slice')) {
@@ -613,6 +613,74 @@ $(function() {
         console.error(err.stack);
     });
 
+    function tokensEquals(one, two) {
+        if (one === two)
+            return true;
+        // FIXME stemming
+        //if (Stemmer.stem(one).equals(Stemmer.stem(two)))
+        //    return true;
+        if (one === 'cardinals' && two === 'cardinal')
+            return true;
+        if (one === 'cardinal' && two === 'cardinals')
+            return true;
+        if (one === 'yourself' && two === 'yourselves')
+            return true;
+        if (one === 'yourselves' && two === 'yourself')
+            return true;
+        return false;
+    }
+
+    function getBestEntityMatch(searchTerm, candidates) {
+        let best = undefined, bestScore = undefined;
+
+        let searchTermTokens = searchTerm.split(' ');
+
+        for (let cand of candidates) {
+            let score = 0;
+            if (cand.value === searchTerm)
+                score += 10;
+
+            let candTokens = cand.canonical.split(' ');
+
+            for (let candToken of candTokens) {
+                let found = false;
+                for (let token of searchTermTokens) {
+                    if (tokensEquals(token, candToken)) {
+                        score += 1;
+                        found = true;
+                    } else if (token === "la" && (candToken === "los" || candToken === "angeles")) {
+                        // FIXME is this needed? is it for "la lakers" vs "los angeles lakers"?
+                        score += 0.5;
+                        found = true;
+                    } else if (candToken.startsWith(token)) {
+                        score += 0.5;
+                    }
+                }
+                if (!found)
+                    score -= 0.1;
+            }
+
+            //console.log(`candidate ${cand.name} score ${score}`);
+            if (bestScore === undefined || score > bestScore) {
+                bestScore = score;
+                best = cand;
+            }
+        }
+
+        return best;
+    }
+
+    async function resolveEntity(entity) {
+        const { data: candidates } = await thingpediaClient.lookupEntity(entity.type, entity.display);
+        if (candidates.length === 0)
+            return;
+
+        const best = getBestEntityMatch(entity.display, candidates);
+        //console.log('resolved entity ' + entityDisplay + ' of type ' + entityType + ' to ' + best.value);
+        entity.value = best.value;
+        entity.display = best.name;
+    }
+
     function createTile(data, options) {
         const candidate = data.json.candidates[0];
         const code = candidate.code;
@@ -620,7 +688,7 @@ $(function() {
         console.log('data', data);
         console.log('code', code);
 
-        return ThingTalk.Grammar.parseAndTypecheck(code, schemaRetriever, true).then((program) => {
+        return ThingTalk.Grammar.parseAndTypecheck(code, schemaRetriever, true).then(async (program) => {
             if (program.rules.length > 1 || program.declarations.length > 0)
                 throw new Error('Sorry, I cannot handle programs with more than one rule');
 
@@ -657,10 +725,17 @@ $(function() {
 
             let in_params = [];
             for (let [,slot,prim,] of program.iterateSlots()) {
+                if (slot instanceof ThingTalk.Ast.Selector)
+                    continue;
+                if (slot.value.isEntity && slot.value.value === null)
+                    await resolveEntity(slot.value);
                 if (!(slot instanceof ThingTalk.Ast.InputParam))
                     continue;
                 if (slot.value.isVarRef || slot.value.isEvent)
                     continue;
+
+
+
                 in_params.push([prim_map.get(prim), slot]);
             }
             //let out_params = display_prim.out_params;
