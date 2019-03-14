@@ -10,6 +10,7 @@
 "use strict";
 
 module.exports.ENABLE_DB_ENCRYPTION = false;
+module.exports.ENABLE_SPEECH = true;
 module.exports.SEMPRE_URL = 'https://almond-nl.stanford.edu';
 module.exports.THINGPEDIA_URL = 'https://thingpedia.stanford.edu/thingpedia';
 module.exports.MS_SPEECH_RECOGNITION_PRIMARY_KEY = 'de1f02817356494483ba502b2ce95f6f';

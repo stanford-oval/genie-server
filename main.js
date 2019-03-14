@@ -12,14 +12,15 @@
 const Q = require('q');
 Q.longStackSupport = true;
 
-const Engine = require('thingengine-core');
-const WebFrontend = require('./service/frontend');
-const AssistantDispatcher = require('./service/assistant');
-
+// load and assign config first
 const Config = require('./config');
 try {
     Object.assign(Config, require('./secret_config'));
 } catch(e) { /* ignore errors */ }
+
+const Engine = require('thingengine-core');
+const WebFrontend = require('./service/frontend');
+const AssistantDispatcher = require('./service/assistant');
 
 let _waitReady;
 let _stopped = false;

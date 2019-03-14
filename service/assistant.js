@@ -15,15 +15,17 @@ const posix = require('posix');
 const child_process = require('child_process');
 
 const Almond = require('almond-dialog-agent');
-let SpeechHandler;
+const Config = require('../config');
+
+let SpeechHandler = null;
 try {
-    SpeechHandler = require('./speech_handler');
+    if (Config.ENABLE_SPEECH)
+        SpeechHandler = require('./speech_handler');
 } catch(e) {
-    SpeechHandler = null;
+    // ignore if speech handler is not available
 }
 const AlmondApi = require('./almond_api');
 
-const Config = require('../config');
 
 class LocalUser {
     constructor() {
@@ -48,7 +50,7 @@ const MessageType = {
 
 class MainConversationDelegate {
     constructor(platform, speechHandler) {
-        this._speechSynth = platform.getCapability('text-to-speech');
+        this._speechSynth = Config.ENABLE_SPEECH ? platform.getCapability('text-to-speech') : null;
         this._outputs = new Set;
 
         this._speechHandler = speechHandler;
