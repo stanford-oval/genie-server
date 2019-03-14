@@ -17,6 +17,9 @@ const WebFrontend = require('./service/frontend');
 const AssistantDispatcher = require('./service/assistant');
 
 const Config = require('./config');
+try {
+    Object.assign(Config, require('./secret_config'));
+} catch(e) { /* ignore errors */ }
 
 let _waitReady;
 let _stopped = false;

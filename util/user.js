@@ -12,6 +12,9 @@
 const Q = require('q');
 const crypto = require('crypto');
 const BaseStrategy = require('passport-strategy');
+const BearerStrategy = require('passport-http-bearer').Strategy;
+
+const Config = require('../config');
 
 // a model of user based on sharedpreferences
 const model = {
@@ -74,7 +77,16 @@ function initializePassport() {
         done(null, user);
     });
 
+    passport.use(new BearerStrategy((accessToken, done) => {
+        const user = model.get();
+        if (Config.API_TOKEN && Config.API_TOKEN === accessToken)
+            done(null, user, { apiUser: true });
+        else
+            done(null, false);
+    }));
+
     passport.use(new HostBasedStrategy());
+
 
     passport.use(new LocalStrategy((username, password, done) => {
         Q.try(() => {

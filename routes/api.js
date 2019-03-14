@@ -12,6 +12,7 @@
 const Q = require('q');
 const express = require('express');
 const crypto = require('crypto');
+const passport = require('passport');
 
 const user = require('../util/user');
 
@@ -24,13 +25,18 @@ function makeRandom(bytes) {
 var router = express.Router();
 
 router.use('/', (req, res, next) => {
-    const compareTo = req.protocol + '://' + req.hostname + ':' + req.app.get('port');
-    if (req.headers.origin && req.headers.origin !== compareTo) {
-        res.status(403).send('Forbidden Cross Origin Request');
-        return;
-    }
+    if (typeof req.query.access_token === 'string' || (req.headers['authorization'] && req.headers['authorization'].startsWith('Bearer'))) {
+        res.set('Access-Control-Allow-Origin', '*');
+        passport.authenticate('bearer', { session: false })(req, res, next);
+    } else {
+        const compareTo = req.protocol + '://' + req.hostname + ':' + req.app.get('port');
+        if (req.headers.origin && req.headers.origin !== compareTo) {
+            res.status(403).send('Forbidden Cross Origin Request');
+            return;
+        }
 
-    next();
+        next();
+    }
 }, user.requireLogIn);
 
 router.get('/parse', (req, res, next) => {
