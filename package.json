@@ -7,6 +7,9 @@
     "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js",
     "update-friendhub": "browserify -t babelify ./browser/friendhub.js -o public/javascripts/friendhub.js"
   },
+  "resolutions": {
+    "thingtalk": "github:Stanford-Mobisocial-IoT-Lab/thingtalk#wip/more-multi-program-runtime"
+  },
   "dependencies": {
     "almond-dialog-agent": "^1.0.3",
     "babel-core": "^6.26.0",
@@ -34,16 +37,16 @@
     "q": "^1.5.0",
     "serve-favicon": "^2.4.3",
     "sqlite3": "^4.0.6",
-    "thingengine-core": "^1.0.2",
+    "thingengine-core": "github:Stanford-Mobisocial-IoT-Lab/thingengine-core#wip/new-runtime",
     "thingpedia": "^2.2.2",
     "thingpedia-discovery": "^1.0.0",
-    "thingtalk": "^1.1.1",
+    "thingtalk": "github:Stanford-Mobisocial-IoT-Lab/thingtalk#wip/more-multi-program-runtime",
     "uuid": "^3.1.0",
     "ws": "^3.0.0"
   },
   "optionalDependencies": {
-    "pulseaudio2": "^0.2.0",
     "node-mimic": "^1.0.0",
+    "pulseaudio2": "^0.2.0",
     "snowboy": "^1.2.0"
   },
   "devDependencies": {
