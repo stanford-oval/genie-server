@@ -24,6 +24,7 @@ try {
 } catch(e) {
     PulseAudio = null;
 }
+const CVC4Solver = require('smtlib').LocalCVC4Solver;
 
 const prefs = require('thingengine-core/lib/util/prefs');
 
@@ -256,6 +257,7 @@ module.exports = {
         case 'contacts':
         case 'content-api':
         case 'assistant':
+        case 'smt-solver':
             return true;
 
         case 'gettext':
@@ -294,6 +296,8 @@ module.exports = {
             return _contentApi;
         case 'contacts':
             return this._contacts;
+        case 'smt-solver':
+            return CVC4Solver;
 
 /*
         case 'notify-api':
