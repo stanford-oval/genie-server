@@ -1,9 +1,9 @@
 env:
   es6: true
   node: true
+parserOptions:
+  ecmaVersion: 2017
 extends: 'eslint:recommended'
-globals:
-  platform: false
 rules:
   indent: off
   no-console: off
