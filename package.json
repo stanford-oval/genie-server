@@ -43,8 +43,7 @@
   },
   "optionalDependencies": {
     "node-mimic": "^1.0.0",
-    "pulseaudio2": "^0.2.0",
-    "snowboy": "^1.2.0"
+    "pulseaudio2": "^0.2.0"
   },
   "devDependencies": {
     "eslint": "^4.18.2"
