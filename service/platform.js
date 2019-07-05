@@ -35,6 +35,7 @@ try {
     SpeechSynthesizer = null;
 }
 const MediaPlayer = require('./media_player');
+const Contacts = require('./contacts');
 
 var _unzipApi = {
     unzip(zipPath, dir) {
@@ -170,6 +171,7 @@ module.exports = {
         }
         
         this._media = new MediaPlayer();
+        this._contacts = new Contacts();
 
         this._sqliteKey = null;
         this._origin = null;
@@ -246,12 +248,12 @@ module.exports = {
         case 'audio-router':
         case 'system-apps':
         case 'graphics-api':
-        case 'contacts':
         case 'telephone':
         // for compat
         case 'notify-api':
             return true;
 */
+        case 'contacts':
         case 'content-api':
         case 'assistant':
             return true;
@@ -290,6 +292,8 @@ module.exports = {
             return this._media;
         case 'content-api':
             return _contentApi;
+        case 'contacts':
+            return this._contacts;
 
 /*
         case 'notify-api':
@@ -317,8 +321,6 @@ module.exports = {
         case 'content-api':
             return _contentApi;
 
-        case 'contacts':
-            return _contactApi;
 
         case 'telephone':
             return _telephoneApi;
