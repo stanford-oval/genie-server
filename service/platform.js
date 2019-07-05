@@ -120,6 +120,18 @@ function getUserCacheDir() {
         return process.env.XDG_CACHE_HOME;
     return os.homedir() + '/.cache';
 }
+function getFilesDir() {
+    if (process.env.THINGENGINE_HOME)
+        return process.env.THINGENGINE_HOME;
+    else
+        return getUserConfigDir() + '/almond-server';
+}
+function getCacheDir() {
+    if (process.env.THINGENGINE_HOME)
+        return process.env.THINGENGINE_HOME + '/cache';
+    else
+        return getUserCacheDir() + '/almond-server';
+}
 
 module.exports = {
     // Initialize the platform code
@@ -129,7 +141,7 @@ module.exports = {
 
         this._gettext = new Gettext();
 
-        this._filesDir = getUserConfigDir() + '/almond-server';
+        this._filesDir = getFilesDir();
         safeMkdirSync(this._filesDir);
         this._locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || 'en-US';
         // normalize this._locale to something that Intl can grok
@@ -138,7 +150,7 @@ module.exports = {
         this._gettext.setLocale(this._locale);
         this._timezone = process.env.TZ;
         this._prefs = new prefs.FilePreferences(this._filesDir + '/prefs.db');
-        this._cacheDir = getUserCacheDir() + '/almond-server';
+        this._cacheDir = getCacheDir();
         safeMkdirSync(this._cacheDir);
 
         this._dbusSession = null;//DBus.sessionBus();
