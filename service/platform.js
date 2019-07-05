@@ -211,7 +211,7 @@ module.exports = {
     },
 
     getPlatformDevice() {
-        return 'home';
+        return null;
     },
 
     // Check if this platform has the required capability
