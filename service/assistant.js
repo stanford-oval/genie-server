@@ -199,13 +199,14 @@ module.exports = class Assistant extends events.EventEmitter {
         super();
 
         this._engine = engine;
+        this._platform = engine.platform;
         this._api = new AlmondApi(this._engine);
 
-        if (SpeechHandler && platform.hasCapability('pulseaudio'))
+        if (SpeechHandler && this._platform.hasCapability('pulseaudio'))
             this._speechHandler = new SpeechHandler(engine.platform);
         else
             this._speechHandler = null;
-        this._speechSynth = platform.getCapability('text-to-speech');
+        this._speechSynth = this._platform.getCapability('text-to-speech');
         this._mainConversation = new MainConversation(engine, this._speechHandler, {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true

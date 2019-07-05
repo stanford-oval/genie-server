@@ -16,6 +16,7 @@ var router = express.Router();
 // FIXME
 const ipAddress = require('thingengine-core/lib/util/ip_address');
 const user = require('../util/user');
+const platform = require('../service/platform');
 
 router.get('/', user.redirectLogIn, (req, res, next) => {
     ipAddress.getServerName().then((host) => {

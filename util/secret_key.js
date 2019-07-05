@@ -10,6 +10,7 @@
 "use strict";
 
 const crypto = require('crypto');
+const platform = require('../service/platform');
 
 module.exports = {
     getSecretKey() {

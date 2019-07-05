@@ -13,6 +13,8 @@ const Q = require('q');
 const crypto = require('crypto');
 const BaseStrategy = require('passport-strategy');
 
+const platform = require('../service/platform');
+
 // a model of user based on sharedpreferences
 const model = {
     isConfigured() {

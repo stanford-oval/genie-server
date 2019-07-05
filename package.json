@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node main.js",
+    "lint": "eslint ./routes ./service ./util ./browser",
     "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js",
     "update-friendhub": "browserify -t babelify ./browser/friendhub.js -o public/javascripts/friendhub.js"
   },

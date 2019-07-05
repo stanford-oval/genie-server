@@ -14,8 +14,6 @@
 
 const Q = require('q');
 const events = require('events');
-const fs = require('fs');
-const dbus = require('dbus-native');
 
 const BLUEZ_SERVICE = 'org.bluez';
 const BLUEZ_MANAGER_PATH = '/';
@@ -41,7 +39,7 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
         super();
 
         this._systemBus = platform.getCapability('dbus-system');
-        this._systemBus.connection.on('error', function() { /* do nothing */ });
+        this._systemBus.connection.on('error', () => { /* do nothing */ });
         this._defaultAdapter = null;
         this._defaultAdapterProperties = {};
         this._devices = {};
@@ -54,7 +52,7 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
     start() {
         return Q.ninvoke(this._systemBus, 'getInterface',
                          BLUEZ_SERVICE, BLUEZ_MANAGER_PATH, OBJECT_MANAGER_INTERFACE)
-            .then(function(objmanager) {
+            .then((objmanager) => {
                 console.log('Obtained BlueZ object manager');
 
                 this._objectManager = objmanager;
@@ -63,16 +61,16 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
                 this._objectManager.on('InterfacesRemoved', this._interfacesRemoved.bind(this));
 
                 return Q.ninvoke(objmanager, 'GetManagedObjects');
-            }.bind(this)).then(function(objects) {
+            }).then((objects) => {
                 objects.forEach(function(object) {
                     this._interfacesAdded(object[0], object[1]);
                 }, this);
-            }.bind(this)).catch(function(e) {
+            }).catch((e) => {
                 console.log('Failed to start BlueZ service: ' + e.message);
             });
     }
 
-    startDiscovery() {
+    async startDiscovery() {
         if (this._defaultAdapter === null)
             return;
 
@@ -80,23 +78,23 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
             return;
 
         this._discovering = true;
-        return Q.ninvoke(this._defaultAdapter.as(BLUEZ_ADAPTER_INTERFACE), 'StartDiscovery');
+        await Q.ninvoke(this._defaultAdapter.as(BLUEZ_ADAPTER_INTERFACE), 'StartDiscovery');
     }
 
-    stopDiscovery() {
+    async stopDiscovery() {
         if (!this._discovering)
             return;
 
         this._discovering = false;
-        return Q.ninvoke(this._defaultAdapter.as(BLUEZ_ADAPTER_INTERFACE), 'StopDiscovery');
+        await Q.ninvoke(this._defaultAdapter.as(BLUEZ_ADAPTER_INTERFACE), 'StopDiscovery');
     }
 
     _interfacesAdded(objectpath, interfaces) {
         console.log('BlueZ interface added at ' + objectpath);
 
-        if (interfaces.some(function(iface) { return iface[0] === BLUEZ_ADAPTER_INTERFACE; }))
+        if (interfaces.some((iface) => { return iface[0] === BLUEZ_ADAPTER_INTERFACE; }))
             this._adapterAdded(objectpath);
-        if (interfaces.some(function(iface) { return iface[0] === BLUEZ_DEVICE_INTERFACE; }))
+        if (interfaces.some((iface) => { return iface[0] === BLUEZ_DEVICE_INTERFACE; }))
             this._deviceAdded(objectpath);
     }
 
@@ -126,28 +124,28 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
         console.log('Found BlueZ device at ' + objectpath);
 
         Q.ninvoke(this._systemBus, 'getObject', BLUEZ_SERVICE, objectpath)
-            .then(function(object) {
-                object.as(PROPERTY_INTERFACE).on('PropertiesChanged', function() {
-                    this._reloadDeviceProperties(object).then(function() {
+            .then((object) => {
+                object.as(PROPERTY_INTERFACE).on('PropertiesChanged', () => {
+                    this._reloadDeviceProperties(object).then(() => {
                         if (this.ondevicechanged)
                             this.ondevicechanged(null, this._devices[objectpath]);
                         //this.emit('device-changed', objectpath, this._devices[objectpath]);
-                    }.bind(this));
-                }.bind(this));
+                    });
+                });
 
                 return this._reloadDeviceProperties(object);
-            }.bind(this)).then(function() {
+            }).then(() => {
                 if (this.ondeviceadded)
                     this.ondeviceadded(null, this._devices[objectpath]);
                 //this.emit('device-added', objectpath, this._devices[objectpath]);
-            }.bind(this)).catch((e) => {
+            }).catch((e) => {
             console.error('Error while processing new Bluez device: ' + e.message);
             });
     }
 
     _reloadDeviceProperties(object) {
         return Q.ninvoke(object.as(PROPERTY_INTERFACE), 'GetAll', BLUEZ_DEVICE_INTERFACE)
-            .then(function(props) {
+            .then((props) => {
                 this._devices[object.name] = {};
                 props.forEach(function(prop) {
                     var name = prop[0];
@@ -157,7 +155,7 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
                     this._devices[object.name][name] = value;
                 }, this);
                 this._devices[object.name] = normalizeDevice(this._devices[object.name]);
-            }.bind(this));
+            });
     }
 
     _adapterAdded(objectpath) {
@@ -171,26 +169,26 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
 
     _tryGetDefaultAdapter(objectpath) {
         return Q.ninvoke(this._systemBus, 'getObject', BLUEZ_SERVICE, objectpath)
-            .then(function(object) {
+            .then((object) => {
                 console.log('Obtained default BlueZ adapter at ' + objectpath);
 
                 this._defaultAdapter = object;
 
-                object.as(PROPERTY_INTERFACE).on('PropertiesChanged', function() {
-                    this._reloadAdapterProperties().then(function() {
+                object.as(PROPERTY_INTERFACE).on('PropertiesChanged', () => {
+                    this._reloadAdapterProperties().then(() => {
                         this.emit('default-adapter-changed');
-                    }.bind(this)).done();
-                }.bind(this));
+                    }).done();
+                });
 
                 return this._reloadAdapterProperties();
-            }.bind(this)).then(function() {
+            }).then(() => {
                 this.emit('default-adapter-changed');
-            }.bind(this));
+            });
     }
 
     _reloadAdapterProperties() {
         return Q.ninvoke(this._defaultAdapter.as(PROPERTY_INTERFACE), 'GetAll', BLUEZ_ADAPTER_INTERFACE)
-            .then(function(props) {
+            .then((props) => {
                 this._defaultAdapterProperties = {};
                 props.forEach(function(prop) {
                     var name = prop[0];
@@ -199,6 +197,6 @@ module.exports = class BluezBluetooth extends events.EventEmitter {
                     var value = prop[1][1][0];
                     this._defaultAdapterProperties[name] = value;
                 }, this);
-            }.bind(this));
+            });
     }
-}
+};

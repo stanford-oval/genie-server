@@ -13,12 +13,14 @@ const Q = require('q');
 const express = require('express');
 var router = express.Router();
 
+
 // FIXME
 const ipAddress = require('thingengine-core/lib/util/ip_address');
 const user = require('../util/user');
+const platform = require('../service/platform');
 
 function config(req, res, next, userData, cloudData) {
-    return ipAddress.getServerName().then(function(host) {
+    return ipAddress.getServerName().then((host) => {
         var port = res.app.get('port');
         var serverAddress = 'http://' +
             (host.indexOf(':' >= 0) ? '[' + host + ']' : host)
@@ -50,11 +52,11 @@ function config(req, res, next, userData, cloudData) {
     });
 }
 
-router.get('/', user.redirectLogIn, function(req, res, next) {
+router.get('/', user.redirectLogIn, (req, res, next) => {
     config(req, res, next, {}, {}).catch(next);
 });
 
-router.post('/set-server-password', user.requireLogIn, function(req, res, next) {
+router.post('/set-server-password', user.requireLogIn, (req, res, next) => {
     var password;
     try {
         if (typeof req.body['password'] !== 'string' ||
@@ -72,12 +74,12 @@ router.post('/set-server-password', user.requireLogIn, function(req, res, next) 
         return;
     }
 
-    user.register(password).then(function(userObj) {
+    user.register(password).then((userObj) => {
         user.unlock(req, password);
         return Q.ninvoke(req, 'login', userObj);
-    }).then(function() {
+    }).then(() => {
         res.redirect('/config');
-    }).catch(function(error) {
+    }).catch((error) => {
         return config(req, res, next, { password: '',
                                         error: error.message }, {});
     });
