@@ -48,4 +48,22 @@ router.get('/friendhub', user.redirectLogIn, (req, res, next) => {
     res.render('friendhub', { page_title: req._("FriendHub")});
 });
 
+router.get('/listen', user.redirectLogIn, (req, res, next) => {
+    res.render('listen', {
+        page_title: req._("Almond - Listen"),
+        csrfToken: req.csrfToken()
+    });
+});
+
+router.post('/listen', user.requireLogIn, (req, res, next) => {
+    const engine = req.app.engine;
+    const assistant = engine.platform.getCapability('assistant');
+
+    assistant.hotword();
+    res.render('listen', {
+        page_title: req._("Almond - Listen"),
+        csrfToken: req.csrfToken()
+    });
+});
+
 module.exports = router;

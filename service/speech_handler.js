@@ -7,55 +7,10 @@
 // See COPYING for details
 "use strict";
 
-const stream = require('stream');
 const events = require('events');
-const path = require('path');
-
-const snowboy = require('snowboy');
 
 const SpeechRecognizer = require('./speech_recognizer');
-
-class DetectorStream extends stream.Transform {
-    constructor() {
-        super();
-
-        let models = new snowboy.Models();
-        /*for (let p of ['silei', 'gcampagn']) {*/
-             models.add({
-                 file: path.resolve(module.filename, '../../data/gcampagn.pmdl'),
-                 sensitivity: '0.4',
-                 hotwords : 'almond'
-             });
-        /*}*/
-
-        this._detector = new snowboy.Detector({
-            resource: path.resolve(module.filename, '../../data/snowboy.res'),
-            models: models,
-            audio_gain: 2
-        });
-
-        this._detector.on('silence', () => {
-        });
-        this._detected = false;
-        this._detector.on('hotword', (index, hotword, buffer) => {
-            this._detected = true;
-            this.emit('hotword', hotword);
-        });
-    }
-
-    finishRequest() {
-        console.log('Request finished');
-        this._detected = false;
-    }
-
-    _transform(chunk, encoding, callback) {
-        if (!this._detected)
-            this._detector.runDetection(chunk);
-        if (this._detected)
-            this.push(chunk);
-        callback();
-    }
-}
+const DetectorStream = require('./wake-word/mycroft_precise');
 
 module.exports = class SpeechHandler extends events.EventEmitter {
     constructor(platform) {
@@ -65,13 +20,49 @@ module.exports = class SpeechHandler extends events.EventEmitter {
 
         this._recognizer = new SpeechRecognizer({ locale: this._platform.locale });
         this._recognizer.on('error', (e) => {
-            this._detector.finishRequest();
             this.emit('error', e);
+        });
+
+        this._autoTrigger = false;
+    }
+
+    setAutoTrigger(autoTrigger) {
+        console.log('setAutoTrigger', autoTrigger);
+        this._autoTrigger = autoTrigger;
+    }
+
+    hotword() {
+        this.emit('hotword');
+        this._onDetected();
+    }
+
+    _onDetected() {
+        let req = this._recognizer.request(this._stream);
+        req.on('hypothesis', (hypothesis) => this.emit('hypothesis', hypothesis));
+        req.on('done', (status, utterance) => {
+            if (status === 'Success') {
+                console.log('Recognized as "' + utterance + '"');
+                this._detector.autoTrigger = false;
+                this.emit('utterance', utterance);
+            } else if (status === 'NoMatch') {
+                this.emit('no-match');
+            } else if (status === 'InitialSilenceTimeout') {
+                this.emit('silence');
+            } else {
+                console.log('Recognition error: ' + status);
+            }
         });
     }
 
     start() {
-        this._stream = this._pulse.createRecordStream({ format: 'S16LE', rate: 16000, channels: 1 });
+        this._stream = this._pulse.createRecordStream({
+            format: 'S16LE',
+            rate: 16000,
+            channels: 1,
+            properties: {
+                'filter.want': 'echo-cancel',
+            }
+        });
 
         this._stream.on('state', (state) => {
             console.log('Record stream is now ' + state);
@@ -81,20 +72,14 @@ module.exports = class SpeechHandler extends events.EventEmitter {
         this._stream.on('error', (e) => this.emit('error', e));
 
         this._detector = new DetectorStream();
+        this._detector.on('sound', () => {
+            if (this._autoTrigger)
+                this._onDetected();
+        });
         this._detector.on('hotword', (hotword) => {
             console.log('Hotword ' + hotword + ' detected');
-            this.emit('hotword', hotword);
-            let req = this._recognizer.request(this._detector);
-            req.on('hypothesis', (hypothesis) => this.emit('hypothesis', hypothesis));
-            req.on('done', (status, utterance) => {
-                if (status === 'Success') {
-                    console.log('Recognized as "' + utterance + '"');
-                    this.emit('utterance', utterance);
-                } else {
-                    console.log('Recognition error: ' + status);
-                }
-                this._detector.finishRequest();
-            });
+            this.emit('hotword');
+            this._onDetected();
         });
         this._stream.pipe(this._detector);
     }
@@ -105,5 +90,6 @@ module.exports = class SpeechHandler extends events.EventEmitter {
         this._stream.end();
         this._stream = null;
         this._recognizer.close();
+        this._detector.destroy();
     }
 };

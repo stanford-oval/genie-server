@@ -63,6 +63,11 @@ class MainConversationDelegate {
         this._conversation = conversation;
     }
 
+    sendHypothesis(hypothesis) {
+        for (let out of this._outputs)
+            out.sendHypothesis(hypothesis);
+    }
+
     addOutput(out) {
         this._outputs.add(out);
         for (let [,msg] of this._history) // replay the history
@@ -141,6 +146,10 @@ class MainConversation extends Almond {
         this._delegate.setConversation(this);
     }
 
+    sendHypothesis(hypothesis) {
+        this._delegate.sendHypothesis(hypothesis);
+    }
+
     addOutput(out) {
         this._delegate.addOutput(out);
     }
@@ -214,14 +223,16 @@ module.exports = class Assistant extends events.EventEmitter {
 
         if (this._speechHandler) {
             this._speechHandler.on('hypothesis', (hypothesis) => {
-                this._api.sendHypothesis(hypothesis);
+                //this._api.sendHypothesis(hypothesis);
+                this._mainConversation.sendHypothesis(hypothesis);
             });
             this._speechHandler.on('hotword', (hotword) => {
                 child_process.spawn('xset', ['dpms', 'force', 'on']);
                 child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
             });
             this._speechHandler.on('utterance', (utterance) => {
-                this._api.sendCommand(utterance);
+                //this._api.sendCommand(utterance);
+                this._mainConversation.handleCommand(utterance);
             });
             this._speechHandler.on('error', (error) => {
                 console.log('Error in speech recognition: ' + error.message);
@@ -234,6 +245,12 @@ module.exports = class Assistant extends events.EventEmitter {
             main: this._mainConversation
         };
         this._lastConversation = this._mainConversation;
+    }
+
+    hotword() {
+        if (!this._speechHandler)
+            return;
+        this._speechHandler.hotword();
     }
 
     parse(sentence, target) {
