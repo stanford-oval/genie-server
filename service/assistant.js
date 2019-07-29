@@ -266,9 +266,10 @@ module.exports = class Assistant extends events.EventEmitter {
         this._api.removeOutput(out);
     }
 
-    start() {
+    async start() {
+        if (this._speechSynth)
+            await this._speechSynth.start();
         return Promise.all([
-            this._speechSynth ? this._speechSynth.start() : Promise.resolve(),
             this._speechHandler ? this._speechHandler.start() : Promise.resolve(),
             this._mainConversation.start()
         ]);

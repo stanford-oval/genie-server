@@ -163,7 +163,7 @@ module.exports = {
                 client: "thingengine-platform-server"
             });
             if (SpeechSynthesizer)
-                this._tts = new SpeechSynthesizer(this._pulse, path.resolve(module.filename, '../../data/cmu_us_slt.flitevox'));
+                this._tts = new SpeechSynthesizer(this);
             else
                 this._tts = null;
         } else {
