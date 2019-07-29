@@ -19,7 +19,7 @@ function appsList(req, res, next, message) {
 
     var apps = engine.apps.getAllApps();
     var info = apps.map((a) => {
-        return { uniqueId: a.uniqueId, name: a.name || "Some app",
+        return { uniqueId: a.uniqueId, name: a.name || "Some app", description: a.description,
                  running: a.isRunning, enabled: a.isEnabled,
                  currentTier: a.currentTier };
     });
@@ -52,7 +52,7 @@ router.post('/delete', user.requireLogIn, (req, res, next) => {
         }).catch((e) => {
             res.status(400).render('error', { page_title: "Almond - Error",
                                               message: e.message + '\n' + e.stack });
-        }).done();
+        }).catch(next);
     } catch(e) {
         res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message + '\n' + e.stack });
