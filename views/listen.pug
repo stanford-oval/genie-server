@@ -1,0 +1,11 @@
+extends layout
+
+block page_name
+  - index = true;
+  | Almond
+
+block content
+  form(action='/listen',method='post')
+    input(type='hidden',name='_csrf',value=csrfToken)
+    button(type='submit')#listen-button
+      img(src='images/doctor.png')

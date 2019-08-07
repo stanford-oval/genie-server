@@ -108,7 +108,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
         } catch(e) {
             console.log('Failed to load translations: ' + e.message);
         }
-        const gettext = gt.dgettext.bind(gt, 'thingengine-platform-server');;
+        const gettext = gt.dgettext.bind(gt, 'thingengine-platform-server');
         const pgettext = gt.dpgettext.bind(gt, 'thingengine-platform-server');
         const ngettext = gt.dngettext.bind(gt, 'thingengine-platform-server');
         this._app.use((req, res, next) => {
@@ -142,15 +142,15 @@ module.exports = class WebFrontend extends events.EventEmitter {
         // '::' means the same as 0.0.0.0 but for IPv6
         // without it, node.js will only listen on IPv4
         return Q.ninvoke(this._server, 'listen', this._app.get('port'), '::')
-            .then(function() {
+            .then(() => {
                 console.log('Express server listening on port ' + this._app.get('port'));
-            }.bind(this));
+            });
     }
 
     close() {
-        return Q.ninvoke(this._server, 'close').then(function() {
+        return Q.ninvoke(this._server, 'close').then(() => {
             console.log('Express server stopped');
-        }).catch(function(error) {
+        }).catch((error) => {
             console.log('Error stopping Express server: ' + error);
             console.log(error.stack);
         });

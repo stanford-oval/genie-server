@@ -9,7 +9,6 @@
 // See COPYING for details
 "use strict";
 
-const Q = require('q');
 const express = require('express');
 const crypto = require('crypto');
 
@@ -200,6 +199,7 @@ router.ws('/conversation', (ws, req, next) => {
     let opened = false;
     const id = 'web-' + makeRandom(16);
     ws.on('error', (err) => {
+        console.error(err);
         ws.close();
     });
     ws.on('close', () => {
@@ -224,7 +224,7 @@ router.ws('/conversation', (ws, req, next) => {
     }
 
     ws.on('message', (data) => {
-        Q.try(() => {
+        Promise.resolve().then(() => {
             const parsed = JSON.parse(data);
             switch(parsed.type) {
             case 'command':

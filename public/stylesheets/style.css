@@ -95,3 +95,13 @@ pre, pre code {
     text-align: center;
     display: block;
 }
+
+#listen-button {
+  background: none;
+  border: none;
+}
+#listen-button img {
+  height: 80vh;
+  display: block;
+  object-fit: contain;
+}

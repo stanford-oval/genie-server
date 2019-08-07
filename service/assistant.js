@@ -9,7 +9,6 @@
 // See COPYING for details
 "use strict";
 
-const Q = require('q');
 const events = require('events');
 const posix = require('posix');
 const child_process = require('child_process');
@@ -61,6 +60,11 @@ class MainConversationDelegate {
     }
     setConversation(conversation) {
         this._conversation = conversation;
+    }
+
+    sendHypothesis(hypothesis) {
+        for (let out of this._outputs)
+            out.sendHypothesis(hypothesis);
     }
 
     addOutput(out) {
@@ -141,6 +145,10 @@ class MainConversation extends Almond {
         this._delegate.setConversation(this);
     }
 
+    sendHypothesis(hypothesis) {
+        this._delegate.sendHypothesis(hypothesis);
+    }
+
     addOutput(out) {
         this._delegate.addOutput(out);
     }
@@ -199,13 +207,14 @@ module.exports = class Assistant extends events.EventEmitter {
         super();
 
         this._engine = engine;
+        this._platform = engine.platform;
         this._api = new AlmondApi(this._engine);
 
-        if (SpeechHandler && platform.hasCapability('pulseaudio'))
+        if (SpeechHandler && this._platform.hasCapability('pulseaudio'))
             this._speechHandler = new SpeechHandler(engine.platform);
         else
             this._speechHandler = null;
-        this._speechSynth = platform.getCapability('text-to-speech');
+        this._speechSynth = this._platform.getCapability('text-to-speech');
         this._mainConversation = new MainConversation(engine, this._speechHandler, {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true
@@ -213,14 +222,16 @@ module.exports = class Assistant extends events.EventEmitter {
 
         if (this._speechHandler) {
             this._speechHandler.on('hypothesis', (hypothesis) => {
-                this._api.sendHypothesis(hypothesis);
+                //this._api.sendHypothesis(hypothesis);
+                this._mainConversation.sendHypothesis(hypothesis);
             });
             this._speechHandler.on('hotword', (hotword) => {
                 child_process.spawn('xset', ['dpms', 'force', 'on']);
                 child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
             });
             this._speechHandler.on('utterance', (utterance) => {
-                this._api.sendCommand(utterance);
+                //this._api.sendCommand(utterance);
+                this._mainConversation.handleCommand(utterance);
             });
             this._speechHandler.on('error', (error) => {
                 console.log('Error in speech recognition: ' + error.message);
@@ -233,6 +244,12 @@ module.exports = class Assistant extends events.EventEmitter {
             main: this._mainConversation
         };
         this._lastConversation = this._mainConversation;
+    }
+
+    hotword() {
+        if (!this._speechHandler)
+            return;
+        this._speechHandler.hotword();
     }
 
     parse(sentence, target) {
@@ -248,12 +265,15 @@ module.exports = class Assistant extends events.EventEmitter {
         this._api.removeOutput(out);
     }
 
-    start() {
-        return Promise.all([
-            this._speechSynth ? this._speechSynth.start() : Promise.resolve(),
-            this._speechHandler ? this._speechHandler.start() : Promise.resolve(),
-            this._mainConversation.start()
-        ]);
+    async start() {
+        if (this._speechSynth)
+            await this._speechSynth.start();
+        if (this._speechHandler)
+            await this._speechHandler.start();
+    }
+
+    startConversation() {
+        return this._mainConversation.start();
     }
 
     stop() {
@@ -264,13 +284,13 @@ module.exports = class Assistant extends events.EventEmitter {
     }
 
     notifyAll(...data) {
-        return Q.all(Object.keys(this._conversations).map((id) => {
+        return Promise.all(Object.keys(this._conversations).map((id) => {
             return this._conversations[id].notify(...data);
         }));
     }
 
     notifyErrorAll(...data) {
-        return Q.all(Object.keys(this._conversations).map((id) => {
+        return Promise.all(Object.keys(this._conversations).map((id) => {
             return this._conversations[id].notifyError(...data);
         }));
     }

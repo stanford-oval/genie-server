@@ -578,8 +578,7 @@ $(function() {
             testCases = testCases.slice(8*slice, 8*(slice+1));
         }
 
-        let tiles = $('.grid-item.tile');
-        function nextTestCase(i) {
+        const nextTestCase = function nextTestCase(i) {
             if (i === testCases.length)
                 return;
             console.log('processing test case #' + (i+1) + '/' + testCases.length);
@@ -589,7 +588,7 @@ $(function() {
                 disableBackground: DISABLE_ALL_LAYOUT || DISABLE_ALL_BACKGROUND
             });
             setTimeout(() => { nextTestCase(i+1); }, 1000);
-        }
+        };
         nextTestCase(0);
     }
 

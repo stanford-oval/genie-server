@@ -18,8 +18,8 @@ function appsList(req, res, next, message) {
     var engine = req.app.engine;
 
     var apps = engine.apps.getAllApps();
-    var info = apps.map(function(a) {
-        return { uniqueId: a.uniqueId, name: a.name || "Some app",
+    var info = apps.map((a) => {
+        return { uniqueId: a.uniqueId, name: a.name || "Some app", description: a.description,
                  running: a.isRunning, enabled: a.isEnabled,
                  currentTier: a.currentTier };
     });
@@ -30,11 +30,11 @@ function appsList(req, res, next, message) {
                               apps: info });
 }
 
-router.get('/', user.redirectLogIn, function(req, res, next) {
+router.get('/', user.redirectLogIn, (req, res, next) => {
     appsList(req, res, next, '');
 });
 
-router.post('/delete', user.requireLogIn, function(req, res, next) {
+router.post('/delete', user.requireLogIn, (req, res, next) => {
     try {
         var engine = req.app.engine;
 
@@ -46,17 +46,17 @@ router.post('/delete', user.requireLogIn, function(req, res, next) {
             return;
         }
 
-        engine.apps.removeApp(app).then(function() {
+        engine.apps.removeApp(app).then(() => {
             req.flash('app-message', "Rule successfully stopped");
             res.redirect(303, '/apps');
-        }).catch(function(e) {
+        }).catch((e) => {
             res.status(400).render('error', { page_title: "Almond - Error",
                                               message: e.message + '\n' + e.stack });
-        }).done();
+        }).catch(next);
     } catch(e) {
         res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message + '\n' + e.stack });
-        return;
+        
     }
 });
 

@@ -9,8 +9,6 @@
 // See COPYING for details
 "use strict";
 
-const Q = require('q');
-
 const express = require('express');
 var router = express.Router();
 
@@ -53,17 +51,14 @@ router.get('/create', user.redirectLogIn, (req, res, next) => {
 });
 
 router.post('/create', user.requireLogIn, (req, res, next) => {
-    var engine = req.app.engine;
-    var devices = engine.devices;
-
-    Q.try(() => {
+    const engine = req.app.engine;
+    Promise.resolve().then(async () => {
         if (typeof req.body['kind'] !== 'string' ||
             req.body['kind'].length === 0)
             throw new Error("You must choose one kind of device");
 
         delete req.body['_csrf'];
-        return devices.loadOneDevice(req.body, true);
-    }).then(() => {
+        await engine.devices.addSerialized(req.body);
         if (req.session['device-redirect-to']) {
             res.redirect(303, req.session['device-redirect-to']);
             delete req.session['device-redirect-to'];
@@ -73,7 +68,7 @@ router.post('/create', user.requireLogIn, (req, res, next) => {
     }).catch((e) => {
         res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message });
-    }).done();
+    });
 });
 
 router.post('/delete', user.requireLogIn, (req, res, next) => {
@@ -101,18 +96,13 @@ router.post('/delete', user.requireLogIn, (req, res, next) => {
 });
 
 router.get('/oauth2/:kind', user.redirectLogIn, (req, res, next) => {
-    var kind = req.params.kind;
-
-    var engine = req.app.engine;
-    var devFactory = engine.devices.factory;
-
-    Q.try(() => {
-        return Q(devFactory.runOAuth2(kind, null));
-    }).then((result) => {
+    const kind = req.params.kind;
+    const engine = req.app.engine;
+    Promise.resolve().then(async () => {
+        const result = await engine.devices.addFromOAuth(kind);
         if (result !== null) {
-            var redirect = result[0];
-            var session = result[1];
-            for (var key in session)
+            const [redirect, session] = result;
+            for (let key in session)
                 req.session[key] = session[key];
             res.redirect(redirect);
         } else {
@@ -122,24 +112,20 @@ router.get('/oauth2/:kind', user.redirectLogIn, (req, res, next) => {
         console.log(e.stack);
         res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message });
-    }).done();
+    });
 });
 
 router.get('/oauth2/callback/:kind', user.redirectLogIn, (req, res, next) => {
-    var kind = req.params.kind;
-
-    var engine = req.app.engine;
-    var devFactory = engine.devices.factory;
-
-    Q.try(() => {
-        return devFactory.runOAuth2(kind, req);
-    }).then(() => {
+    const kind = req.params.kind;
+    const engine = req.app.engine;
+    Promise.resolve().then(async () => {
+        await engine.devices.completeOAuth(kind, req.url, req.session);
         res.redirect('/devices?class=online');
     }).catch((e) => {
         console.log(e.stack);
         res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message });
-    }).done();
+    });
 });
 
 

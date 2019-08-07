@@ -9,7 +9,7 @@
 // See COPYING for details
 "use strict";
 
-const Q = require('q');
+const util = require('util');
 const child_process = require('child_process');
 
 // A simple Media Player based on GStreamer
@@ -18,19 +18,18 @@ module.exports = class MediaPlayer {
         this._playing = null;
     }
 
-    _discover(url) {
+    async _discover(url) {
         if (url.startsWith('https://www.youtube.com/watch?v=') ||
             url.startsWith('http://www.youtube.com/watch?v='))
-            return Q('youtube');
+            return 'youtube';
 
-        return Q.nfcall(child_process.execFile, 'gst-discoverer-1.0', [url]).then(([stdout, stderr]) => {
-            if (stdout.indexOf('video') >= 0)
-                return 'video';
-            else if (stdout.indexOf('audio') >= 0)
-                return 'audio';
-            else
-                return 'unknown';
-        });
+        const { stdout, } = await util.promisify(child_process.execFile)('gst-discoverer-1.0', [url]);
+        if (stdout.indexOf('video') >= 0)
+            return 'video';
+        else if (stdout.indexOf('audio') >= 0)
+            return 'audio';
+        else
+            return 'unknown';
     }
 
     stopPlaying() {
