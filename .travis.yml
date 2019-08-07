@@ -8,7 +8,6 @@ addons:
 node_js:
 - '10'
 before_install:
-- ./travis/unlock-key.sh
 - mkdir cvc4/
 - wget https://almond-static.stanford.edu/test-data/cvc4-1.6-x86_64-linux-opt -O cvc4/cvc4
 - chmod +x cvc4/cvc4
