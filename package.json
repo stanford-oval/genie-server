@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "coveralls": "^3.0.6",
-    "eslint": "^4.18.2",
+    "eslint": "^6.0.0",
     "nyc": "^14.1.1",
     "parse5": "^5.1.0",
     "selenium-webdriver": "^4.0.0-alpha.4"
