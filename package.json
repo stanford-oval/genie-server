@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node main.js",
     "lint": "eslint ./routes ./service ./util ./browser",
+    "test": "nyc ./everything.sh",
     "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js",
     "update-friendhub": "browserify -t babelify ./browser/friendhub.js -o public/javascripts/friendhub.js",
     "prepare": "(cd node_modules/thingtalk; yarn); (cd node_modules/thingengine-core; yarn; rm -fr node_modules);"
@@ -55,6 +56,10 @@
     "pulseaudio2": "^0.2.0"
   },
   "devDependencies": {
-    "eslint": "^4.18.2"
+    "coveralls": "^3.0.6",
+    "eslint": "^4.18.2",
+    "nyc": "^14.1.1",
+    "parse5": "^5.1.0",
+    "selenium-webdriver": "^4.0.0-alpha.4"
   }
 }
