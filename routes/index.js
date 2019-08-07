@@ -44,10 +44,6 @@ router.get('/widgets', user.redirectLogIn, (req, res, next) => {
     res.render('brassau', { page_title: req._("Almond - Widgets") });
 });
 
-router.get('/friendhub', user.redirectLogIn, (req, res, next) => {
-    res.render('friendhub', { page_title: req._("FriendHub")});
-});
-
 router.get('/listen', user.redirectLogIn, (req, res, next) => {
     res.render('listen', {
         page_title: req._("Almond - Listen"),
