@@ -9,8 +9,8 @@
 // See COPYING for details
 "use strict";
 
-const Q = require('q');
 const crypto = require('crypto');
+const util = require('util');
 const BaseStrategy = require('passport-strategy');
 
 const platform = require('../service/platform');
@@ -63,7 +63,7 @@ function makeRandom() {
 }
 
 function hashPassword(salt, password) {
-    return Q.nfcall(crypto.pbkdf2, password, salt, 10000, 32, 'sha1')
+    return util.promisify(crypto.pbkdf2)(password, salt, 10000, 32, 'sha1')
         .then((buffer) => buffer.toString('hex'));
 }
 
@@ -79,7 +79,7 @@ function initializePassport() {
     passport.use(new HostBasedStrategy());
 
     passport.use(new LocalStrategy((username, password, done) => {
-        Q.try(() => {
+        Promise.resolve().then(() => {
             try {
                 var user = model.get();
 
@@ -96,7 +96,7 @@ function initializePassport() {
             done(null, result[0], { message: result[1] });
         }, (err) => {
             done(err);
-        }).done();
+        });
     }));
 }
 

@@ -14,7 +14,7 @@
 const Q = require('q');
 const fs = require('fs');
 const os = require('os');
-const path = require('path');
+const Tp = require('thingpedia');
 const child_process = require('child_process');
 const Gettext = require('node-gettext');
 const DBus = require('dbus-native');
@@ -26,8 +26,6 @@ try {
 }
 const CVC4Solver = require('smtlib').LocalCVC4Solver;
 
-const prefs = require('thingengine-core/lib/util/prefs');
-
 const BluezBluetooth = require('./bluez');
 let SpeechSynthesizer;
 try {
@@ -37,6 +35,7 @@ try {
 }
 const MediaPlayer = require('./media_player');
 const Contacts = require('./contacts');
+const _graphicsApi = require('./graphics');
 
 var _unzipApi = {
     unzip(zipPath, dir) {
@@ -68,8 +67,6 @@ const _btApi = JavaAPI.makeJavaAPI('Bluetooth',
 const _audioRouterApi = JavaAPI.makeJavaAPI('AudioRouter',
     ['setAudioRouteBluetooth'], ['start', 'stop', 'isAudioRouteBluetooth'], []);
 const _systemAppsApi = JavaAPI.makeJavaAPI('SystemApps', [], ['startMusic'], []);
-const _graphicsApi = require('./graphics');
-
 const _contentJavaApi = JavaAPI.makeJavaAPI('Content', [], ['getStream'], []);
 const _contentApi = {
     getStream(url) {
@@ -135,10 +132,10 @@ function getCacheDir() {
         return getUserCacheDir() + '/almond-server';
 }
 
-module.exports = {
-    // Initialize the platform code
-    // Will be called before instantiating the engine
-    init: function() {
+class ServerPlatform extends Tp.BasePlatform {
+    constructor() {
+        super();
+
         this._assistant = null;
 
         this._gettext = new Gettext();
@@ -151,12 +148,15 @@ module.exports = {
 
         this._gettext.setLocale(this._locale);
         this._timezone = process.env.TZ;
-        this._prefs = new prefs.FilePreferences(this._filesDir + '/prefs.db');
+        this._prefs = new Tp.Helpers.FilePreferences(this._filesDir + '/prefs.db');
         this._cacheDir = getCacheDir();
         safeMkdirSync(this._cacheDir);
 
         this._dbusSession = null;//DBus.sessionBus();
-        this._dbusSystem = DBus.systemBus();
+        if (process.env.DBUS_SYSTEM_BUS_ADDRESS || fs.existsSync('/var/run/dbus/system_bus_socket'))
+            this._dbusSystem = DBus.systemBus();
+        else
+            this._dbusSystem = null;
         this._btApi = null;
         if (PulseAudio) {
             this._pulse = new PulseAudio({
@@ -170,31 +170,33 @@ module.exports = {
             this._pulse = null;
             this._tts = null;
         }
-        
+
         this._media = new MediaPlayer();
         this._contacts = new Contacts();
 
         this._sqliteKey = null;
         this._origin = null;
-    },
+    }
 
     setAssistant(ad) {
         this._assistant = ad;
-    },
+    }
 
-    type: 'server',
+    get type() {
+        return 'server';
+    }
 
     get encoding() {
         return 'utf8';
-    },
+    }
 
     get locale() {
         return this._locale;
-    },
+    }
 
     get timezone() {
         return this._timezone;
-    },
+    }
 
     // Check if we need to load and run the given thingengine-module on
     // this platform
@@ -208,11 +210,11 @@ module.exports = {
         default:
             return true;
         }
-    },
+    }
 
     getPlatformDevice() {
         return null;
-    },
+    }
 
     // Check if this platform has the required capability
     // (eg. long running, big storage, reliable connectivity, server
@@ -227,13 +229,15 @@ module.exports = {
             return true;
 
         case 'dbus-session':
-            return false;
+            return this._dbusSession !== null;
         case 'dbus-system':
-            return true;
+            return this._dbusSystem !== null;
         case 'text-to-speech':
             return this._tts !== null;
 
         case 'bluetooth':
+            return this._dbusSystem !== null;
+
         case 'media-player':
             return true;
 
@@ -248,12 +252,12 @@ module.exports = {
         case 'bluetooth':
         case 'audio-router':
         case 'system-apps':
-        case 'graphics-api':
         case 'telephone':
         // for compat
         case 'notify-api':
             return true;
 */
+        case 'graphics-api':
         case 'contacts':
         case 'content-api':
         case 'assistant':
@@ -266,7 +270,7 @@ module.exports = {
         default:
             return false;
         }
-    },
+    }
 
     // Retrieve an interface to an optional functionality provided by the
     // platform
@@ -285,6 +289,8 @@ module.exports = {
         case 'text-to-speech':
             return this._tts;
         case 'bluetooth':
+            if (this._dbusSystem === null)
+                return null;
             if (!this._btApi)
                 this._btApi = new BluezBluetooth(this);
             return this._btApi;
@@ -294,6 +300,8 @@ module.exports = {
             return this._media;
         case 'content-api':
             return _contentApi;
+        case 'graphics-api':
+            return _graphicsApi;
         case 'contacts':
             return this._contacts;
         case 'smt-solver':
@@ -319,8 +327,6 @@ module.exports = {
         case 'system-apps':
             return _systemAppsApi;
 
-        case 'graphics-api':
-            return _graphicsApi;
 
         case 'content-api':
             return _contentApi;
@@ -339,7 +345,7 @@ module.exports = {
         default:
             return null;
         }
-    },
+    }
 
     // Obtain a shared preference store
     // Preferences are simple key/value store which is shared across all apps
@@ -348,13 +354,13 @@ module.exports = {
     // shared store such as DataVault should be used by regular apps
     getSharedPreferences() {
         return this._prefs;
-    },
+    }
 
     // Get a directory that is guaranteed to be writable
     // (in the private data space for Android)
     getWritableDir() {
         return this._filesDir;
-    },
+    }
 
     // Get a temporary directory
     // Also guaranteed to be writable, but not guaranteed
@@ -362,30 +368,26 @@ module.exports = {
     // (ie, it could be periodically cleaned by the system)
     getTmpDir() {
         return os.tmpdir();
-    },
+    }
 
     // Get a directory good for long term caching of code
     // and metadata
     getCacheDir() {
         return this._cacheDir;
-    },
+    }
 
     // Get the filename of the sqlite database
     getSqliteDB() {
         return this._filesDir + '/sqlite.db';
-    },
+    }
 
     _setSqliteKey(key) {
         this._sqliteKey = key.toString('hex');
-    },
+    }
 
     getSqliteKey() {
         return this._sqliteKey;
-    },
-
-    getGraphDB() {
-        return this._filesDir + '/rdf.db';
-    },
+    }
 
     // Stop the main loop and exit
     // (In Android, this only stops the node.js thread)
@@ -393,37 +395,37 @@ module.exports = {
     // code, after stopping the engine
     exit() {
         process.exit();
-    },
+    }
 
     // Get the ThingPedia developer key, if one is configured
     getDeveloperKey() {
         return this._prefs.get('developer-key');
-    },
+    }
 
     // Change the ThingPedia developer key, if possible
     // Returns true if the change actually happened
     setDeveloperKey(key) {
         return this._prefs.set('developer-key', key);
-    },
+    }
 
     // Return a server/port URL that can be used to refer to this
     // installation. This is primarily used for OAuth redirects, and
     // so must match what the upstream services accept.
     _setOrigin(origin) {
         this._origin = origin;
-    },
+    }
 
     getOrigin() {
         return this._origin;
-    },
+    }
 
     getCloudId() {
         return this._prefs.get('cloud-id');
-    },
+    }
 
     getAuthToken() {
         return this._prefs.get('auth-token');
-    },
+    }
 
     // Change the auth token
     // Returns true if a change actually occurred, false if the change
@@ -435,4 +437,5 @@ module.exports = {
         this._prefs.set('auth-token', authToken);
         return true;
     }
-};
+}
+module.exports = new ServerPlatform;

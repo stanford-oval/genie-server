@@ -10,7 +10,7 @@
 const mimic = require('node-mimic');
 const path = require('path');
 const util = require('util');
-const { ninvoke } = require('./platform/utils');
+const { ninvoke } = require('./utils');
 
 class CancelledError extends Error {
     constructor() {

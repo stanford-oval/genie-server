@@ -11,6 +11,7 @@
 
 const Q = require('q');
 Q.longStackSupport = true;
+process.on('unhandledRejection', (up) => { throw up; });
 
 const Engine = require('thingengine-core');
 const WebFrontend = require('./service/frontend');
@@ -18,62 +19,75 @@ const AssistantDispatcher = require('./service/assistant');
 
 const Config = require('./config');
 
-let _waitReady;
 let _stopped = false;
+let _running = false;
 let _engine, _frontend, _ad;
+
+function handleStop() {
+    if (_running)
+        _engine.stop();
+    else
+        _stopped = true;
+}
 
 const DEBUG = false;
 
-function main() {
-    global.platform = require('./service/platform');
+async function init(platform) {
+    _engine = new Engine(platform, { thingpediaUrl: Config.THINGPEDIA_URL });
+    _frontend.setEngine(_engine);
 
-    global.platform.init();
+    _ad = new AssistantDispatcher(_engine);
+    platform.setAssistant(_ad);
+    await _engine.open();
+    await _ad.start();
+}
 
-    _frontend = new WebFrontend(global.platform);
+async function main() {
+    process.on('SIGINT', handleStop);
+    process.on('SIGTERM', handleStop);
 
-    function init() {
-        _engine = new Engine(global.platform, { thingpediaUrl: Config.THINGPEDIA_URL });
-        _frontend.setEngine(_engine);
+    const platform = require('./service/platform');
+    try {
 
-        _ad = new AssistantDispatcher(_engine);
-        global.platform.setAssistant(_ad);
-        return _engine.open().then(() => {
-            return _ad.start();
-        });
-    }
+        _frontend = new WebFrontend(platform);
+        await _frontend.open();
 
-    if (Config.ENABLE_DB_ENCRYPTION) {
-        _waitReady = new Promise((callback, errback) => {
-            _frontend.on('unlock', (key) => {
-                console.log('Attempting unlock...');
-                if (DEBUG)
-                    console.log('Unlock key: ' + key.toString('hex'));
-                global.platform._setSqliteKey(key);
-                callback(init());
+        if (Config.ENABLE_DB_ENCRYPTION) {
+            await new Promise((resolve, reject) => {
+                _frontend.on('unlock', (key) => {
+                    console.log('Attempting unlock...');
+                    if (DEBUG)
+                        console.log('Unlock key: ' + key.toString('hex'));
+                    platform._setSqliteKey(key);
+                    resolve(init(platform));
+                });
             });
-        });
-    } else {
-        _waitReady = init();
-    }
-    _frontend.open();
+        } else {
+            await init(platform);
+        }
 
-    Q(_waitReady).then(() => {
-        if (_stopped)
-            return Promise.resolve();
-        return _engine.run();
-    }).catch((error) => {
-        console.log('Uncaught exception: ' + error.message);
-        console.log(error.stack);
-    }).finally(() => {
-        _ad.stop();
-        return _engine.close();
-    }).catch((error) => {
-        console.log('Exception during stop: ' + error.message);
-        console.log(error.stack);
-    }).finally(() => {
+        try {
+            console.log('Ready');
+            if (!_stopped) {
+                _running = true;
+                await _engine.run();
+            }
+        } finally {
+            try {
+                await _ad.stop();
+                await _engine.close();
+            } catch(error) {
+                console.log('Exception during stop: ' + error.message);
+                console.log(error.stack);
+            }
+        }
+    } catch(error) {
+        console.error('Uncaught exception: ' + error.message);
+        console.error(error.stack);
+    } finally {
         console.log('Cleaning up');
         platform.exit();
-    });
+    }
 }
 
 main();

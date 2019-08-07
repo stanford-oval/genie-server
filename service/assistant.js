@@ -9,7 +9,6 @@
 // See COPYING for details
 "use strict";
 
-const Q = require('q');
 const events = require('events');
 const posix = require('posix');
 const child_process = require('child_process');
@@ -269,10 +268,12 @@ module.exports = class Assistant extends events.EventEmitter {
     async start() {
         if (this._speechSynth)
             await this._speechSynth.start();
-        return Promise.all([
-            this._speechHandler ? this._speechHandler.start() : Promise.resolve(),
-            this._mainConversation.start()
-        ]);
+        if (this._speechHandler)
+            await this._speechHandler.start();
+    }
+
+    startConversation() {
+        return this._mainConversation.start();
     }
 
     stop() {
@@ -283,13 +284,13 @@ module.exports = class Assistant extends events.EventEmitter {
     }
 
     notifyAll(...data) {
-        return Q.all(Object.keys(this._conversations).map((id) => {
+        return Promise.all(Object.keys(this._conversations).map((id) => {
             return this._conversations[id].notify(...data);
         }));
     }
 
     notifyErrorAll(...data) {
-        return Q.all(Object.keys(this._conversations).map((id) => {
+        return Promise.all(Object.keys(this._conversations).map((id) => {
             return this._conversations[id].notifyError(...data);
         }));
     }

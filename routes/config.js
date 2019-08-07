@@ -70,7 +70,7 @@ router.post('/set-server-password', user.requireLogIn, (req, res, next) => {
 
     } catch(e) {
         config(req, res, next, { password: '',
-                                 error: e.message }, {}).done();
+                                 error: e.message }, {}).catch(next);
         return;
     }
 
@@ -82,7 +82,7 @@ router.post('/set-server-password', user.requireLogIn, (req, res, next) => {
     }).catch((error) => {
         return config(req, res, next, { password: '',
                                         error: error.message }, {});
-    });
+    }).catch(next);
 });
 
 module.exports = router;
