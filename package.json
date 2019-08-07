@@ -7,7 +7,7 @@
     "lint": "eslint ./routes ./service ./util ./browser",
     "test": "nyc ./tests/everything.sh",
     "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js",
-    "prepare": "(cd node_modules/thingtalk; yarn); (cd node_modules/thingengine-core; yarn; rm -fr node_modules);",
+    "prepare": "(cd node_modules/thingtalk; yarn); (cd node_modules/thingengine-core; yarn; rm -fr node_modules); yarn update-brassau",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "resolutions": {
@@ -18,10 +18,7 @@
   },
   "dependencies": {
     "almond-dialog-agent": "github:stanford-oval/almond-dialog-agent",
-    "babel-core": "^6.26.0",
-    "babelify": "^8.0.0",
     "body-parser": "^1.17.2",
-    "browserify": "^16.1.1",
     "color-scheme": "^1.0.0",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.3",
@@ -30,13 +27,13 @@
     "errorhandler": "^1.5.0",
     "express": "^4.15.3",
     "express-session": "^1.14.0",
-    "express-ws": "^3.0.0",
-    "gm": "~1.21.1",
+    "express-ws": "^4.0.0",
+    "gm": "~1.23.1",
     "levelgraph": "^2.0.1",
-    "levelup": "^1.3.8",
+    "levelup": "^4.1.0",
     "morgan": "^1.8.2",
     "node-gettext": "^2.0.0",
-    "passport": "^0.3.2",
+    "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "posix": "^4.1.1",
     "pug": "^2.0.0-rc.2",
@@ -49,13 +46,16 @@
     "thingpedia-discovery": "^1.0.0",
     "thingtalk": "github:stanford-oval/thingtalk",
     "uuid": "^3.1.0",
-    "ws": "^3.0.0"
+    "ws": "^7.1.1"
   },
   "optionalDependencies": {
     "node-mimic": "^1.0.0",
     "pulseaudio2": "^0.2.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "browserify": "^16.1.1",
+    "babelify": "^10.0.0",
     "coveralls": "^3.0.6",
     "eslint": "^6.0.0",
     "nyc": "^14.1.1",
