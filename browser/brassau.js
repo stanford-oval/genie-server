@@ -11,7 +11,7 @@
 // See COPYING for details
 "use strict";
 
-require('thingengine-core/lib/polyfill');
+require('./polyfill');
 
 const ColorScheme = require('color-scheme');
 const ThingTalk = require('thingtalk');
