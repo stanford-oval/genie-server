@@ -1,7 +1,7 @@
 env:
   browser: true
-  node: true
   es6: true
+  node: true
 parserOptions:
   ecmaVersion: 2017
 globals:
@@ -46,4 +46,10 @@ rules:
   no-label-var: error
   no-lonely-if: off
   no-new-object: error
-
+  arrow-body-style: off
+  arrow-parens:
+    - error
+    - always
+  prefer-arrow-callback: error
+  prefer-numeric-literals: error
+  require-atomic-updates: off

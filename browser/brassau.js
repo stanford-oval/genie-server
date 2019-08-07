@@ -49,7 +49,7 @@ function toWidthHeight(box) {
 }
 
 function luminanace(r, g, b) {
-    let a = [r, g, b].map(function (v) {
+    let a = [r, g, b].map((v) => {
         v /= 255;
         return v <= 0.03928
             ? v / 12.92
@@ -119,7 +119,7 @@ function colorToHue(c) {
     return rgbToHsl(r, g, b)[0];
 }
 
-$(function() {
+$(() => {
     // fake gettext for English only
     const gettext = {
         gettext: (x) => x,
@@ -145,7 +145,7 @@ $(function() {
             '<': '&lt;',
             '>': '&gt;'
         };
-        return string.replace(/[&"'<>]/g, function(what) {
+        return string.replace(/[&"'<>]/g, (what) => {
             return REPLACEMENTS[what];
         });
     }
@@ -319,7 +319,7 @@ $(function() {
             let brands = meta.brands || [];
             let boxes = {};
 
-            meta.rectangles.forEach(function(box, i) {
+            meta.rectangles.forEach((box, i) => {
                 let label = box.label || 'unknown';
                 if (label === 'unknown') {
                     let rect = toWidthHeight(box.coordinates);
@@ -441,7 +441,7 @@ $(function() {
     function genUniqueId() {
         let id = new Uint8Array(16);
         window.crypto.getRandomValues(id);
-        return Array.prototype.map.call(id, function(n) { return n.toString(16); }).join('');
+        return Array.prototype.map.call(id, (n) => { return n.toString(16); }).join('');
     }
 
     class TileStorageManager {
@@ -518,7 +518,7 @@ $(function() {
             disableLayout: DISABLE_ALL_LAYOUT,
             disableBackground: DISABLE_ALL_LAYOUT || DISABLE_ALL_BACKGROUND
         };
-        return ThingEngineApi.parseCommand(command).then(function(json) {
+        return ThingEngineApi.parseCommand(command).then((json) => {
             if (json.error) {
                 console.error('Received server error', json.error);
                 alert('Sorry, that did not work: ' + json.error.message);
@@ -545,14 +545,14 @@ $(function() {
 
                 expandTile($item, tile);
             });
-        }).catch(function(e) {
+        }).catch((e) => {
             console.error('Error creating tile', e);
             alert('Sorry, that did not work: ' + e.message);
             $('#loader').hide();
         });
     }
 
-    $('#input_command_form').submit(function(e) {
+    $('#input_command_form').submit((e) => {
         e.preventDefault();
         $('#loader').show();
 
@@ -592,7 +592,7 @@ $(function() {
         nextTestCase(0);
     }
 
-    Promise.all(tileStorageManager.getTiles().map(function (tile) {
+    Promise.all(tileStorageManager.getTiles().map((tile) => {
         console.log('restoring tile ' + tile.uniqueId + ': ' + tile.json.description);
         return createTile(tile, {
             disableLayout: DISABLE_ALL_LAYOUT,
@@ -814,7 +814,7 @@ $(function() {
                 a += `<img src="https://thingpedia.stanford.edu/thingpedia/api/entities/icon?entity_type=${firstEntity.type}&entity_value=${encodeURIComponent(firstEntity.value)}&entity_display=${encodeURIComponent(firstEntity.display || '')}" class="program-icon">`;                }
 
             a+=`<div class="program-logo">`;
-            device_icons.forEach(function(device_icon) {
+            device_icons.forEach((device_icon) => {
                 a +=`<img src=${device_icon}>`;
             });
             a+=`</div>`;
@@ -824,7 +824,7 @@ $(function() {
             // for now, bad heuristic: if a numeric out parameter is present,
             // we assume it's a replace when
             if (has_trigger) {
-                is_list = !out_params2.some(function(o) {
+                is_list = !out_params2.some((o) => {
                     let ptype = out_param_types[o];
                     return ptype.isNumber || ptype.isMeasure;
                 });
@@ -841,7 +841,7 @@ $(function() {
                     is_list = false;
             } else if (display_prim_type === 'query') {
                 let has_count = false;
-                display_prim.in_params.forEach(function(in_param) {
+                display_prim.in_params.forEach((in_param) => {
                     if (in_param.name === 'count')
                         has_count = true;
 
@@ -911,7 +911,7 @@ $(function() {
             };
 
             let display_in_params = [];
-            in_params.forEach(function([primId, in_param]) {
+            in_params.forEach(([primId, in_param]) => {
                 let prim = all_prims2[primId];
 
                 let tt_type = prim.schema.inReq[in_param.name] || prim.schema.inOpt[in_param.name];
@@ -997,36 +997,36 @@ $(function() {
             }
 
             const DEFAULT_OUTPUT_PARAM = {
-                display: value => value.display || value,
+                display: (value) => value.display || value,
                 show: false
             };
             const OUTPUT_PARAM_BY_TYPES = {
                 'String': {
-                    display: value => `${escapeHTML(value)}`,
+                    display: (value) => `${escapeHTML(value)}`,
                     show: true,
                 },
                 'Measure(C)': {
-                    display: value => `${value.toFixed(1)} C`,
+                    display: (value) => `${value.toFixed(1)} C`,
                     show: true,
                 },
                 'Measure(mps)': {
-                    display: value => `${value.toFixed(1)} m/s`,
+                    display: (value) => `${value.toFixed(1)} m/s`,
                     show: true,
                 },
                 'Measure(byte)': {
-                    display: value => `${(value /1024/1024).toFixed(2)} MB`,
+                    display: (value) => `${(value /1024/1024).toFixed(2)} MB`,
                     show: true,
                 },
                 'Measure(kg)': {
-                    display: value => `${value.toFixed(1)} kg`,
+                    display: (value) => `${value.toFixed(1)} kg`,
                     show: true,
                 },
                 'Measure(ms)': {
-                    display: value => `${(value /60000).toFixed(0)} minutes`,
+                    display: (value) => `${(value /60000).toFixed(0)} minutes`,
                     show: true,
                 },
                 'Measure(m)': {
-                    display: value => {
+                    display: (value) => {
                         let unit = 'm';
                         if (value >= 0.1 * 1.496e+11) {
                             // NASA astronomic distances
@@ -1044,13 +1044,13 @@ $(function() {
                     show: true,
                 },
                 'Currency': {
-                    display: value => {
+                    display: (value) => {
                         return (new ThingTalk.Builtin.Currency(value.value, value.code)).toLocaleString();
                     },
                     show: true,
                 },
                 'Number': {
-                    display: value => {
+                    display: (value) => {
                         value = Number(value || 0);
                         if (Math.floor(value) === value)
                             return String(value);
@@ -1060,23 +1060,23 @@ $(function() {
                     show: true,
                 },
                 'Date': {
-                    display: value => `${new Date(value).toLocaleString()}`,
+                    display: (value) => `${new Date(value).toLocaleString()}`,
                     show: true
                 },
                 'Entity(tt:email_address)': {
-                    display: value => {
+                    display: (value) => {
                         return `<a href="mailto:${escapeHTML(value.value || value)}" target="_blank">${escapeHTML(value.display || value.value || value)}</a>`;
                     },
                     show: true
                 },
                 'Entity(tt:phone_number)': {
-                    display: value => {
+                    display: (value) => {
                         return `<a href="tel:${escapeHTML(value.value || value)}" target="_blank">${escapeHTML(value.display || value.value || value)}</a>`;
                     },
                     show: true
                 },
                 'Entity(tt:picture)': {
-                    display: value => {
+                    display: (value) => {
                         if (!value)
                             return '';
                         if (has_link)
@@ -1087,19 +1087,19 @@ $(function() {
                     show: true,
                 },
                 'Entity(tt:username)': {
-                    display: value => `@${escapeHTML(value.value || value)}`,
+                    display: (value) => `@${escapeHTML(value.value || value)}`,
                     show: true,
                 },
                 'Entity(tt:url)': {
-                    display: value => `<a href="${value.value || value}">${value.display || value.value || value}</a>`,
+                    display: (value) => `<a href="${value.value || value}">${value.display || value.value || value}</a>`,
                     show: true,
                 },
                 'Array(Entity(tt:hashtag))': {
-                    display: value => `${escapeHTML(value.map((v) => '#' + (v.value || v)).join(' '))}`,
+                    display: (value) => `${escapeHTML(value.map((v) => '#' + (v.value || v)).join(' '))}`,
                     show: true,
                 },
                 'Array(Entity(tt:url))': {
-                    display: value => `${value.map((v) => '<a href="' + escapeHTML(v.value || v) + '">' + escapeHTML(v.value || v)
+                    display: (value) => `${value.map((v) => '<a href="' + escapeHTML(v.value || v) + '">' + escapeHTML(v.value || v)
                      + '</a>').join(' ')}`,
                     show: true,
                 }
@@ -1117,15 +1117,15 @@ $(function() {
 
             const MORE_HARDCODED_OUTPUT_PARAMS = {
                 'org.thingpedia.builtin.thingengine.builtin:get_time:time': {
-                    display: value => `${new Date(value).toLocaleTimeString()}`,
+                    display: (value) => `${new Date(value).toLocaleTimeString()}`,
                     show: true
                 },
                 'org.thingpedia.builtin.thingengine.builtin:get_date:date': {
-                    display: value => `${new Date(value).toLocaleDateString()}`,
+                    display: (value) => `${new Date(value).toLocaleDateString()}`,
                     show: true
                 },
                 'com.imgflip:generate:name': {
-                    display: value => null,
+                    display: (value) => null,
                     show: false
                 }
             };
@@ -1138,7 +1138,7 @@ $(function() {
                     show: false
                 },
                 in_reply_to: {
-                    display: value => {
+                    display: (value) => {
                         if (!value)
                             return '';
                         else
@@ -1147,49 +1147,49 @@ $(function() {
                     show: true,
                 },
                 video_id: {
-                    display: value => `<iframe title="YouTube video player" class="youtube-player" type="text/html"
+                    display: (value) => `<iframe title="YouTube video player" class="youtube-player" type="text/html"
 width="100%" src="http://www.youtube.com/embed/${escapeHTML(value.value || value)}"
 frameborder="0" allowFullScreen></iframe>`,
                     show: true,
                 },
                 channel_id: {
-                    display: value => `<a href="http://www.youtube.com/channel/${escapeHTML(value)}" target="_blank">Go To Channel</a>`,//"
+                    display: (value) => `<a href="http://www.youtube.com/channel/${escapeHTML(value)}" target="_blank">Go To Channel</a>`,//"
                     show: true
                 },
                 link: {
-                    display: value => `<a href="${escapeHTML(value.value || value)}">${escapeHTML(value.display || value.value || value)}</a>`,
+                    display: (value) => `<a href="${escapeHTML(value.value || value)}">${escapeHTML(value.display || value.value || value)}</a>`,
                     show: !has_link
                 },
                 low_estimate: {
-                    display: value => `${escapeHTML(value)} $`,
+                    display: (value) => `${escapeHTML(value)} $`,
                     show: true
                 },
                 company_name: {
-                    display: value => null,
+                    display: (value) => null,
                     show: false
                 },
                 image_id: {
-                    display: value => null,
+                    display: (value) => null,
                     show: false
                 },
                 from_name: {
-                    display: value => null,
+                    display: (value) => null,
                     show: false
                 },
                 surge: {
-                    display: value => null,
+                    display: (value) => null,
                     show: false
                 },
                 currency_code: {
-                    display: value => null,
+                    display: (value) => null,
                     show: false
                 },
                 asteroid_id: {
-                    display: value => null,
+                    display: (value) => null,
                     show: false
                 },
                 orbiting_body: {
-                    display: value => null,
+                    display: (value) => null,
                     show: false
                 }
             };
@@ -1225,7 +1225,7 @@ frameborder="0" allowFullScreen></iframe>`,
             }
 
             let display_out_params = [];
-            out_params2.forEach(function(out_param) {
+            out_params2.forEach((out_param) => {
                 let ptype = out_param_types[out_param];
 
                 let key = display_prim.selector.kind + ':' + display_prim.channel + ':' + out_param;
@@ -1318,7 +1318,7 @@ frameborder="0" allowFullScreen></iframe>`,
 
             let inputOutputParams = display_in_params.concat(display_out_params);
             let inputOutputImportance = {};
-            inputOutputParams.forEach(function([primId, inOutParam]) {
+            inputOutputParams.forEach(([primId, inOutParam]) => {
                 let importance, box_label;
                 if (inOutParam.isInputParam) {
                     importance = computeInputParamImportance(primId, inOutParam);
@@ -1345,7 +1345,7 @@ frameborder="0" allowFullScreen></iframe>`,
             });
             console.log('importance', inputOutputImportance);
             for (let box_label in inputOutputImportance) {
-                inputOutputImportance[box_label].sort(function(a, b) {
+                inputOutputImportance[box_label].sort((a, b) => {
                     let [aPrimId, aInOutParam, aImportance] = a;
                     let [bPrimId, bInOutParam, bImportance] = b;
                     if (bImportance === aImportance) {
@@ -1402,16 +1402,16 @@ frameborder="0" allowFullScreen></iframe>`,
 
             let input_rects = [];
             let output_rects = [];
-            display_in_params = display_in_params.filter(function([primId, in_param]) {
+            display_in_params = display_in_params.filter(([primId, in_param]) => {
                 return !!inputOutputAssignment[primId + ':' + in_param.name];
             });
-            input_rects = display_in_params.map(function([primId, in_param]) {
+            input_rects = display_in_params.map(([primId, in_param]) => {
                 return inputOutputAssignment[primId + ':' + in_param.name];
             });
-            display_out_params = display_out_params.filter(function([primId, out_param]) {
+            display_out_params = display_out_params.filter(([primId, out_param]) => {
                 return !!inputOutputAssignment[primId + ':' + out_param];
             });
-            output_rects = display_out_params.map(function([primId, out_param]) {
+            output_rects = display_out_params.map(([primId, out_param]) => {
                 return inputOutputAssignment[primId + ':' + out_param];
             });
 
@@ -1442,19 +1442,19 @@ frameborder="0" allowFullScreen></iframe>`,
                     let colors = scheme.from_hex(rgbToHex(background_color).substr(1))
                         .scheme('contrast')
                         .colors()
-                        .map(color => "#" + color);
+                        .map((color) => "#" + color);
                     console.log('fallback to color scheme from ' + rgbToHex(background_color), colors);
                     return colors[1];
                 }
 
                 return rgbToHex(color_candidate);
             }
-            let input_colors = data.input_colors || input_rects.map(function(rect) {
+            let input_colors = data.input_colors || input_rects.map((rect) => {
                 return rect['font-color'] || chooseForegroundColor(rect['left-color']);
             });
             data.input_colors = input_colors;
 
-            let output_colors = data.output_colors || output_rects.map(function(rect) {
+            let output_colors = data.output_colors || output_rects.map((rect) => {
                 return rect['font-color'] || chooseForegroundColor(rect['left-color']);
             });
             data.output_colors = output_colors;
@@ -1498,7 +1498,7 @@ frameborder="0" allowFullScreen></iframe>`,
                 a +=`<div class='test-case-number'>${data.testCaseNumber}</div>`;
             a += `</div>`;
 
-            display_in_params.forEach(function([primId, in_param]) {
+            display_in_params.forEach(([primId, in_param]) => {
                 let prim = all_prims2[primId];
                 let display_type = in_param_types[primId + ':' + in_param.name];
                 if (!display_type)
@@ -1708,7 +1708,7 @@ frameborder="0" allowFullScreen></iframe>`,
                     a += `<a href="${escapeHTML(link.value || link)}" target="_blank">`;
                 }
 
-                display_out_params.forEach(function([primId, out_param]) {
+                display_out_params.forEach(([primId, out_param]) => {
                     let prim = all_prims2[primId];
                     let ptype = out_param_types[out_param];
                     let out_param_id = next_out_param_id++;
@@ -1782,7 +1782,7 @@ frameborder="0" allowFullScreen></iframe>`,
             }
             function replaceOutputList(resultList) {
                 data.resultList = resultList;
-                data.isUnreadList = resultList.map(function() { return true; });
+                data.isUnreadList = resultList.map(() => { return true; });
                 data.lastResultPos = 0;
                 data.unreadItems = resultList.length;
                 replaceOutputs(resultList[0], 0);
@@ -1855,7 +1855,7 @@ frameborder="0" allowFullScreen></iframe>`,
             let $item = $(a);
             $item.attr('data-tile-id', data.uniqueId);
             function escapeBackgroundImage(url) {
-                return encodeURIComponent(url).replace(/[!'()*]/g, function(c) {
+                return encodeURIComponent(url).replace(/[!'()*]/g, (c) => {
                     return '%' + c.charCodeAt(0).toString(16);
                 });
             }
@@ -1878,8 +1878,8 @@ frameborder="0" allowFullScreen></iframe>`,
 
             $(".program-notification-badge", $item).hide();
             $(".arrow", $item).hide();
-            $(".arrow-next", $item).on('tap', function() { selectOutput(1); });
-            $(".arrow-prev", $item).on('tap', function() { selectOutput(-1); });
+            $(".arrow-next", $item).on('tap', () => { selectOutput(1); });
+            $(".arrow-prev", $item).on('tap', () => { selectOutput(-1); });
             $(".checkbox-switch", $item).bootstrapSwitch();
             /*$(".location-widget", $item).each(function(i, element) {
                 let $element = $(element)
@@ -1916,7 +1916,7 @@ frameborder="0" allowFullScreen></iframe>`,
             }
             $("input.program-input, select.program-input, textarea.program-input", $item).on('change', bindInputParamChange);
             $(".program-input.checkbox-switch", $item).on('switchChange.bootstrapSwitch', bindInputParamChange);
-            $(".program-input.entity-drop-down", $item).each(function(i, element) {
+            $(".program-input.entity-drop-down", $item).each((i, element) => {
                 let $el = $(element);
                 let entityType = $el.attr('data-entity-type');
                 let in_param_handler;
@@ -1925,9 +1925,9 @@ frameborder="0" allowFullScreen></iframe>`,
                 else
                     in_param_handler = in_param_map[element.id.substr('input-'.length)];
 
-                $.ajax('https://thingpedia.stanford.edu/thingpedia/api/entities/list/' + entityType).then(function(res) {
+                $.ajax('https://thingpedia.stanford.edu/thingpedia/api/entities/list/' + entityType).then((res) => {
                     let data = res.data || [];
-                    data.forEach(function(item) {
+                    data.forEach((item) => {
                         let $option = $('<option>').attr('value', item.id).text(item.name);
                         if (item.id === in_param_handler.in_param.value.value)
                             $option.attr('selected', 'selected');
@@ -1999,7 +1999,7 @@ frameborder="0" allowFullScreen></iframe>`,
             }
             if (!options.disableLayout) {
                 emptyBoxes.forEach(createEmptyBox);
-                output_rects.forEach(function(rect) {
+                output_rects.forEach((rect) => {
                     let box = createEmptyBox(rect);
                     if (box)
                         box.addClass('program-temporary-box');
@@ -2030,7 +2030,7 @@ frameborder="0" allowFullScreen></iframe>`,
                             y: 37.4299195
                         }
                     }
-                }).then(function(response) {
+                }).then((response) => {
                     console.log("executeGetOrDo callback");
                     console.log(response);
                     let results = response.results;
@@ -2147,7 +2147,7 @@ frameborder="0" allowFullScreen></iframe>`,
                 }
             };
 
-            $('.close', $item).on('tap', function() {
+            $('.close', $item).on('tap', () => {
                 if (data.currentAppId) {
                     console.log('deleting and stopping app', data.currentAppId);
                     let appId = data.currentAppId;
@@ -2278,7 +2278,7 @@ frameborder="0" allowFullScreen></iframe>`,
         });
     }
 
-    $grid.on('click', '.grid-item', function(event) {
+    $grid.on('click', '.grid-item', (event) => {
         event.stopPropagation();
         let $item = $(event.currentTarget);
         let tile = tileStorageManager.getTile($item.attr('data-tile-id'));

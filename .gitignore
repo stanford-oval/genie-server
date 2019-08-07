@@ -2,10 +2,10 @@
 
 home/
 node_modules/
+.nyc_output/
 
 public/javascripts/brassau.js
 public/javascripts/friendhub.js
 service/platform_config.js
 
 yarn-error.log
-
