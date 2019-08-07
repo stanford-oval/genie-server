@@ -1,26 +1,14 @@
-# ThingEngine
+# Almond For Home Servers
 
-## Help the World Connect the Dots
+[![Build Status](https://travis-ci.com/stanford-oval/almond-server.svg?branch=master)](https://travis-ci.com/stanford-oval/almond-server) [![Coverage Status](https://coveralls.io/repos/github/stanford-oval/almond-server/badge.svg?branch=master)](https://coveralls.io/github/stanford-oval/almond-server?branch=master) [![Dependency Status](https://david-dm.org/stanford-oval/almond-server/status.svg)](https://david-dm.org/stanford-oval/almond-server) [![Greenkeeper badge](https://badges.greenkeeper.io/stanford-oval/almond-server.svg)](https://greenkeeper.io/) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/stanford-oval/almond-server.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/stanford-oval/almond-server/context:javascript)
 
-ThingEngine is the workhorse behind ThingPedia, the open source platform for IoT rules
-that you can execute anywhere you want.
+## End User Programmable Virtual Assistants
 
-ThingEngine comes in three form:
+This repository contains home server version of Almond, the end user programmable
+assistant. It is a single-user version, suitable for running on low-power
+devices and smart speakers.
 
-- As a phone app, for Android
-- As an installable app for a home server
-- As a web service hosted at <https://thingengine.stanford.edu>
-
-This module contains the installable home server version of ThingEngine, and
-depends on a number of other modules. You will only need this module
-if you want to run your own private ThingEngine.
-
-The server version of ThingEngine is single user only. If you want a
-multi-user version, look at
-[thingengine-platform-cloud](https://github.com/Stanford-IoT-Lab/thingengine-platform-cloud).
-
-ThingEngine is part of Open Thing Platform, a research project led by
+Almond is part of Open Thing Platform, a research project led by
 prof. Monica Lam, from Stanford University.  You can find more
-information at <http://thingengine.stanford.edu/about>. User
-documentation is available in
-[thingengine-core](https://github.com/Stanford-IoT-Lab/thingengine-core).
+information at <https://thingpedia.stanford.edu/about>.
+
