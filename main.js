@@ -70,6 +70,7 @@ async function main() {
             console.log('Ready');
             if (!_stopped) {
                 _running = true;
+                await _ad.startConversation();
                 await _engine.run();
             }
         } finally {

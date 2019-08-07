@@ -94,8 +94,50 @@ async function testHomepage(driver) {
     assert.strictEqual(await title.getText(), 'It works!');
 }
 
+
+async function testMyConversation(driver) {
+    await driver.get(BASE_URL + '/conversation');
+
+    const inputEntry = await driver.wait(
+        WD.until.elementLocated(WD.By.id('input')),
+        30000);
+    await checkAllImages(driver);
+
+    // wait some extra time for the almond thread to respond
+    await driver.sleep(5000);
+
+    let messages = await driver.findElements(WD.By.css('.message'));
+    assert.strictEqual(messages.length, 1);
+    assert.strictEqual(await messages[0].getText(), `Welcome back!`);
+
+    await inputEntry.sendKeys('no', WD.Key.ENTER);
+
+    const ourInput = await driver.wait(
+        WD.until.elementLocated(WD.By.css('.message.from-user:nth-child(2)')),
+        10000);
+    assert.strictEqual(await ourInput.getText(), 'no');
+
+    const response = await driver.wait(
+        WD.until.elementLocated(WD.By.css('.from-almond:nth-child(3) .message')),
+        10000);
+    assert.strictEqual(await response.getText(), 'No way!');
+
+    /*await inputEntry.sendKeys('hello', WD.Key.ENTER);
+
+    const ourInput2 = await driver.wait(
+        WD.until.elementLocated(WD.By.css('.message.from-user:nth-child(3)')),
+        10000);
+    assert.strictEqual(await ourInput2.getText(), 'hello');
+
+    const response2 = await driver.wait(
+        WD.until.elementLocated(WD.By.css('.from-almond:nth-child(4) .message')),
+        10000);
+    assert.strictEqual(await response2.getText(), 'Hi!');*/
+}
+
 async function main() {
     await withSelenium(testHomepage);
+    await withSelenium(testMyConversation);
 }
 module.exports = main;
 if (!module.parent)
