@@ -40,7 +40,7 @@
     "q": "^1.5.0",
     "serve-favicon": "^2.4.3",
     "smtlib": "^0.1.1",
-    "sqlite3": "^4.0.6",
+    "sqlite3": "^4.1.0",
     "thingengine-core": "github:stanford-oval/thingengine-core",
     "thingpedia": "github:stanford-oval/thingpedia-api",
     "thingpedia-discovery": "^1.0.0",
