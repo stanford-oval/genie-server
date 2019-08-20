@@ -27,8 +27,13 @@ module.exports = class AlmondApi {
 
     _sendWs(obj) {
         let str = JSON.stringify(obj);
-        for (let out of this._outputs)
-            out.send(str);
+        for (let out of this._outputs) {
+            try {
+                out.send(str);
+            } catch(e) {
+                // ignore errors if the connection was closed, while still sending to other connections
+            }
+        }
     }
     addOutput(out) {
         this._outputs.add(out);
@@ -88,6 +93,12 @@ module.exports = class AlmondApi {
                 if (!slot.get())
                     throw new TypeError(`missing location ${relativeTag}`);
             }
+            if (value.isTime && value.value.isRelative) {
+                let relativeTag = value.value.relativeTag;
+                slot.set(this._resolveUserContext('$context.time.' + relativeTag));
+                if (!slot.get())
+                    throw new TypeError(`missing time ${relativeTag}`);
+            }
         }
 
         let icon = null;
@@ -146,12 +157,19 @@ module.exports = class AlmondApi {
     async createApp(data) {
         let code = data.code;
         let locations = data.locations || {};
+        let times = data.times || {};
 
         let sharedPrefs = this._engine.platform.getSharedPreferences();
         for (let loc in locations) {
             if (loc === 'home' || loc === 'work') {
                 let location = Ast.Value.fromJSON(ThingTalk.Type.Location, locations[loc]);
                 sharedPrefs.set('context-$context.location.' + loc, location.toJS());
+            }
+        }
+        for (let time in times) {
+            if (time === 'morning' || time === 'evening') {
+                let time = Ast.Value.fromJSON(ThingTalk.Type.Time, times[time]);
+                sharedPrefs.set('context-$context.time.' + time, time.toJS());
             }
         }
         if (!code)
@@ -190,7 +208,7 @@ module.exports = class AlmondApi {
                 return this._doParse(sentence);
             }
         }).then((analyzed) => {
-            return Promise.all(analyzed.candidates.slice(0, 3).map((candidate) => {
+            return Promise.all(analyzed.candidates.map((candidate) => {
                 return this._processCandidate(candidate, analyzed);
             })).then((programs) => {
                 return programs.filter((r) => r !== null);
@@ -198,7 +216,7 @@ module.exports = class AlmondApi {
                 return {
                     tokens: analyzed.tokens,
                     entities: analyzed.entities,
-                    candidates: programs
+                    candidates: programs.slice(0, 3)
                 };
             });
         });
@@ -213,7 +231,7 @@ module.exports = class AlmondApi {
             }
 
             if (factory.type === 'none') {
-                return this._engine.devices.loadOneDevice({ kind: factory.kind }, true).then((device) => {
+                return this._engine.devices.addSerialized({ kind: factory.kind }).then((device) => {
                     return [device, null];
                 });
             } else {
@@ -286,6 +304,14 @@ module.exports = class AlmondApi {
                 else
                     return null;
             }
+            case '$context.time.morning':
+            case '$context.time.evening': {
+                let value = sharedPrefs.get('context-' + variable);
+                if (value !== undefined)
+                    return Ast.Value.fromJSON(ThingTalk.Type.Time, value);
+                else
+                    return null;
+            }
             default:
                 throw new TypeError('Invalid variable ' + variable);
         }
@@ -330,39 +356,48 @@ module.exports = class AlmondApi {
                     result.locations[slot.value.value.relativeTag] = false;
                 }
             }
+            if (slot.value.isTime && slot.value.value.isRelative) {
+                let value = this._resolveUserContext('$context.time.' + slot.value.value.relativeTag);
+                if (value !== null) {
+                    slot.value.value = value;
+                    result.times[slot.value.value.relativeTag] = true;
+                } else {
+                    result.times[slot.value.value.relativeTag] = false;
+                }
+            }
         }
     }
 
-    _toProgram(code, entities) {
-        if (code[0] === 'bookkeeping')
-            return Promise.reject(new Error('Not a ThingTalk program'));
-        return Promise.resolve(ThingTalk.NNSyntax.fromNN(code, entities));
-    }
+    async _processCandidate(candidate, analyzed) {
+        if (candidate.code[0] === 'bookkeeping') // not a thingtalk program
+            return null;
 
-    _processCandidate(candidate, analyzed) {
-        return this._toProgram(candidate.code, analyzed.entities).then((program) => program.typecheck(this._engine.schemas, true)).catch((e) => {
+        let program;
+        try {
+            program = ThingTalk.NNSyntax.fromNN(candidate.code, analyzed.entities);
+            await program.typecheck(this._engine.schemas, true);
+        } catch(e) {
             console.error('Failed to analyze ' + candidate.code.join(' ') + ' : ' + e.message);
             return null;
-        }).then((program) => {
-            if (!program || !program.isProgram)
-                return null;
+        }
+        if (!program || !program.isProgram)
+            return null;
 
-            const primitives = new Map;
+        const primitives = new Map;
 
-            const result = {
-                score: candidate.score,
-                code: null,
-                commandClass: 'rule',
-                devices: {},
-                locations: {},
-            };
-            return this._processPrimitives(program, primitives, result).then((ok) => {
-                if (!ok)
-                    return null;
-                this._slotFill(program, primitives, result);
-                result.code = program.prettyprint(true);
-                return result;
-            });
-        });
+        const result = {
+            score: candidate.score,
+            code: null,
+            commandClass: 'rule',
+            devices: {},
+            locations: {},
+            times: {},
+        };
+        const ok = await this._processPrimitives(program, primitives, result);
+        if (!ok)
+            return null;
+        this._slotFill(program, result);
+        result.code = program.prettyprint(true);
+        return result;
     }
 };

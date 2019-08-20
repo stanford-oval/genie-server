@@ -10,14 +10,9 @@
     "prepare": "(cd node_modules/thingtalk; yarn); (cd node_modules/thingengine-core; yarn; rm -fr node_modules); yarn update-brassau",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
-  "resolutions": {
-    "almond-dialog-agent": "github:stanford-oval/almond-dialog-agent",
-    "thingtalk": "github:stanford-oval/thingtalk",
-    "thingengine-core": "github:stanford-oval/thingengine-core",
-    "thingpedia": "github:stanford-oval/thingpedia-api"
-  },
+  "resolutions": {},
   "dependencies": {
-    "almond-dialog-agent": "github:stanford-oval/almond-dialog-agent",
+    "almond-dialog-agent": "~1.6.0",
     "body-parser": "^1.17.2",
     "color-scheme": "^1.0.0",
     "connect-flash": "^0.1.1",
@@ -41,10 +36,10 @@
     "serve-favicon": "^2.4.3",
     "smtlib": "^0.1.1",
     "sqlite3": "^4.0.6",
-    "thingengine-core": "github:stanford-oval/thingengine-core",
-    "thingpedia": "github:stanford-oval/thingpedia-api",
+    "thingengine-core": "~1.6.0",
+    "thingpedia": "~2.5.0",
     "thingpedia-discovery": "^1.0.0",
-    "thingtalk": "github:stanford-oval/thingtalk",
+    "thingtalk": "~1.8.0",
     "uuid": "^3.1.0",
     "ws": "^7.1.1"
   },
@@ -54,8 +49,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
-    "browserify": "^16.1.1",
     "babelify": "^10.0.0",
+    "browserify": "^16.1.1",
     "coveralls": "^3.0.6",
     "eslint": "^6.0.0",
     "nyc": "^14.1.1",
