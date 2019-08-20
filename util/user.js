@@ -119,7 +119,7 @@ module.exports = {
         var user = model.get();
         hashPassword(user.sqliteKeySalt, password).then((key) => {
             req.app.frontend.unlock(key);
-        }).done();
+        });
     },
 
     /* Middleware to check if the user is logged in before performing an
