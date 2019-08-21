@@ -285,31 +285,31 @@ module.exports = class Assistant extends events.EventEmitter {
                 child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
             });
             this._speechHandler.on('utterance', (utterance) => {
-                if (isRecordRequest(text) && isMorning(text) && isEvening(text)) {
+                if (isRecordRequest(utterance) && isMorning(utterance) && isEvening(utterance)) {
                     this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0), makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
                     return;
                 }
-                if (isRecordRequest(text) && isMorning(text)) {
+                if (isRecordRequest(utterance) && isMorning(utterance)) {
                     this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
                     return;
                 }
-                if (isRecordRequest(text) && isEvening(text)) {
+                if (isRecordRequest(utterance) && isEvening(utterance)) {
                     this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
                     return;
                 }
-                if (isRecordRequest(text) && isNoon(text)) {
+                if (isRecordRequest(utterance) && isNoon(utterance)) {
                     this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(12, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
                     return;
                 }
-                if (isRecordRequest(text) && isOnceADay(text)) {
+                if (isRecordRequest(utterance) && isOnceADay(utterance)) {
                     this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
                     return;
                 }
-                if (isRecordRequest(text) && isTwiceADay(text)) {
+                if (isRecordRequest(utterance) && isTwiceADay(utterance)) {
                     this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0), makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
                     return;
                 }
-                if (isRecordRequest(text) && isThriceADay(text)) {
+                if (isRecordRequest(utterance) && isThriceADay(utterance)) {
                     this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0), makeTime(12, 0), makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
                     return;
                 }
