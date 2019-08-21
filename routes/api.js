@@ -232,7 +232,7 @@ router.ws('/conversation', (ws, req, next) => {
             case 'parsed':
                 return conversation.handleParsedCommand(parsed.json, parsed.title);
             case 'tt':
-                return conversation.handleThingTalk(parsed.code);
+                return conversation.handleThingTalk(parsed.code, parsed.raw);
             default:
                 throw new Error('Invalid command type ' + parsed.type);
             }

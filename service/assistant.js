@@ -170,10 +170,10 @@ class MainConversation extends Almond {
         return super.handleParsedCommand.apply(this, arguments);
     }
 
-    handleThingTalk(code) {
+    handleThingTalk(code, raw) {
         this._delegate.clearSpeechQueue();
         this._delegate.collapseButtons();
-        this._delegate.addCommandToHistory("Code: " + code);
+        this._delegate.addCommandToHistory(raw ? raw : "Code: " + code);
         return super.handleThingTalk.apply(this, arguments);
     }
 

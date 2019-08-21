@@ -189,6 +189,61 @@ $(function() {
             handleParsedCommand({ code: line.split(' '), entities: {} });
     }
 
+    function isRecordRequest(text) {
+      if (text.includes('bob') === false) {
+        return false;
+      }
+      if (text.includes('blood pressure') === false && text.includes('pressure') === false) {
+        return false;
+      }
+      if (text.includes('record') || text.includes('report') || text.includes('write') || text.includes('measure') || text.includes('for') || text.includes('give') || text.includes('send') || text.includes('take')) {
+        return true;
+      }
+      return false;
+    }
+
+    function isOnceADay(text) {
+      if (text.includes('once') || text.includes('one time')) {
+        return true;
+      }
+      return false;
+    }
+
+    function isTwiceADay(text) {
+      if (text.includes('twice') || text.includes('two times')) {
+        return true;
+      }
+      return false;
+    }
+
+    function isThriceADay(text) {
+      if (text.includes('thrice') || text.includes('three times') || text.includes('with meal') || text.includes('at meal')) {
+        return true;
+      }
+      return false;
+    }
+
+    function isMorning(text) {
+      if (text.includes('morning') || text.includes('breakfast') || text.includes('wake') || text.includes('waking')) {
+        return true;
+      }
+      return false;
+    }
+
+    function isEvening(text) {
+      if (text.includes('evening') || text.includes('night') || text.includes('dinner') || text.includes('bed') || text.includes('sleep') || text.includes('sleeping') || text.includes('asleep')) {
+        return true;
+      }
+      return false;
+    }
+
+    function isNoon(text) {
+      if (text.includes('noon') || text.includes('lunch')) {
+        return true;
+      }
+      return false;
+    }
+
     function handleCommand(text) {
         if (text.startsWith('\\r')) {
             handleSlashR(text.substring(3));
@@ -198,14 +253,46 @@ $(function() {
             handleThingTalk(text.substring(3));
             return;
         }
+        if (text === 'cat') {
+            handleThingTalk(`now => @com.thecatapi.get() => notify;`, text);
+            return;
+        }
+        if (isRecordRequest(text) && isMorning(text) && isEvening(text)) {
+            handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0), makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+            return;
+        }
+        if (isRecordRequest(text) && isMorning(text)) {
+            handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+            return;
+        }
+        if (isRecordRequest(text) && isEvening(text)) {
+            handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+            return;
+        }
+        if (isRecordRequest(text) && isNoon(text)) {
+            handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(12, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+            return;
+        }
+        if (isRecordRequest(text) && isOnceADay(text)) {
+            handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+            return;
+        }
+        if (isRecordRequest(text) && isTwiceADay(text)) {
+            handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0), makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+            return;
+        }
+        if (isRecordRequest(text) && isThriceADay(text)) {
+            handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0), makeTime(12, 0), makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+            return;
+        }
 
         ws.send(JSON.stringify({ type: 'command', text: text }));
     }
     function handleParsedCommand(json, title) {
         ws.send(JSON.stringify({ type: 'parsed', json: json, title: title }));
     }
-    function handleThingTalk(tt) {
-        ws.send(JSON.stringify({ type: 'tt', code: tt }));
+    function handleThingTalk(tt, raw) {
+        ws.send(JSON.stringify({ type: 'tt', code: tt, raw: raw }));
     }
     function handleChoice(idx, title) {
         handleParsedCommand({ code: ['bookkeeping', 'choice', String(idx)], entities: {} }, title);
