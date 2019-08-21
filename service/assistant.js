@@ -202,6 +202,61 @@ class OtherConversation extends Almond {
     }
 }
 
+function isRecordRequest(text) {
+  if (text.includes('bob') === false) {
+    return false;
+  }
+  if (text.includes('blood pressure') === false && text.includes('pressure') === false) {
+    return false;
+  }
+  if (text.includes('record') || text.includes('report') || text.includes('write') || text.includes('measure') || text.includes('for') || text.includes('give') || text.includes('send') || text.includes('take')) {
+    return true;
+  }
+  return false;
+}
+
+function isOnceADay(text) {
+  if (text.includes('once') || text.includes('one time')) {
+    return true;
+  }
+  return false;
+}
+
+function isTwiceADay(text) {
+  if (text.includes('twice') || text.includes('two times')) {
+    return true;
+  }
+  return false;
+}
+
+function isThriceADay(text) {
+  if (text.includes('thrice') || text.includes('three times') || text.includes('with meal') || text.includes('at meal')) {
+    return true;
+  }
+  return false;
+}
+
+function isMorning(text) {
+  if (text.includes('morning') || text.includes('breakfast') || text.includes('wake') || text.includes('waking')) {
+    return true;
+  }
+  return false;
+}
+
+function isEvening(text) {
+  if (text.includes('evening') || text.includes('night') || text.includes('dinner') || text.includes('bed') || text.includes('sleep') || text.includes('sleeping') || text.includes('asleep')) {
+    return true;
+  }
+  return false;
+}
+
+function isNoon(text) {
+  if (text.includes('noon') || text.includes('lunch')) {
+    return true;
+  }
+  return false;
+}
+
 module.exports = class Assistant extends events.EventEmitter {
     constructor(engine) {
         super();
@@ -230,6 +285,34 @@ module.exports = class Assistant extends events.EventEmitter {
                 child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
             });
             this._speechHandler.on('utterance', (utterance) => {
+                if (isRecordRequest(text) && isMorning(text) && isEvening(text)) {
+                    this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0), makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+                    return;
+                }
+                if (isRecordRequest(text) && isMorning(text)) {
+                    this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+                    return;
+                }
+                if (isRecordRequest(text) && isEvening(text)) {
+                    this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+                    return;
+                }
+                if (isRecordRequest(text) && isNoon(text)) {
+                    this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(12, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+                    return;
+                }
+                if (isRecordRequest(text) && isOnceADay(text)) {
+                    this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+                    return;
+                }
+                if (isRecordRequest(text) && isTwiceADay(text)) {
+                    this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0), makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+                    return;
+                }
+                if (isRecordRequest(text) && isThriceADay(text)) {
+                    this._mainConversation.handleThingTalk(`executor = "bob"^^tt:username : { attimer(time=[makeTime(9, 0), makeTime(12, 0), makeTime(19, 0)]) => @org.thingpedia.cardiology.patient.record();}`);
+                    return;
+                }
                 //this._api.sendCommand(utterance);
                 this._mainConversation.handleCommand(utterance);
             });
