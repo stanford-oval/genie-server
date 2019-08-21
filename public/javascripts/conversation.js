@@ -198,14 +198,18 @@ $(function() {
             handleThingTalk(text.substring(3));
             return;
         }
+        if (text === 'cat') {
+            handleThingTalk(`now => @com.thecatapi.get() => notify;`, text);
+            return;
+        }
 
         ws.send(JSON.stringify({ type: 'command', text: text }));
     }
     function handleParsedCommand(json, title) {
         ws.send(JSON.stringify({ type: 'parsed', json: json, title: title }));
     }
-    function handleThingTalk(tt) {
-        ws.send(JSON.stringify({ type: 'tt', code: tt }));
+    function handleThingTalk(tt, raw) {
+        ws.send(JSON.stringify({ type: 'tt', code: tt, raw: raw }));
     }
     function handleChoice(idx, title) {
         handleParsedCommand({ code: ['bookkeeping', 'choice', String(idx)], entities: {} }, title);
