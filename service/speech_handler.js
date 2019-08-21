@@ -78,8 +78,8 @@ module.exports = class SpeechHandler extends events.EventEmitter {
         });
         this._detector.on('hotword', (hotword) => {
             console.log('Hotword ' + hotword + ' detected');
-            this.emit('hotword');
-            this._onDetected();
+            //this.emit('hotword');
+            //this._onDetected();
         });
         this._stream.pipe(this._detector);
     }

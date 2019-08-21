@@ -1,0 +1,15 @@
+class @org.thingpedia.cardiology.patient
+#_[name="Cardiology (Patient)"]
+#_[description="The patient's interface to the cardiology project, which is run by the Almond team."]
+#[version=26]
+#[package_version=26] {
+  import loader from @org.thingpedia.v2();
+  import config from @org.thingpedia.config.builtin();
+
+  action record(in opt systolic: Number #_[prompt="Please enter your systolic blood pressure measurement (the top number)."] #_[canonical="systolic"],
+                in opt diastolic: Number #_[prompt="Please enter your diastolic blood pressure measurement (the bottom number)."] #_[canonical="diastolic"])
+  #_[canonical="prompt patient to measure blood pressure"]
+  #_[confirmation="record blood pressure"]
+  #[doc="Sends your blood pressure measurements to your doctor."]
+  #[confirm=true];
+}

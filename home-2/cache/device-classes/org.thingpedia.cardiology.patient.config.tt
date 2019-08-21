@@ -1,0 +1,13 @@
+class @org.thingpedia.cardiology.patient.config
+#_[name="Cardiology Support Service"]
+#_[description="This is a service that internally supports the Cardiology Assistant. It cannot be used directly."]
+#[version=3]
+#[package_version=3] {
+  import loader from @org.thingpedia.v2();
+  import config from @org.thingpedia.config.none();
+
+  action configure_patient(in req email: Entity(tt:email_address) #_[canonical="email"],
+                           in req key: String #_[canonical="key"])
+  #_[confirmation="configure your patient account with email ${email}"]
+  #_[canonical="configure patient on cardiology support service"];
+}

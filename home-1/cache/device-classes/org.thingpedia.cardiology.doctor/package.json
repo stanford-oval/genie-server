@@ -1,0 +1,1 @@
+{"name":"org.thingpedia.cardiology.doctor","version":"1.0.0","description":"A virtual assistant, based on Almond, that helps doctors remind patients to track their blood pressure regularly.","main":"device.js","author":"Ricky Grannis-Vu, Elvis Zhang","dependencies":{"uuid":"^3.3.2"},"thingpedia-version":41}

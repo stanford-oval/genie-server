@@ -11,12 +11,12 @@
 const MOCK_ADDRESS_BOOK_DATA = [
     { displayName: 'Bob', alternativeDisplayName: 'Doctor',
       isPrimary: true, starred: false, timesContacted: 0, type: 'home',
-      email_address: 'elvzhang@stanford.edu', phone_number: '+1555BBOBSON',
+      email_address: 'rickygv99@yahoo.com', phone_number: '+1555BBOBSON',
       speakerId: 'cc52eb7a-179d-49d8-b01d-96bd3c297b5d' /* giovanni */ },
     {
       displayName: 'Ricky', alternativeDisplayName: 'Patient freaky riki rikis reekis reekes',
       isPrimary: true, starred: false, timesContacted: 0, type: 'home',
-      email_address: 'elviszhang0606@gmail.com', phone_number: null,
+      email_address: 'rickygv@stanford.edu', phone_number: null,
       speakerId: 'f83882d6-795a-45f6-a9a4-6cd75731d960' /* silei */
     },
     {

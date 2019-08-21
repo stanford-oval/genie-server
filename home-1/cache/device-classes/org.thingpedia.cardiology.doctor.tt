@@ -1,0 +1,25 @@
+class @org.thingpedia.cardiology.doctor
+#_[name="Cardiology (Doctor)"]
+#_[description="The doctor's interface to the cardiology project, which is run by the Almond team."]
+#[version=41]
+#[package_version=41] {
+  import loader from @org.thingpedia.v2();
+  import config from @org.thingpedia.config.basic_auth();
+
+  monitorable list query readings(out username: Entity(tt:email_address) #_[canonical="username"],
+                                  out time: Date #_[canonical="time"],
+                                  out systolic: Number #_[canonical="systolic"],
+                                  out diastolic: Number #_[canonical="diastolic"])
+  #_[canonical="blood pressure readings"]
+  #_[confirmation="readings"]
+  #_[formatted=[{type="text",text="At ${time}, ${username}'s blood pressure was ${systolic}/${diastolic}"}]]
+  #[doc="Get all blood pressure readings."]
+  #[poll_interval=60min]
+  #[confirm=false];
+
+  action add_patient(in req email: Entity(tt:email_address) #_[prompt="Enter the email of the patient you would like to add to the system."] #_[canonical="email"])
+  #_[canonical="add a patient"]
+  #_[confirmation="add patient"]
+  #[doc="Add a patient to the Cardiology system."]
+  #[confirm=true];
+}
