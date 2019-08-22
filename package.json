@@ -26,6 +26,7 @@
     "gm": "~1.23.1",
     "levelgraph": "^2.0.1",
     "levelup": "^4.1.0",
+    "mimic": "^2.0.9",
     "morgan": "^1.8.2",
     "node-gettext": "^2.0.0",
     "passport": "^0.4.0",
@@ -45,7 +46,7 @@
   },
   "optionalDependencies": {
     "node-mimic": "^1.0.0",
-    "pulseaudio2": "^0.2.0"
+    "pulseaudio2": "^0.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",

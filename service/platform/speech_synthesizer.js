@@ -22,7 +22,7 @@ class CancelledError extends Error {
 module.exports = class SpeechSynthesizer {
     constructor(platform) {
         this._pulseCtx = platform.getCapability('pulseaudio');
-        this._voiceFile = path.resolve(module.filename, '../../data/cmu_us_slt.flitevox');
+        this._voiceFile = path.resolve(module.filename, '../../../data/cmu_us_slt.flitevox');
 
         this._queue = [];
         this._speaking = false;

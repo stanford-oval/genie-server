@@ -2541,6 +2541,11 @@ mimic-fn@^2.1.0:
   resolved "https://registry.yarnpkg.com/mimic-fn/-/mimic-fn-2.1.0.tgz#7ed2c2ccccaf84d3ffcb7a69b57711fc2083401b"
   integrity sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==
 
+mimic@^2.0.9:
+  version "2.0.9"
+  resolved "https://registry.yarnpkg.com/mimic/-/mimic-2.0.9.tgz#82bf87dc6aacbb30d7e6c657005fb2b2d6882abc"
+  integrity sha512-9l3dnDztx2XJFIoo8+D6ybmeFQlG0ObCij2Lae6qd707vm37bAO+x9HqW6SyT3tUfG/b4i3Y5b5R8ve9EF+c0w==
+
 minimalistic-assert@^1.0.0, minimalistic-assert@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/minimalistic-assert/-/minimalistic-assert-1.0.1.tgz#2e194de044626d4a10e7f7fbc00ce73e83e4d5c7"
@@ -3249,7 +3254,7 @@ pug@^2.0.0-rc.2:
     pug-runtime "^2.0.5"
     pug-strip-comments "^1.0.4"
 
-pulseaudio2@^0.2.0:
+pulseaudio2@^0.2.2:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/pulseaudio2/-/pulseaudio2-0.2.2.tgz#c9ddc7e89fb3a97bb308fe4e4189808387babef7"
   integrity sha512-m+XGYEN2wqInITgkWEgmtV68JcinNeZfWdnJ/kIo9lv+O0AVyMrBzfk9DEs12ayDr7+AfVLV96f3iQ4t4Wt//w==
