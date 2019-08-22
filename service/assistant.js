@@ -216,21 +216,21 @@ function isRecordRequest(text) {
 }
 
 function isOnceADay(text) {
-  if (text.includes('once') || text.includes('one time')) {
+  if (text.includes('once') || text.includes('one time') || text.includes('1 time')) {
     return true;
   }
   return false;
 }
 
 function isTwiceADay(text) {
-  if (text.includes('twice') || text.includes('two times')) {
+  if (text.includes('twice') || text.includes('two times')) || text.includes('2 times') {
     return true;
   }
   return false;
 }
 
 function isThriceADay(text) {
-  if (text.includes('thrice') || text.includes('three times') || text.includes('with meal') || text.includes('at meal')) {
+  if (text.includes('thrice') || text.includes('three times') || text.includes('3 times') || text.includes('with meal') || text.includes('at meal')) {
     return true;
   }
   return false;
