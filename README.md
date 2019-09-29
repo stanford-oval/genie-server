@@ -12,3 +12,23 @@ Almond is part of Open Thing Platform, a research project led by
 prof. Monica Lam, from Stanford University.  You can find more
 information at <https://thingpedia.stanford.edu/about>.
 
+## Installation
+
+This assumes that you have [node](https://github.com/nodejs/node) and [yarn](https://github.com/yarnpkg/yarn) installed.
+
+1. Clone this repo on your machine.
+```
+git clone https://github.com/stanford-oval/almond-server.git
+```
+
+2. Install all packages. 
+```
+yarn
+```
+
+3. Start Almond server.
+```
+yarn start
+```
+
+4. Navigate to [localhost:3000](http://localhost:3000).
