@@ -12,3 +12,19 @@ Almond is part of Open Thing Platform, a research project led by
 prof. Monica Lam, from Stanford University.  You can find more
 information at <https://thingpedia.stanford.edu/about>.
 
+## To Run
+
+This assumes that you have [docker](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/) installed, with at least **2 GB** of available diskspace. Please be sure to be on a **fast internet connection** before running through this process for the first time.
+
+1. Clone this repo to your machine.
+```
+git clone https://github.com/stanford-oval/almond-server.git
+```
+
+2. Run docker-compose.  
+```
+docker-compose up
+```
+**Note:** This command can take a long time depending on the speed of your internet connection as well as your access to processing power.
+
+3. Navigate to [localhost:3000](http://localhost:3000) to access Almond.
