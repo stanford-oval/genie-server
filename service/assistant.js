@@ -10,7 +10,6 @@
 "use strict";
 
 const events = require('events');
-const posix = require('posix');
 const child_process = require('child_process');
 
 const Almond = require('almond-dialog-agent');
@@ -26,11 +25,10 @@ const Config = require('../config');
 
 class LocalUser {
     constructor() {
-        var pwnam = posix.getpwnam(process.getuid());
 
         this.id = process.getuid();
-        this.account = pwnam.name;
-        this.name = pwnam.gecos;
+        this.account = '';//pwnam.name;
+        this.name = '';//pwnam.gecos;
     }
 }
 

@@ -2652,7 +2652,7 @@ mute-stream@0.0.8:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.8.tgz#1630c42b2251ff81e2a283de96a5497ea92e5e0d"
   integrity sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
 
-nan@^2.12.1, nan@^2.4.x:
+nan@^2.12.1:
   version "2.14.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.0.tgz#7818f722027b2459a86f0295d434d1fc2336c52c"
   integrity sha512-INOFj37C7k3AfaNTtX8RhsTw7qRy7eLET14cROi9+5HAVbbHuIWUHEauBv5qT4Av2tWasiTY1Jw6puUNqRJXQg==
@@ -3074,13 +3074,6 @@ pkg-dir@^3.0.0:
   integrity sha512-/E57AYkoeQ25qkxMj5PBOVgF8Kiu/h7cYS30Z5+R7WaiCCBfLq58ZI/dSeaEKb9WVJV5n/03QwrN3IeWIFllvw==
   dependencies:
     find-up "^3.0.0"
-
-posix@^4.1.1:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/posix/-/posix-4.1.2.tgz#a382ee09dc7bf712f8683b3104d09d5b7909ebe9"
-  integrity sha512-R1YLMO0tDKuWVRQfcL3dbfv9LvLmB4W6oh+yE2qwlGG0Otkgz1KDIZjnqcs/v+RZfuvDLpCDZs9MQgbcyjppCg==
-  dependencies:
-    nan "^2.4.x"
 
 prelude-ls@~1.1.2:
   version "1.1.2"
