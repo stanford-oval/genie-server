@@ -14,7 +14,10 @@
 const Q = require('q');
 const fs = require('fs');
 const os = require('os');
+const path = require('path');
+const util = require('util');
 const Tp = require('thingpedia');
+const ThingTalk = require('thingtalk');
 const child_process = require('child_process');
 const Gettext = require('node-gettext');
 const DBus = require('dbus-native');
@@ -36,6 +39,10 @@ try {
 const MediaPlayer = require('./media_player');
 const Contacts = require('./contacts');
 const _graphicsApi = require('./graphics');
+
+const { makeDeviceFactory } = require('./device_factories');
+
+const Config = require('../../config');
 
 var _unzipApi = {
     unzip(zipPath, dir) {
@@ -150,6 +157,125 @@ const _gpsApi = {
     }
 };
 
+class CmdlineThingpediaClient extends Tp.HttpClient {
+    constructor(platform) {
+        super(platform, process.env.THINGPEDIA_URL || Config.THINGPEDIA_URL);
+    }
+
+    async _getLocalDeviceManifest(manifestPath, deviceKind) {
+        const ourMetadata = (await util.promisify(fs.readFile)(manifestPath)).toString();
+        const ourParsed = ThingTalk.Grammar.parse(ourMetadata);
+        ourParsed.classes[0].annotations.version = new ThingTalk.Ast.Value.Number(-1);
+
+        if (!ourParsed.classes[0].is_abstract) {
+            try {
+                const ourConfig = ourParsed.classes[0].config;
+                if (!ourConfig.in_params.some((v) => v.value.isUndefined))
+                    return ourParsed.classes[0];
+
+                // ourMetadata might lack some of the fields that are in the
+                // real metadata, such as api keys and OAuth secrets
+                // for that reason we fetch the metadata for thingpedia as well,
+                // and fill in any missing parameter
+                const officialMetadata = await super.getDeviceCode(deviceKind);
+                const officialParsed = ThingTalk.Grammar.parse(officialMetadata);
+
+                ourConfig.in_params = ourConfig.in_params.filter((ip) => !ip.value.isUndefined);
+                const ourConfigParams = new Set(ourConfig.in_params.map((ip) => ip.name));
+                const officialConfig = officialParsed.classes[0].config;
+
+                for (let in_param of officialConfig.in_params) {
+                    if (!ourConfigParams.has(in_param.name))
+                        ourConfig.in_params.push(in_param);
+                }
+
+            } catch(e) {
+                if (e.code !== 404)
+                    throw e;
+            }
+        }
+
+        return ourParsed.classes[0];
+    }
+
+    async getDeviceCode(id) {
+        const prefs = this.platform.getSharedPreferences();
+        const developerDir = prefs.get('developer-dir');
+
+        const localPath = path.resolve(developerDir, id, 'manifest.tt');
+        if (developerDir && await util.promisify(fs.exists)(localPath))
+            return (await this._getLocalDeviceManifest(localPath, id)).prettyprint();
+        else
+            return super.getDeviceCode(id);
+    }
+
+    async getModuleLocation(id) {
+        const prefs = this.platform.getSharedPreferences();
+        const developerDir = prefs.get('developer-dir');
+        if (developerDir && await util.promisify(fs.exists)(path.resolve(developerDir, id)))
+            return 'file://' + path.resolve(developerDir, id);
+        else
+            return super.getModuleLocation(id);
+    }
+
+    async getSchemas(kinds, withMetadata) {
+        const prefs = this.platform.getSharedPreferences();
+        const developerDir = prefs.get('developer-dir');
+        if (!developerDir)
+            return super.getSchemas(kinds, withMetadata);
+
+        const forward = [];
+        const handled = [];
+
+        for (let kind of kinds) {
+            const localPath = path.resolve(developerDir, kind, 'manifest.tt');
+            if (await util.promisify(fs.exists)(localPath))
+                handled.push(await this._getLocalDeviceManifest(localPath, kind));
+            else
+                forward.push(kind);
+        }
+
+        let code = '';
+        if (handled.length > 0)
+            code += new ThingTalk.Ast.Input.Library(handled, []).prettyprint();
+        if (forward.length > 0)
+            code += await super.getSchema(kinds, withMetadata);
+
+        return code;
+    }
+
+    async _getLocalFactory(localPath, kind) {
+        const classDef = await this._getLocalDeviceManifest(localPath, kind);
+        return makeDeviceFactory(classDef, {
+            category: 'data', // doesn't matter too much
+            primary_kind: kind,
+            name: classDef.metadata.thingpedia_name || classDef.metadata.name || kind,
+        });
+    }
+
+    async getDeviceSetup(kinds) {
+        const prefs = this.platform.getSharedPreferences();
+        const developerDir = prefs.get('developer-dir');
+        if (!developerDir)
+            return super.getDeviceSetup(kinds);
+
+        const forward = [];
+        const handled = {};
+        for (let kind of kinds) {
+            const localPath = path.resolve(developerDir, kind, 'manifest.tt');
+            if (await util.promisify(fs.exists)(localPath))
+                handled[kind] = await this._getLocalFactory(localPath, kind);
+            else
+                forward.push(kind);
+        }
+
+        if (forward.length > 0)
+            handled.assign(await super.getDeviceSetup(forward));
+
+        return handled;
+    }
+}
+
 class ServerPlatform extends Tp.BasePlatform {
     constructor() {
         super();
@@ -169,6 +295,8 @@ class ServerPlatform extends Tp.BasePlatform {
         this._prefs = new Tp.Helpers.FilePreferences(this._filesDir + '/prefs.db');
         this._cacheDir = getCacheDir();
         safeMkdirSync(this._cacheDir);
+
+        this._tpClient = new CmdlineThingpediaClient(this);
 
         this._dbusSession = null;//DBus.sessionBus();
         if (process.env.DBUS_SYSTEM_BUS_ADDRESS || fs.existsSync('/var/run/dbus/system_bus_socket'))
@@ -256,6 +384,9 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'bluetooth':
             return this._dbusSystem !== null;
 
+        case 'thingpedia-client':
+            return true;
+
         case 'media-player':
             return true;
 
@@ -299,6 +430,9 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'code-download':
             // We have the support to download code
             return _unzipApi;
+
+        case 'thingpedia-client':
+            return this._tpClient;
 
         case 'dbus-session':
             return this._dbusSession;
