@@ -51,6 +51,25 @@ router.get('/parse', (req, res, next) => {
     });
 });
 
+router.post('/converse', (req, res, next) => {
+    let command = req.body.command;
+    if (!command) {
+        res.status(400).json({error:'Missing command'});
+        return;
+    }
+
+    const engine = req.app.engine;
+    const assistant = engine.platform.getCapability('assistant');
+    Promise.resolve().then(() => {
+        return assistant.converse(command);
+    }).then((result) => {
+        res.json(result);
+    }).catch((e) => {
+        console.error(e.stack);
+        res.status(500).json({error:e.message});
+    });
+});
+
 function describeApp(app) {
     return {
         uniqueId: app.uniqueId,

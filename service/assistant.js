@@ -9,6 +9,7 @@
 // See COPYING for details
 "use strict";
 
+const assert = require('assert');
 const events = require('events');
 const child_process = require('child_process');
 
@@ -171,7 +172,7 @@ class MainConversation extends Almond {
     handleThingTalk(code) {
         this._delegate.clearSpeechQueue();
         this._delegate.collapseButtons();
-        this._delegate.addCommandToHistory("Code: " + code);
+        this._delegate.addCommandToHistory("\\t " + code);
         return super.handleThingTalk.apply(this, arguments);
     }
 
@@ -195,8 +196,66 @@ class OtherConversation extends Almond {
     }
 
     handleThingTalk(code) {
-        this._delegate.sendCommand("Code: " + code);
+        this._delegate.sendCommand("\\t " + code);
         return super.handleThingTalk(code);
+    }
+}
+
+class StatelessConversationDelegate {
+    constructor(locale) {
+        this._locale = locale;
+        this._buffer = [];
+        this._askSpecial = null;
+    }
+
+    flush() {
+        const buffer = this._buffer;
+        const askSpecial = this._askSpecial;
+        this._buffer = [];
+        this._askSpecial = null;
+        return {
+            messages: buffer,
+            askSpecial: askSpecial
+        };
+    }
+
+    send(text, icon) {
+        this._buffer.push({ type: 'text', text, icon });
+    }
+
+    sendPicture(url, icon) {
+        this._buffer.push({ type: 'picture', url, icon });
+    }
+
+    sendChoice(idx, what, title, text) {
+        this._buffer.push({ type: 'choice', idx, title, text });
+    }
+
+    sendLink(title, url) {
+        this._buffer.push({ type: 'link', title, url });
+    }
+
+    sendButton(title, json) {
+        this._buffer.push({ type: 'button', title, json });
+    }
+
+    sendRDL(rdl, icon) {
+        this._buffer.push({ type: 'rdl', rdl, icon });
+    }
+
+    sendResult(message, icon) {
+        this._buffer.push({
+            type: 'result',
+            result: message,
+
+            fallback: message.toLocaleString(this._locale),
+            icon
+        });
+    }
+
+    sendAskSpecial(what) {
+        assert(this._askSpecial === null);
+        this._askSpecial = what;
     }
 }
 
@@ -216,6 +275,10 @@ module.exports = class Assistant extends events.EventEmitter {
         this._mainConversation = new MainConversation(engine, this._speechHandler, {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true
+        });
+        this._statelessConversation = new Almond(engine, 'stateless', new LocalUser(), new StatelessConversationDelegate(this._platform.locale), {
+            sempreUrl: Config.SEMPRE_URL,
+            showWelcome: false
         });
 
         if (this._speechHandler) {
@@ -239,9 +302,26 @@ module.exports = class Assistant extends events.EventEmitter {
 
         this._conversations = {
             api: this._api,
-            main: this._mainConversation
+            main: this._mainConversation,
+            stateless: this._statelessConversation
         };
         this._lastConversation = this._mainConversation;
+    }
+
+    async converse(command) {
+        const conversation = this._conversations.stateless;
+        const delegate = conversation._delegate;
+
+        if (command.type === 'command')
+            await conversation.handleCommand(command.text);
+        else if (command.type === 'parsed')
+            await conversation.handleParsedCommand(command.json);
+        else if (command.type === 'tt')
+            await conversation.handleThingTalk(command.code);
+        else
+            throw new Error('Invalid command type ' + command.type);
+
+        return delegate.flush();
     }
 
     hotword() {
@@ -270,8 +350,10 @@ module.exports = class Assistant extends events.EventEmitter {
             await this._speechHandler.start();
     }
 
-    startConversation() {
-        return this._mainConversation.start();
+    async startConversation() {
+        await this._mainConversation.start();
+
+        await this._statelessConversation.start();
     }
 
     stop() {
@@ -283,12 +365,16 @@ module.exports = class Assistant extends events.EventEmitter {
 
     notifyAll(...data) {
         return Promise.all(Object.keys(this._conversations).map((id) => {
+            if (id === 'stateless')
+                return Promise.resolve();
             return this._conversations[id].notify(...data);
         }));
     }
 
     notifyErrorAll(...data) {
         return Promise.all(Object.keys(this._conversations).map((id) => {
+            if (id === 'stateless')
+                return Promise.resolve();
             return this._conversations[id].notifyError(...data);
         }));
     }
