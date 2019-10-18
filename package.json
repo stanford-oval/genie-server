@@ -55,7 +55,7 @@
     "eslint": "^6.0.0",
     "nyc": "^14.1.1",
     "parse5": "^5.1.0",
-    "selenium-webdriver": "^4.0.0-alpha.4"
+    "selenium-webdriver": "^4.0.0-alpha.5"
   },
   "nyc": {
     "exclude": [
