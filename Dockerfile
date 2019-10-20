@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 # Install sudo, git, curl, libpulse, and https sources support
 RUN apt-get update
-RUN apt-get -y install software-properties-common git curl apt-transport-https ca-certificates libpulse-dev
+RUN apt-get -y install software-properties-common git curl apt-transport-https ca-certificates libpulse-dev unzip
 
 # Install pcre2
 RUN apt-get install -y libpcre2-dev libpcre2-8-0 pcre2-utils
