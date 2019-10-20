@@ -1,0 +1,7 @@
+version: "3.7"
+services:
+  web:
+    build: .
+    command: bash -c "cd /opt/almond && yarn start"
+    ports:
+      - "3000:3000"
