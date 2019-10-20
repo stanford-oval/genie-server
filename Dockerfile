@@ -7,18 +7,17 @@ RUN apt-get -y install software-properties-common git curl apt-transport-https c
 # Install pcre2
 RUN apt-get install -y libpcre2-dev libpcre2-8-0 pcre2-utils
 
+# Install nodejs && yarn
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+RUN apt-get update && apt-get -y install nodejs yarn
+
 # Install mimic
 RUN add-apt-repository -y ppa:mycroft-ai/mycroft-ai
 RUN apt-get update
-RUN apt-get install -y mimic 
-# Install nodejs
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
-RUN apt-get install -y nodejs
-
-# Install Yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update && apt-get -y install yarn
+RUN apt-get install -y mimic
+RUN rm /usr/lib/*/libttsmimic*.a
 
 # Create necessary directories in root
 RUN mkdir /root/.cache /root/.config
