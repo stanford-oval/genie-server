@@ -12,19 +12,35 @@ Almond is part of Open Thing Platform, a research project led by
 prof. Monica Lam, from Stanford University.  You can find more
 information at <https://thingpedia.stanford.edu/about>.
 
-## To Run
+## Running almond-server
 
-This assumes that you have [docker](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/) installed, with at least **2 GB** of available diskspace. Please be sure to be on a **fast internet connection** before running through this process for the first time.
+The recommended way to run almond-server is through [podman](https://podman.io/), a replacement for [docker](https://docs.docker.com/install/) that allows
+the container to run as your regular user (and thus access PulseAudio from your normal session).
 
-1. Clone this repo to your machine.
-```
-git clone https://github.com/stanford-oval/almond-server.git
+To run, use the command:
+```bash
+podman run -p 3000:3000 --uidmap keep-id \
+    -v /dev/shm:/dev/shm \
+    -v $XDG_RUNTIME_DIR/pulse:/run/pulse \
+    -v ${XDG_CONFIG_HOME:-$HOME/.config}/almond-server:/var/lib/almond-server \
+    stanfordoval/almond-server
 ```
 
-2. Run docker-compose.  
-```
-docker-compose up
-```
-**Note:** This command can take a long time depending on the speed of your internet connection as well as your access to processing power.
+You can now navigate to [127.0.0.1:3000](http://127.0.0.1:3000) to access Almond, or use your voice with the hotword "Almond".
 
-3. Navigate to [localhost:3000](http://localhost:3000) to access Almond.
+## Development setup
+
+To develop almond-server, you should clone this repository, then install the dependencies with:
+
+```
+yarn
+```
+
+This will only install the minimal set of dependencies, and will not install any voice support. To enable voice, you must also run (Linux only):
+```
+dnf -y install pulseaudio-libs-devel mimic-devel python3-numpy python3-scipy portaudio-devel libcanberra-devel
+pip3 install 'tensorflow<2.0.0' 'git+https://github.com/stanford-oval/mycroft-precise'
+```
+then run `yarn` again to pick up the new dependencies.
+
+After installing the dependencies locally, the server can be started using `yarn start`. 
