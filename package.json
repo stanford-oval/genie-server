@@ -7,7 +7,7 @@
     "lint": "eslint ./routes ./service ./util ./browser",
     "test": "nyc ./tests/everything.sh",
     "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js",
-    "prepare": "(cd node_modules/thingtalk; yarn); (cd node_modules/thingengine-core; yarn; rm -fr node_modules); yarn update-brassau",
+    "prepare": "yarn update-brassau",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "resolutions": {},
