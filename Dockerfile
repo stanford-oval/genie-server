@@ -1,7 +1,7 @@
 FROM docker.io/fedora:30
 
 # Install all deps in the standard repos
-RUN dnf -y install git curl pulseaudio-libs-devel unzip nodejs mimic-devel python3 python3-pip python3-numpy python3-scipy make gcc gcc-c++ portaudio-devel
+RUN dnf -y install git curl pulseaudio-libs-devel unzip nodejs mimic-devel python3 python3-pip python3-numpy python3-scipy make gcc gcc-c++ portaudio-devel libcanberra-devel
 
 # Install yarn
 RUN curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo

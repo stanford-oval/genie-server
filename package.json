@@ -14,6 +14,7 @@
   "dependencies": {
     "almond-dialog-agent": "~1.6.0",
     "body-parser": "^1.17.2",
+    "canberra": "^0.1.0",
     "color-scheme": "^1.0.0",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.3",
