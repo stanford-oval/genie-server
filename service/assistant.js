@@ -11,7 +11,12 @@
 
 const events = require('events');
 const child_process = require('child_process');
-const canberra = require('canberra');
+let canberra;
+try {
+    canberra = require('canberra');
+} catch(e) {
+    canberra = null;
+}
 
 const Almond = require('almond-dialog-agent');
 let SpeechHandler;
@@ -217,12 +222,16 @@ module.exports = class Assistant extends events.EventEmitter {
             this._speechHandler = null;
         this._speechSynth = this._platform.getCapability('text-to-speech');
         try {
-            this._eventSoundCtx = new canberra.Context({
-                [canberra.Property.APPLICATION_ID]: 'edu.stanford.Almond',
-            });
-            this._eventSoundCtx.cache({
-                [canberra.Property.EVENT_ID]: 'message-new-instant'
-            });
+            if (canberra) {
+                this._eventSoundCtx = new canberra.Context({
+                    [canberra.Property.APPLICATION_ID]: 'edu.stanford.Almond',
+                });
+                this._eventSoundCtx.cache({
+                    [canberra.Property.EVENT_ID]: 'message-new-instant'
+                });
+            } else {
+                this._eventSoundCtx = null;
+            }
         } catch(e) {
             this._eventSoundCtx = null;
             console.error(`Failed to initialize libcanberra: ${e.message}`);
