@@ -14,9 +14,7 @@ RUN mkdir /opt/almond
 COPY . /opt/almond
 RUN rm -rf /opt/almond/node_modules
 WORKDIR /opt/almond
-# we need python2 to run node-gyp...
-# to avoid having it in the final image or in any layer, we install it, use it, and then remove it again
-RUN dnf -y install python2 && PYTHON=/usr/bin/python2 yarn && dnf -y remove python2 && rm -fr /root/.cache
+RUN yarn && rm -fr /root/.cache
 
 EXPOSE 3000
 ENV THINGENGINE_HOME=/var/lib/almond-server

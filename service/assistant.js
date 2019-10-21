@@ -238,9 +238,8 @@ module.exports = class Assistant extends events.EventEmitter {
                 this._mainConversation.sendHypothesis(hypothesis);
             });
             this._speechHandler.on('hotword', async (hotword) => {
-                child_process.spawn('xset', ['dpms', 'force', 'on'], (err) => {
-                    if (err)
-                        console.error(`Failed to wake up the screen: ${err.message}`);
+                child_process.spawn('xset', ['dpms', 'force', 'on']).on('error', (err) => {
+                    console.error(`Failed to wake up the screen: ${err.message}`);
                 });
                 if (!this._eventSoundCtx)
                     return;
