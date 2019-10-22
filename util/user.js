@@ -129,8 +129,10 @@ module.exports = {
      */
     requireLogIn(req, res, next) {
         if (!model.isConfigured()) {
-            res.status(401).render('configuration_required',
-                                   { page_title: "ThingEngine - Error" });
+            res.status(401).render('error', {
+                page_title: "ThingEngine - Error",
+                message: "You must configure your Almond from your browser before you can access it."
+            });
         } else if (!req.user) {
             res.status(401).render('login_required',
                                    { page_title: "ThingEngine - Error" });

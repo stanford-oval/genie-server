@@ -1,9 +1,16 @@
 extends layout
 
 block page_name
-  | Error
+  = Error
 
 block content
   p Sorry that did not work
-  p= message
+  if typeof message === 'string'
+    p= message
+  else if message.name === 'SyntaxError'
+    p= "Syntax error at %s line %d: %s".format(message.fileName, message.lineNumber, message.message)
+  else if message.message
+    p= message.message
+  else
+    p= String(message)
   a(href='javascript:history.back()').btn.btn-primary Go back
