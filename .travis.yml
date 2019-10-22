@@ -16,7 +16,7 @@ before_install:
 - tar xvf geckodriver-v0.22.0-linux64.tar.gz -C geckodriver/
 - export PATH="`pwd`/cvc4:`pwd`/geckodriver:$PATH"
 - sudo apt-get update -q -y
-- sudo apt-get install -y graphicsmagick realpath python3 libpulse-dev pulseaudio portaudio19-dev
+- sudo apt-get install -y graphicsmagick realpath python3 libpulse-dev pulseaudio portaudio19-dev unzip
 - pulseaudio --start
 install:
 - travis_retry yarn

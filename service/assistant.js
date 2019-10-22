@@ -12,6 +12,12 @@
 const assert = require('assert');
 const events = require('events');
 const child_process = require('child_process');
+let canberra;
+try {
+    canberra = require('canberra');
+} catch(e) {
+    canberra = null;
+}
 
 const Almond = require('almond-dialog-agent');
 let SpeechHandler;
@@ -259,6 +265,8 @@ class StatelessConversationDelegate {
     }
 }
 
+const HOTWORD_DETECTED_ID = 1;
+
 module.exports = class Assistant extends events.EventEmitter {
     constructor(engine) {
         super();
@@ -272,6 +280,21 @@ module.exports = class Assistant extends events.EventEmitter {
         else
             this._speechHandler = null;
         this._speechSynth = this._platform.getCapability('text-to-speech');
+        try {
+            if (canberra) {
+                this._eventSoundCtx = new canberra.Context({
+                    [canberra.Property.APPLICATION_ID]: 'edu.stanford.Almond',
+                });
+                this._eventSoundCtx.cache({
+                    [canberra.Property.EVENT_ID]: 'message-new-instant'
+                });
+            } else {
+                this._eventSoundCtx = null;
+            }
+        } catch(e) {
+            this._eventSoundCtx = null;
+            console.error(`Failed to initialize libcanberra: ${e.message}`);
+        }
         this._mainConversation = new MainConversation(engine, this._speechHandler, {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true
@@ -286,9 +309,19 @@ module.exports = class Assistant extends events.EventEmitter {
                 //this._api.sendHypothesis(hypothesis);
                 this._mainConversation.sendHypothesis(hypothesis);
             });
-            this._speechHandler.on('hotword', (hotword) => {
-                child_process.spawn('xset', ['dpms', 'force', 'on']);
-                child_process.spawn('canberra-gtk-play', ['-f', '/usr/share/sounds/purple/receive.wav']);
+            this._speechHandler.on('hotword', async (hotword) => {
+                child_process.spawn('xset', ['dpms', 'force', 'on']).on('error', (err) => {
+                    console.error(`Failed to wake up the screen: ${err.message}`);
+                });
+                if (!this._eventSoundCtx)
+                    return;
+                try {
+                    await this._eventSoundCtx.play(HOTWORD_DETECTED_ID, {
+                        [canberra.Property.EVENT_ID]: 'message-new-instant'
+                    });
+                } catch(e) {
+                    console.error(`Failed to play hotword detection sound: ${e.message}`);
+                }
             });
             this._speechHandler.on('utterance', (utterance) => {
                 //this._api.sendCommand(utterance);

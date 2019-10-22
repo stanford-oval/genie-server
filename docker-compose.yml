@@ -2,6 +2,8 @@ version: "3.7"
 services:
   web:
     build: .
-    command: bash -c "cd /opt/almond && yarn start"
+    volumes:
+      - ${XDG_RUNTIME_DIR}/pulse:/run/pulse
+      - /var/lib/almond-server:/var/lib/almond-server
     ports:
       - "3000:3000"

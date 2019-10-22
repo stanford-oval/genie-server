@@ -44,7 +44,8 @@
   },
   "optionalDependencies": {
     "node-mimic": "^1.0.0",
-    "pulseaudio2": "^0.2.0"
+    "pulseaudio2": "^0.2.0",
+    "canberra": "^0.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
