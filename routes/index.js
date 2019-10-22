@@ -40,10 +40,6 @@ router.get('/conversation', user.redirectLogIn, (req, res, next) => {
     res.render('conversation', { page_title: req._("Almond - Chat") });
 });
 
-router.get('/widgets', user.redirectLogIn, (req, res, next) => {
-    res.render('brassau', { page_title: req._("Almond - Widgets") });
-});
-
 router.get('/listen', user.redirectLogIn, (req, res, next) => {
     res.render('listen', {
         page_title: req._("Almond - Listen"),
