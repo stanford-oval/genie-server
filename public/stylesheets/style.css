@@ -1,9 +1,35 @@
+html, body {
+  margin: 0;
+}
+
+.force-inline {
+  display: inline;
+}
+
 #page-body {
-    margin-top: 60px;
+    margin-top: 45px;
+    min-height: calc(100vh - 195px);
+    height: auto !important;
+}
+#page-body.container, #page-body.container-fluid {
+    padding-bottom: 30px;
+    min-height: calc(100vh - 165px);
 }
 
 #page-title {
     text-align: center;
+}
+
+footer.page-footer {
+  padding-top: 1.5em;
+  background-color: #8c1515;
+  color: white;
+  text-align: right;
+  min-height: 120px;
+}
+
+footer.page-footer a:link, footer.page-footer a:visited, footer.page-footer a:hover {
+  color: white;
 }
 
 .placeholder {
