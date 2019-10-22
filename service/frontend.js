@@ -129,9 +129,11 @@ module.exports = class WebFrontend extends events.EventEmitter {
         // mount /api before csurf so we can perform requests without the CSRF token
         this._app.use('/api', require('../routes/api'));
 
-        this._app.use(csurf({ cookie: false,
-                              ignoreMethods: ['GET','HEAD','OPTIONS',
-                                              'UPGRADE','CONNECT'] }));
+        this._app.use(csurf({ cookie: false }));
+        this._app.use((req, res, next) => {
+            res.locals.csrfToken = req.csrfToken();
+            next();
+        });
         this._app.use('/', require('../routes/index'));
         this._app.use('/apps', require('../routes/apps'));
         this._app.use('/user', require('../routes/user'));
