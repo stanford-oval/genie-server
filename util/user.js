@@ -1,6 +1,6 @@
 // -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
-// This file is part of ThingEngine
+// This file is part of Almond
 //
 // Copyright 2015 The Board of Trustees of the Leland Stanford Junior University
 //
@@ -130,10 +130,10 @@ module.exports = {
     requireLogIn(req, res, next) {
         if (!model.isConfigured()) {
             res.status(401).render('configuration_required',
-                                   { page_title: "ThingEngine - Error" });
+                                   { page_title: "Almond - Error" });
         } else if (!req.user) {
             res.status(401).render('login_required',
-                                   { page_title: "ThingEngine - Error" });
+                                   { page_title: "Almond - Error" });
         } else {
             next();
         }
