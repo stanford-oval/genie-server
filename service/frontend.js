@@ -22,6 +22,7 @@ const passport = require('passport');
 const connect_flash = require('connect-flash');
 
 const user = require('../util/user');
+const errorHandling = require('../util/error_handling');
 const secretKey = require('../util/secret_key');
 
 const Config = require('../config');
@@ -136,6 +137,15 @@ module.exports = class WebFrontend extends events.EventEmitter {
         this._app.use('/user', require('../routes/user'));
         this._app.use('/config', require('../routes/config'));
         this._app.use('/devices', require('../routes/devices'));
+
+        this._app.use((req, res) => {
+            // if we get here, we have a 404 response
+            res.status(404).render('error', {
+                page_title: req._("Almond - Page Not Found"),
+                message: req._("The requested page does not exist.")
+            });
+        });
+        this._app.use(errorHandling.html);
     }
 
     open() {

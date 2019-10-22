@@ -1,10 +1,64 @@
 "use strict";
 $(function() {
     var thingpediaUrl = document.body.dataset.thingpediaUrl;
-    var url = (location.protocol === 'https' ? 'wss' : 'ws') + '://' + location.host
+    var url = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host
         + '/api/conversation';
-    console.log(url);
-    var ws = new WebSocket(url);
+
+    var ws;
+    var open = false;
+
+    var pastCommandsUp = []; // array accessed by pressing up arrow
+    var pastCommandsDown = []; // array accessed by pressing down arrow
+    var currCommand = ""; // current command between pastCommandsUp and pastCommandsDown
+
+    function updateFeedback(thinking) {
+        if (!ws || !open) {
+            $('#input-form-group').addClass('has-warning');
+            $('#input-form-group .spinner-container').addClass('hidden');
+-           $('#input-form-group .glyphicon-warning-sign, #input-form-group .help-block').removeClass('hidden');
+            return;
+        }
+
+        $('#input-form-group').removeClass('has-warning');
+        $('#input-form-group .glyphicon-warning-sign, #input-form-group .help-block').addClass('hidden');
+        if (thinking)
+            $('#input-form-group .spinner-container').removeClass('hidden');
+        else
+            $('#input-form-group .spinner-container').addClass('hidden');
+    }
+
+    (function() {
+        var reconnectTimeout = 100;
+
+        function connect() {
+            ws = new WebSocket(url);
+            ws.onmessage = function(event) {
+                if (!open) {
+                    open = true;
+                    reconnectTimeout = 100;
+                    updateFeedback(false);
+                }
+                onWebsocketMessage(event);
+            };
+
+            ws.onclose = function() {
+                console.error('Web socket closed');
+                ws = undefined;
+                updateFeedback(false);
+
+                // reconnect immediately if the connection previously succeeded, otherwise
+                // try again in a little bit
+                if (open) {
+                    setTimeout(connect, 100);
+                } else {
+                    reconnectTimeout = 1.5 * reconnectTimeout;
+                    setTimeout(connect, reconnectTimeout);
+                }
+            };
+        }
+
+        connect();
+    })();
 
     function syncCancelButton(msg) {
         var visible = msg.ask !== null;
@@ -26,30 +80,43 @@ $(function() {
         return msg;
     }
 
+    function maybeScroll(container) {
+        if (!$('#input:focus').length)
+            return;
+
+        scrollChat();
+        setTimeout(scrollChat, 1000);
+    }
+
+    function scrollChat() {
+        let chat = document.getElementById('conversation');
+        chat.scrollTop = chat.scrollHeight;
+    }
+
     function textMessage(text, icon) {
         var container = almondMessage(icon);
         container.append($('<span>').addClass('message message-text')
             .text(text));
-        container[0].scrollIntoView(false);
+        maybeScroll(container);
     }
 
     function picture(url, icon) {
         var container = almondMessage(icon);
         container.append($('<img>').addClass('message message-picture')
             .attr('src', url));
-        container[0].scrollIntoView(false);
+        maybeScroll(container);
     }
 
     function rdl(rdl, icon) {
         var container = almondMessage(icon);
         var rdlMessage = $('<a>').addClass('message message-rdl')
-            .attr('href', rdl.webCallback);
+            .attr('href', rdl.webCallback).attr("target", "_blank").attr("rel", "noopener nofollow");
         rdlMessage.append($('<span>').addClass('message-rdl-title')
             .text(rdl.displayTitle));
         rdlMessage.append($('<span>').addClass('message-rdl-content')
             .text(rdl.displayText));
         container.append(rdlMessage);
-        container[0].scrollIntoView(false);
+        maybeScroll(container);
     }
 
     function getGrid() {
@@ -67,25 +134,25 @@ $(function() {
         var btn = $('<a>').addClass('message message-choice btn btn-default')
             .attr('href', '#').text(title);
         btn.click(function(event) {
-            handleChoice(idx, title);
+            handleChoice(idx);
             event.preventDefault();
         });
         holder.append(btn);
         getGrid().append(holder);
-        holder[0].scrollIntoView(false);
+        maybeScroll(holder);
     }
 
     function buttonMessage(title, json) {
-        var holder = $('<div>').addClass('col-xs-12 col-sm-6 col-md-4');
+        var holder = $('<div>').addClass('col-xs-12 col-sm-6');
         var btn = $('<a>').addClass('message message-button btn btn-default')
             .attr('href', '#').text(title);
         btn.click(function(event) {
-            handleParsedCommand(json, title);
+            handleParsedCommand(json);
             event.preventDefault();
         });
         holder.append(btn);
         getGrid().append(holder);
-        holder[0].scrollIntoView(false);
+        maybeScroll(holder);
     }
 
     function linkMessage(title, url) {
@@ -94,12 +161,12 @@ $(function() {
         else if (url.startsWith('/devices'))
             url = '/me' + url;*/
 
-        var holder = $('<div>').addClass('col-xs-12 col-sm-6 col-md-4');
+        var holder = $('<div>').addClass('col-xs-12 col-sm-6');
         var btn = $('<a>').addClass('message message-button btn btn-default')
-            .attr('href', url).text(title);
+            .attr('href', url).attr("target", "_blank").attr("rel", "noopener").text(title);
         holder.append(btn);
         getGrid().append(holder);
-        holder[0].scrollIntoView(false);
+        maybeScroll(holder);
     }
 
     function yesnoMessage() {
@@ -107,7 +174,7 @@ $(function() {
         var btn = $('<a>').addClass('message message-yesno btn btn-default')
             .attr('href', '#').text("Yes");
         btn.click(function(event) {
-            handleSpecial('yes', "Yes");
+            handleSpecial('yes');
             event.preventDefault();
         });
         holder.append(btn);
@@ -116,19 +183,26 @@ $(function() {
         btn = $('<a>').addClass('message message-yesno btn btn-default')
             .attr('href', '#').text("No");
         btn.click(function(event) {
-            handleSpecial('no', "No");
+            handleSpecial('no');
             event.preventDefault();
         });
         holder.append(btn);
         getGrid().append(holder);
-        holder[0].scrollIntoView(false);
+        maybeScroll(holder);
     }
 
     function collapseButtons() {
         $('.message-button, .message-choice, .message-yesno').remove();
     }
 
-    ws.onmessage = function(event) {
+    function syncKeyboardType(ask) {
+        if (ask === 'password')
+            $('#input').attr('type', 'password');
+        else
+            $('#input').attr('type', 'text');
+    }
+
+    function onWebsocketMessage(event) {
         var parsed = JSON.parse(event.data);
         console.log('received ' + event.data);
         switch (parsed.type) {
@@ -147,6 +221,12 @@ $(function() {
             currentGrid = null;
             break;
 
+        case 'result':
+            // FIXME: support more type of results
+            textMessage(parsed.fallback, parsed.icon);
+            currentGrid = null;
+            break;
+
         case 'choice':
             choice(parsed.idx, parsed.title);
             break;
@@ -160,6 +240,7 @@ $(function() {
             break;
 
         case 'askSpecial':
+            syncKeyboardType(parsed.ask);
             syncCancelButton(parsed);
             if (parsed.ask === 'yesno')
                 yesnoMessage();
@@ -175,11 +256,9 @@ $(function() {
             appendUserMessage(parsed.text);
             break;
         }
-    };
-    ws.onclose = function() {
-        console.error('Web socket closed');
-        // reconnect here...
-    };
+
+        updateFeedback(false);
+    }
 
     function handleSlashR(line) {
         line = line.trim();
@@ -199,12 +278,15 @@ $(function() {
             return;
         }
 
+        updateFeedback(true);
         ws.send(JSON.stringify({ type: 'command', text: text }));
     }
     function handleParsedCommand(json, title) {
-        ws.send(JSON.stringify({ type: 'parsed', json: json, title: title }));
+        updateFeedback(true);
+        ws.send(JSON.stringify({ type: 'parsed', json: json }));
     }
     function handleThingTalk(tt) {
+        updateFeedback(true);
         ws.send(JSON.stringify({ type: 'tt', code: tt }));
     }
     function handleChoice(idx, title) {
@@ -217,11 +299,18 @@ $(function() {
     function appendUserMessage(text) {
         container.append($('<span>').addClass('message message-text from-user')
             .text(text));
-        container[0].scrollIntoView(false);
     }
 
     $('#input-form').submit(function(event) {
         var text = $('#input').val();
+        if (currCommand !== "")
+          pastCommandsUp.push(currCommand);
+        if (pastCommandsDown.length !== 0) {
+          pastCommandsUp = pastCommandsUp.concat(pastCommandsDown);
+          pastCommandsDown = [];
+        }
+        pastCommandsUp.push(text);
+
         $('#input').val('');
 
         handleCommand(text);
@@ -229,5 +318,23 @@ $(function() {
     });
     $('#cancel').click(function() {
         handleSpecial('nevermind', "Cancel.");
+    });
+
+    $('#input-form').on('keydown', function(event) { // button is pressed
+      if (event.keyCode === 38) {  // Up
+        // removes last item from array pastCommandsUp, displays it as currCommand, adds current input text to pastCommandsDown
+        currCommand = pastCommandsUp.pop();
+        if ($('#input').val() !== "")
+          pastCommandsDown.push($('#input').val());
+        $('#input').val(currCommand);
+      }
+
+      if (event.keyCode === 40) {  // Down
+        // removes last item from array pastCommandsDown, displays it as currCommand, adds current input text to pastCommandsUp
+        currCommand = pastCommandsDown.pop();
+        if ($('#input').val() !== "")
+          pastCommandsUp.push($('#input').val());
+        $('#input').val(currCommand);
+      }
     });
 });

@@ -1,5 +1,5 @@
 (function() {
-    window.ThingEngine = {
+    window.Almond = {
         getThingpedia: function() {
             return 'https://thingpedia.stanford.edu';
         }

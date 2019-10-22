@@ -1,6 +1,6 @@
 // -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
-// This file is part of ThingEngine
+// This file is part of Almond
 //
 // Copyright 2015 The Board of Trustees of the Leland Stanford Junior University
 //
@@ -13,6 +13,7 @@ const express = require('express');
 const crypto = require('crypto');
 
 const user = require('../util/user');
+const errorHandling = require('../util/error_handling');
 
 const Config = require('../config');
 
@@ -261,5 +262,13 @@ router.ws('/conversation', (ws, req, next) => {
         });
     });
 });
+
+// if nothing handled the route, return a 404
+router.use('/', (req, res) => {
+    res.status(404).json({ error: 'Invalid endpoint' });
+});
+
+// if something failed, return a 500 in json form, or the appropriate status code
+router.use(errorHandling.json);
 
 module.exports = router;
