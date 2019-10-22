@@ -43,4 +43,6 @@ pip3 install 'tensorflow<2.0.0' 'git+https://github.com/stanford-oval/mycroft-pr
 ```
 then run `yarn` again to pick up the new dependencies.
 
+(The above command is for the Fedora Linux distribution. Other distribution have similar commands.)
+
 After installing the dependencies locally, the server can be started using `yarn start`. 
