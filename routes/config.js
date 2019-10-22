@@ -23,7 +23,7 @@ function config(req, res, next, userData, cloudData) {
     return ipAddress.getServerName().then((host) => {
         var port = res.app.get('port');
         var serverAddress = 'http://' +
-            (host.indexOf(':' >= 0) ? '[' + host + ']' : host)
+            (host.indexOf(':') >= 0 ? '[' + host + ']' : host)
             + ':' + port + '/config';
 
         var prefs = platform.getSharedPreferences();

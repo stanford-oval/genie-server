@@ -49,7 +49,7 @@ block content
           div.form-group
             button(type='submit').btn.btn-primary Change
 
-  div.panel.panel-default.config-unit
+  //div.panel.panel-default.config-unit
     div.panel-heading
       h2.panel-title Cloud
     div.panel-body
@@ -57,7 +57,7 @@ block content
         p You successfully logged in with your cloud account.
         p Your cloud ID is <samp>#{cloud.id}</samp>
       else
-        p You did not log in to a ThingEngine Cloud account.
+        p You did not log in to a Almond Cloud account.
         //You can do it now.
 
         //if cloud.error
@@ -90,13 +90,11 @@ block content
       h2.panel-title Phone
     div.panel-body
       div#config-phone-desktop-browser
-        p To configure your phone, you must visit the address
-          samp= server.address
-          |  from a mobile browser.
+        p!= _("To link your phone to this Almond, you must visit the address <samp>%s</samp> from a mobile browser.").format(server.address)
 
-        p Or you can scan this QR code:
+        p!= _("Alternatively, you can scan this QR code:")
           div#qrcode-target= qrcodeTarget
           div#qrcode-placeholder
 
       p#config-phone-mobile-browser(aria-hidden='true')
-        a(href=qrcodeTarget).btn.btn-primary Configure
+        a(href=qrcodeTarget).btn.btn-primary= _("Configure")
