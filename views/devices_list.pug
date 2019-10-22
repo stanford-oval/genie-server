@@ -4,7 +4,7 @@ block scripts
   script(src='/javascripts/apps.js')
 
 block page_name
-  = _("My Goods")
+  = _("My Skills")
 
 block styles
   link(rel='stylesheet', href='/stylesheets/my_stuff.css')
@@ -69,7 +69,5 @@ block content
                       button(type='submit').btn.btn-danger.btn-sm.btn-block= _("Forget")
 
   div.row
-      div.col-sm-6.col-md-3
-        a(href='/devices/create?class=physical', role='button').btn.btn-primary.btn-block= _("Configure new device")
-      div.col-sm-6.col-md-3
-        a(href='/devices/create?class=online', role='button').btn.btn-primary.btn-block= _("Add new account")
+    div.col-sm-6.col-md-3
+      a(href='/devices/create').btn.btn-primary.btn-block= _("Configure a new skill")
