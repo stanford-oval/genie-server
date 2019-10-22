@@ -4,10 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node main.js",
-    "lint": "eslint ./routes ./service ./util ./browser",
+    "lint": "eslint ./routes ./service ./util",
     "test": "nyc ./tests/everything.sh",
-    "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js",
-    "prepare": "yarn update-brassau",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "resolutions": {},
