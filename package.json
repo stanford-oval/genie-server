@@ -6,7 +6,8 @@
     "start": "node main.js",
     "lint": "eslint ./routes ./service ./util",
     "test": "nyc ./tests/everything.sh",
-    "coverage": "nyc report --reporter=text-lcov | coveralls"
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "debug": "nodemon --legacy-watch --watch ./routes --watch ./util --inspect=0.0.0.0:5858 --nolazy main.js"
   },
   "resolutions": {},
   "dependencies": {
@@ -41,9 +42,9 @@
     "ws": "^7.1.1"
   },
   "optionalDependencies": {
+    "canberra": "^0.1.0",
     "node-mimic": "^1.0.0",
-    "pulseaudio2": "^0.2.0",
-    "canberra": "^0.1.0"
+    "pulseaudio2": "^0.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
@@ -51,6 +52,7 @@
     "browserify": "^16.1.1",
     "coveralls": "^3.0.6",
     "eslint": "^6.0.0",
+    "nodemon": "^1.19.4",
     "nyc": "^14.1.1",
     "parse5": "^5.1.0",
     "selenium-webdriver": "^4.0.0-alpha.5"
