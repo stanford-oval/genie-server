@@ -312,16 +312,23 @@ module.exports = class Assistant extends events.EventEmitter {
         const conversation = this._conversations.stateless;
         const delegate = conversation._delegate;
 
-        if (command.type === 'command')
+        switch (command.type) {
+        case 'command':
             await conversation.handleCommand(command.text);
-        else if (command.type === 'parsed')
+            break;
+        case 'parsed':
             await conversation.handleParsedCommand(command.json);
-        else if (command.type === 'tt')
+            break;
+        case 'tt':
             await conversation.handleThingTalk(command.code);
-        else
+            break;
+        default:
             throw new Error('Invalid command type ' + command.type);
+        }
 
-        return delegate.flush();
+        const result = delegate.flush();
+        result.conversationId = conversation.id;
+        return result;
     }
 
     hotword() {

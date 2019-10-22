@@ -52,7 +52,7 @@ router.get('/parse', (req, res, next) => {
 });
 
 router.post('/converse', (req, res, next) => {
-    let command = req.body.command;
+    const command = req.body.command;
     if (!command) {
         res.status(400).json({error:'Missing command'});
         return;
