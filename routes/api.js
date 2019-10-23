@@ -71,6 +71,34 @@ router.post('/converse', (req, res, next) => {
     });
 });
 
+function describeDevice(d, req) {
+    return {
+        uniqueId: d.uniqueId,
+        name: d.name || req._("Unknown device"),
+        description: d.description || req._("Description not available"),
+        kind: d.kind,
+        ownerTier: d.ownerTier
+    };
+}
+
+router.get('/devices/list', (req, res, next) => {
+    const engine = req.app.engine;
+    Promise.resolve().then(() => {
+        const result = engine.devices.getAllDevices().map((d) => describeDevice(d, req));
+        // sort by name to provide a deterministic result
+        result.sort((a, b) => a.name.localeCompare(b.name));
+        res.json(result);
+    }).catch(next);
+});
+
+router.post('/devices/create', (req, res, next) => {
+    const engine = req.app.engine;
+    Promise.resolve().then(async () => {
+        const device = await engine.devices.addSerialized(req.body);
+        res.json(describeDevice(device, req));
+    }).catch(next);
+});
+
 function describeApp(app) {
     return {
         uniqueId: app.uniqueId,
