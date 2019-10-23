@@ -28,6 +28,18 @@ podman run -p 3000:3000 --uidmap keep-id \
 
 You can now navigate to [127.0.0.1:3000](http://127.0.0.1:3000) to access Almond, or use your voice with the hotword "Almond".
 
+### I am a Mac!
+
+Voice support is only available on Linux. On Mac or Windows, you can use the following docker command:
+
+```bash
+docker run -p 3000:3000 \
+    -v $HOME/.almond-server:/var/lib/almond-server \
+    stanfordoval/almond-server:latest-portable
+```
+
+Change the `-v` line to a different path to save the almond-server configuration files in a different directory than `$HOME/.almond-server`.
+
 ## Development setup
 
 To develop almond-server, you should clone this repository, then install the dependencies with:
