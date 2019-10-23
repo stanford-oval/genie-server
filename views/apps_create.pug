@@ -10,7 +10,7 @@ block content
         span(aria-hidden='true') ×
       p= error
 
-  form(action="/apps/create", method="post")
+  form(action=Config.BASE_URL + "/apps/create", method="post")
     input(type='hidden',name='_csrf',value=csrfToken)
     div.form-group
       h3

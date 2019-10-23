@@ -13,18 +13,19 @@ const Q = require('q');
 const express = require('express');
 var router = express.Router();
 
-
 // FIXME
 const ipAddress = require('thingengine-core/lib/util/ip_address');
 const user = require('../util/user');
 const platform = require('../service/platform');
+
+const Config = require('../config');
 
 function config(req, res, next, userData, cloudData) {
     return ipAddress.getServerName().then((host) => {
         var port = res.app.get('port');
         var serverAddress = 'http://' +
             (host.indexOf(':') >= 0 ? '[' + host + ']' : host)
-            + ':' + port + '/config';
+            + ':' + port + Config.BASE_URL + '/config';
 
         var prefs = platform.getSharedPreferences();
         var cloudId = prefs.get('cloud-id');
@@ -78,7 +79,7 @@ router.post('/set-server-password', user.requireLogIn, (req, res, next) => {
         user.unlock(req, password);
         return Q.ninvoke(req, 'login', userObj);
     }).then(() => {
-        res.redirect('/config');
+        res.redirect(Config.BASE_URL + '/config');
     }).catch((error) => {
         return config(req, res, next, { password: '',
                                         error: error.message }, {});

@@ -14,6 +14,7 @@ const util = require('util');
 const BaseStrategy = require('passport-strategy');
 
 const platform = require('../service/platform');
+const Config = require('../config');
 
 // a model of user based on sharedpreferences
 const model = {
@@ -145,10 +146,10 @@ module.exports = {
     redirectLogIn(req, res, next) {
         if (!model.isConfigured()) {
             req.session.redirect_to = req.originalUrl;
-            res.redirect('/user/configure');
+            res.redirect(Config.BASE_URL + '/user/configure');
         } else if (!req.user) {
             req.session.redirect_to = req.originalUrl;
-            res.redirect('/user/login');
+            res.redirect(Config.BASE_URL + '/user/login');
         } else {
             next();
         }

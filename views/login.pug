@@ -15,7 +15,7 @@ block content
         span(aria-hidden='true') ×
 
       p= error
-  form(action='/user/login', method='post')
+  form(action=Config.BASE_URL + '/user/login', method='post')
     input(type='hidden',name='_csrf',value=csrfToken)
     input(type='hidden',name='username',value='ignored')
     div.form-group

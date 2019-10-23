@@ -14,6 +14,7 @@ const express = require('express');
 const passport = require('passport');
 
 const user = require('../util/user');
+const Config = require('../config');
 
 var router = express.Router();
 
@@ -87,18 +88,18 @@ router.get('/login', (req, res, next) => {
 });
 
 
-router.post('/login', passport.authenticate('local', { failureRedirect: '/user/login',
+router.post('/login', passport.authenticate('local', { failureRedirect: Config.BASE_URL + '/user/login',
                                                        failureFlash: true }), (req, res, next) => {
     user.unlock(req, req.body.password);
     // Redirection back to the original page
-    var redirect_to = req.session.redirect_to || '/';
+    var redirect_to = req.session.redirect_to || (Config.BASE_URL + '/');
     delete req.session.redirect_to;
     res.redirect(redirect_to);
 });
 
 router.get('/logout', (req, res, next) => {
     req.logout();
-    res.redirect('/');
+    res.redirect(Config.BASE_URL + '/');
 });
 
 

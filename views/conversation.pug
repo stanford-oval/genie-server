@@ -1,11 +1,11 @@
 extends layout
 
 block scripts
-  script(src='/javascripts/conversation.js')
+  script(src=Config.BASE_URL + '/javascripts/conversation.js')
 
 block styles
-  link(rel='stylesheet', href='/stylesheets/spinner.css')
-  link(rel='stylesheet', href='/stylesheets/conversation.css')
+  link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/spinner.css')
+  link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/conversation.css')
 
 block page_name
   = _("Chat")

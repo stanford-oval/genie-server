@@ -1,13 +1,13 @@
 extends layout
 
 block scripts
-  script(src='/javascripts/apps.js')
+  script(src=Config.BASE_URL + '/javascripts/apps.js')
 
 block page_name
   = _("My Skills")
 
 block styles
-  link(rel='stylesheet', href='/stylesheets/my_stuff.css')
+  link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/my_stuff.css')
 
 block content
   if message
@@ -60,7 +60,7 @@ block content
             div.row
               if !dev.isTransient
                 div.col-md-6
-                  form.form-inline(action="/devices/delete",method="post").form-delete
+                  form.form-inline(action=Config.BASE_URL + '/devices/delete',method="post").form-delete
                     input(type='hidden',name='id',value=dev.uniqueId)
                     input(type='hidden',name='_csrf',value=csrfToken)
                     if datasource
@@ -70,4 +70,4 @@ block content
 
   div.row
     div.col-sm-6.col-md-3
-      a(href='/devices/create').btn.btn-primary.btn-block= _("Configure a new skill")
+      a(href=Config.BASE_URL + '/devices/create').btn.btn-primary.btn-block= _("Configure a new skill")

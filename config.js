@@ -9,7 +9,25 @@
 // See COPYING for details
 "use strict";
 
+/**
+  The URL prefix at which all almond-server APIs and pages are exposed.
+
+  This configuration is provided to simplify reverse-proxying almond-server.
+  If set, it should start with a slash, not end in a slash, and have no two consecutive slashes.
+
+  Good: /foo /foo/bar
+  Bad: foo foo/ /foo/ /foo//bar
+*/
+module.exports.BASE_URL = process.env.THINGENGINE_BASE_URL || '';
+
+/**
+  Enable password-based DB encryption.
+
+  If true, the engine will start locked until the user enters their password.
+*/
 module.exports.ENABLE_DB_ENCRYPTION = false;
+
+
 module.exports.SEMPRE_URL = 'https://almond-nl.stanford.edu';
 module.exports.THINGPEDIA_URL = 'https://thingpedia.stanford.edu/thingpedia';
 module.exports.MS_SPEECH_RECOGNITION_PRIMARY_KEY = 'de1f02817356494483ba502b2ce95f6f';

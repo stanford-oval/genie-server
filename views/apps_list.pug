@@ -1,13 +1,13 @@
 extends layout
 
 block scripts
-  script(src='/javascripts/apps.js')
+  script(src=Config.BASE_URL + '/javascripts/apps.js')
 
 block page_name
   = _("My Rules")
 
 block styles
-  link(rel='stylesheet', href='/stylesheets/my_stuff.css')
+  link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/my_stuff.css')
 
 block content
   if message
@@ -21,7 +21,7 @@ block content
   for app in apps
     div.row
       div.col-lg-6.col-xs-12.app-template
-        form.form-inline(action="/apps/delete",method="post").form-delete.form-delete-app
+        form.form-inline(action=Config.BASE_URL + "/apps/delete",method="post").form-delete.form-delete-app
           input(type='hidden',name='id',value=app.uniqueId)
           input(type='hidden',name='_csrf',value=csrfToken)
           button(type='submit').btn.btn-sm.btn-danger= _("Stop")

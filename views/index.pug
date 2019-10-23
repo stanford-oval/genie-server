@@ -12,13 +12,13 @@ block content
     p If you see this message, your server is correctly configured.
 
     p
-      a(href='/conversation').btn.btn-primary=_("Start a conversation")
+      a(href=Config.BASE_URL + '/conversation').btn.btn-primary=_("Start a conversation")
       | &nbsp;
-      a(href='/apps').btn.btn-default= _("Check your enabled rules")
+      a(href=Config.BASE_URL + '/apps').btn.btn-default= _("Check your enabled rules")
 
     //if !cloud.isConfigured
       p You did not configure cloud access yet. You should do that&#x20;
-        a(href='/config') now
+        a(href=Config.BASE_URL + '/config') now
         | .
 
     //if server.initialSetup

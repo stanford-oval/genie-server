@@ -15,7 +15,7 @@ block content
         span(aria-hidden='true') ×
       p= error
 
-  form(action='/user/configure', method='post',data-toggle='validator')
+  form(action=Config.BASE_URL + '/user/configure', method='post',data-toggle='validator')
     input(type='hidden',name='_csrf',value=csrfToken)
     div.form-group
       label(for='password').control-label Password

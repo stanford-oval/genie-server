@@ -13,6 +13,7 @@ const express = require('express');
 var router = express.Router();
 
 const user = require('../util/user');
+const Config = require('../config');
 
 function getAllDevices(req, engine) {
     return engine.devices.getAllDevices().map((d) => {
@@ -63,7 +64,7 @@ router.post('/create', user.requireLogIn, (req, res, next) => {
             res.redirect(303, req.session['device-redirect-to']);
             delete req.session['device-redirect-to'];
         } else {
-            res.redirect(303, '/devices');
+            res.redirect(303, Config.BASE_URL + '/devices');
         }
     }).catch((e) => {
         res.status(400).render('error', { page_title: "Almond - Error",
@@ -88,7 +89,7 @@ router.post('/delete', user.requireLogIn, (req, res, next) => {
         }
 
         engine.devices.removeDevice(device);
-        res.redirect('/devices');
+        res.redirect(Config.BASE_URL + '/devices');
     } catch(e) {
         res.status(400).render('error', { page_title: "Almond - Error",
                                           message: e.message });
@@ -106,7 +107,7 @@ router.get('/oauth2/:kind', user.redirectLogIn, (req, res, next) => {
                 req.session[key] = session[key];
             res.redirect(redirect);
         } else {
-            res.redirect('/devices?class=online');
+            res.redirect(Config.BASE_URL + '/devices?class=online');
         }
     }).catch((e) => {
         console.log(e.stack);
@@ -120,7 +121,7 @@ router.get('/oauth2/callback/:kind', user.redirectLogIn, (req, res, next) => {
     const engine = req.app.engine;
     Promise.resolve().then(async () => {
         await engine.devices.completeOAuth(kind, req.url, req.session);
-        res.redirect('/devices?class=online');
+        res.redirect(Config.BASE_URL + '/devices?class=online');
     }).catch((e) => {
         console.log(e.stack);
         res.status(400).render('error', { page_title: "Almond - Error",
