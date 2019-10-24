@@ -1,8 +1,7 @@
 "use strict";
 $(function() {
     var thingpediaUrl = document.body.dataset.thingpediaUrl;
-    var url = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host
-        + '/api/conversation';
+    var url = 'ws' + location.href.substring('http'.length) + '/../api/conversation';
 
     var ws;
     var open = false;

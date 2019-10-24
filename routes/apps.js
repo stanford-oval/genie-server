@@ -13,6 +13,7 @@ const express = require('express');
 var router = express.Router();
 
 const user = require('../util/user');
+const Config = require('../config');
 
 function appsList(req, res, next, message) {
     var engine = req.app.engine;
@@ -48,7 +49,7 @@ router.post('/delete', user.requireLogIn, (req, res, next) => {
 
         engine.apps.removeApp(app).then(() => {
             req.flash('app-message', "Rule successfully stopped");
-            res.redirect(303, '/apps');
+            res.redirect(303, Config.BASE_URL + '/apps');
         }).catch((e) => {
             res.status(400).render('error', { page_title: "Almond - Error",
                                               message: e.message + '\n' + e.stack });

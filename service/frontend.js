@@ -65,7 +65,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
                                 saveUninitialized: false,
                                 secret: secretKey.getSecretKey() }));
         this._app.use(connect_flash());
-        this._app.use(express.static(path.join(__dirname, '../public')));
+        this._app.use('/', express.static(path.join(__dirname, '../public')));
 
         // development only
         if ('development' === this._app.get('env')) {
@@ -85,7 +85,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
         user.initializePassport();
 
         this._app.use((req, res, next) => {
-            this._platform._setOrigin(req.protocol + '://' + req.hostname + ':' + this._app.get('port'));
+            this._platform._setOrigin(req.protocol + '://' + req.hostname + ':' + this._app.get('port') + Config.BASE_URL);
             if (req.user) {
                 res.locals.authenticated = true;
                 res.locals.user = { username: req.user, isConfigured: true };

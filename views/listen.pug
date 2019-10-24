@@ -5,7 +5,7 @@ block page_name
   | Almond
 
 block content
-  form(action='/listen',method='post')
+  form(action=Config.BASE_URL + '/listen',method='post')
     input(type='hidden',name='_csrf',value=csrfToken)
     button(type='submit')#listen-button
-      img(src='images/doctor.png')
+      img(src=Config.BASE_URL + '/images/doctor.png')

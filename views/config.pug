@@ -1,8 +1,8 @@
 extends layout
 
 block scripts
-  script(src='/javascripts/qrcode.js')
-  script(src='/javascripts/config.js')
+  script(src=Config.BASE_URL + '/javascripts/qrcode.js')
+  script(src=Config.BASE_URL + '/javascripts/config.js')
 
 block page_name
   | Configuration
@@ -34,7 +34,7 @@ block content
 
             p= user.error
 
-        form(action='/config/set-server-password',method='post',data-toggle='validator')
+        form(action=Config.BASE_URL + '/config/set-server-password',method='post',data-toggle='validator')
           input(type='hidden',name='_csrf',value=csrfToken)
           div.form-group
             label(for='password').control-label Password
@@ -67,7 +67,7 @@ block content
 
             p= cloud.error
 
-        //form(action='/config/cloud-setup', method='post').form-inline
+        //form(action=Config.BASE_URL + '/config/cloud-setup', method='post').form-inline
           input(type='hidden',name='_csrf',value=csrfToken)
           p
             span.form-group

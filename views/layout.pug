@@ -7,15 +7,15 @@ html
     title= page_title
     link(rel='stylesheet', href='https://use.fontawesome.com/releases/v5.2.0/css/all.css')
     link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,200i,300,300i,400,400i,600,600i,700,700i,900,900i")
-    link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
-    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/bootstrap.min.css')
+    link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/style.css')
     block styles
     script(src="https://code.jquery.com/jquery-3.4.1.min.js",integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=",crossorigin="anonymous")
     script(src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js",integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd",
       crossorigin="anonymous")
-    script(src='/javascripts/validator.min.js')
-    script(src='/javascripts/jstz.min.js')
-    script(src='/javascripts/shared.js')
+    script(src=Config.BASE_URL + '/javascripts/validator.min.js')
+    script(src=Config.BASE_URL + '/javascripts/jstz.min.js')
+    script(src=Config.BASE_URL + '/javascripts/shared.js')
     block scripts
 
   - var index = false;
@@ -29,7 +29,7 @@ html
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        a.navbar-brand.scroller.hidden-xs.hidden-sm(href='/') Almond
+        a.navbar-brand.scroller.hidden-xs.hidden-sm(href=Config.BASE_URL + '/') Almond
         span.navbar-brand.scroller.hidden-md.hidden-lg(aria-hidden='true')
           block page_name
 
