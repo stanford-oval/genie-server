@@ -31,7 +31,6 @@ function getAllDevices(req, engine) {
 
 router.get('/', user.redirectLogIn, (req, res, next) => {
     res.render('devices_list', { page_title: 'Almond - My Goods',
-                                 csrfToken: req.csrfToken(),
                                  devices: getAllDevices(req, req.app.engine) });
 });
 
@@ -43,8 +42,6 @@ router.get('/create', user.redirectLogIn, (req, res, next) => {
     }
 
     res.render('devices_create', { page_title: req._("Almond - Configure device"),
-                                   csrfToken: req.csrfToken(),
-                                   developerKey: req.user.developer_key,
                                    klass: req.query.class,
                                    ownTier: 'cloud',
                                  });
