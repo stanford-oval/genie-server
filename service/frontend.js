@@ -56,6 +56,8 @@ module.exports = class WebFrontend extends events.EventEmitter {
         this._app.set('port', process.env.PORT || 3000);
         this._app.set('views', path.join(__dirname, '../views'));
         this._app.set('view engine', 'pug');
+        if (Config.HOST_BASED_AUTHENTICATION === 'proxied-ip')
+            this._app.set('trust proxy', true);
         //this._app.use(favicon());
         this._app.use(logger('dev'));
         this._app.use(bodyParser.json());
@@ -81,7 +83,8 @@ module.exports = class WebFrontend extends events.EventEmitter {
             res.locals.isLocked = this._isLocked;
             next();
         });
-        this._app.use(passport.authenticate('host-based'));
+        if (Config.HOST_BASED_AUTHENTICATION !== 'disabled')
+            this._app.use(passport.authenticate('host-based'));
         user.initializePassport();
 
         this._app.use((req, res, next) => {

@@ -46,10 +46,23 @@ class HostBasedStrategy extends BaseStrategy {
     constructor() {
         super();
         this.name = 'host-based';
+
+        this._mode = Config.HOST_BASED_AUTHENTICATION;
+        if (['disabled', 'local-ip', 'proxied-ip', 'insecure'].indexOf(this._mode) < 0)
+            throw new Error(`Configuration error: invalid value ${this._mode} for HOST_BASED_AUTHENTICATION setting`);
     }
 
     authenticate(req, options) {
-        if (req.hostname === '127.0.0.1' && !req.isLocked && model.isConfigured())
+        // if the server is not configured, disable HBA and let the user set the password
+        if (!model.isConfigured())
+            return this.pass();
+        // if the engine is still locked (DB encryption is on), we need the user to enter their password
+        if (req.isLocked)
+            return this.pass();
+
+        // otherwise, we allow if mode is insecure (all IPs are OK), or if the IP is local
+        // whether the IP is the proxy/direct client, or the proxied client depends on the "trust proxy" setting
+        if (this._mode === 'insecure' || req.ip === '127.0.0.1' || req.ip === '::1')
             return this.success(model.get());
         else
             return this.pass();
