@@ -62,7 +62,7 @@ class HostBasedStrategy extends BaseStrategy {
 
         // otherwise, we allow if mode is insecure (all IPs are OK), or if the IP is local
         // whether the IP is the proxy/direct client, or the proxied client depends on the "trust proxy" setting
-        if (this._mode === 'insecure' || req.ip === '127.0.0.1' || req.ip === '::1')
+        if (this._mode === 'insecure' || req.ip === '127.0.0.1' || req.ip === '::ffff:127.0.0.1' || req.ip === '::1')
             return this.success(model.get());
         else
             return this.pass();
