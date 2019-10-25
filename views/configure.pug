@@ -6,8 +6,10 @@ block page_name
 block content
   h2 Welcome to Almond!
 
-  p You must configure a password before you use your Almond. This password will
-    |  be used to generate a secure encryption key to store your saved credentials.
+  p
+    | You must configure a password before you use your Almond.
+    if Config.ENABLE_DB_ENCRYPTION
+      |  This password will be used to generate a secure encryption key to store your saved credentials.
 
   each error in errors
     div.alert.alert-danger.alert-dismissible.fade.in(role='alert')
