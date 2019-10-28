@@ -50,9 +50,9 @@ async function main() {
     try {
 
         _frontend = new WebFrontend(platform);
-        await _frontend.open();
 
         if (Config.ENABLE_DB_ENCRYPTION) {
+            await _frontend.open();
             await new Promise((resolve, reject) => {
                 _frontend.on('unlock', (key) => {
                     console.log('Attempting unlock...');
@@ -64,6 +64,7 @@ async function main() {
             });
         } else {
             await init(platform);
+            await _frontend.open();
         }
 
         try {
