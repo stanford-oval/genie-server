@@ -1,5 +1,5 @@
 "use strict";
-$(function() {
+$(() => {
     function getThingpedia() {
         return document.body.dataset.thingpediaUrl;
     }
@@ -75,7 +75,9 @@ $(function() {
 
     const developerKey = document.body.dataset.developerKey;
     const url = getThingpedia() + '/api/devices?developer_key=' + developerKey;
-    $.get(url, function(factoryList) {
+    $.get(url, (factoryList) => {
+        factoryList = factoryList.filter((f) => f.factory.type !== 'oauth2');
+
         const container = $('#online-account-selector');
 
         for (let i = 0; i < factoryList.length; i += 3) {
