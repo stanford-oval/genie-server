@@ -67,6 +67,11 @@ block content
                       button(type='submit').btn.btn-danger.btn-sm.btn-block= _("Disable")
                     else
                       button(type='submit').btn.btn-danger.btn-sm.btn-block= _("Forget")
+                div.col-md-6
+                  form.form-inline(action=Config.BASE_URL + '/devices/update',method="post").form-delete
+                    input(type='hidden',name='kind',value=dev.kind)
+                    input(type='hidden',name='_csrf',value=csrfToken)
+                    button(type='submit').btn.btn-primary.btn-sm.btn-block= _("Update")
 
   div.row
     div.col-sm-6.col-md-3

@@ -48,6 +48,13 @@ router.get('/create', user.redirectLogIn, (req, res, next) => {
                                  });
 });
 
+router.post('/update', user.requireLogIn, (req, res, next) => {
+    const engine = req.app.engine;
+    return engine.devices.updateDevicesOfKind(req.body.kind).then(() => {
+        res.redirect(303, Config.BASE_URL + '/devices');
+    }).catch(next);
+});
+
 router.post('/create', user.requireLogIn, (req, res, next) => {
     const engine = req.app.engine;
     Promise.resolve().then(async () => {
