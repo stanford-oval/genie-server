@@ -35,26 +35,43 @@ function config(req, res, next, userData, cloudData) {
             + port + '/' + authToken;
 
         var ipAddresses = ipAddress.getServerAddresses(host);
-        res.render('config', { page_title: "Configure Almond",
-                               csrfToken: req.csrfToken(),
-                               server: { name: host, port: port,
-                                         address: serverAddress,
-                                         extraAddresses: ipAddresses,
-                                         initialSetup: authToken === undefined },
-                               user: { isConfigured: user.isConfigured(),
-                                       username: userData.username || req.user,
-                                       password: userData.password,
-                                       error: userData.error },
-                               cloud: { isConfigured: cloudId !== undefined,
-                                        error: cloudData.error,
-                                        username: cloudData.username,
-                                        id: cloudId },
-                               qrcodeTarget: qrcodeTarget });
+        res.render('config', {
+            page_title: "Configure Almond",
+            csrfToken: req.csrfToken(),
+            server: {
+                name: host, port: port,
+                address: serverAddress,
+                extraAddresses: ipAddresses,
+                initialSetup: authToken === undefined
+            },
+            user: {
+                isConfigured: user.isConfigured(),
+                username: userData.username || req.user,
+                password: userData.password,
+                error: userData.error
+            },
+            cloud: {
+                isConfigured: cloudId !== undefined,
+                error: cloudData.error,
+                username: cloudData.username,
+                id: cloudId
+            },
+            settings: {
+                data_collection: prefs.get('sabrina-store-log') === 'yes'
+            },
+            qrcodeTarget: qrcodeTarget
+        });
     });
 }
 
 router.get('/', user.redirectLogIn, (req, res, next) => {
     config(req, res, next, {}, {}).catch(next);
+});
+
+router.post('/set-options', user.requireLogIn, (req, res, next) => {
+    const prefs = platform.getSharedPreferences();
+    prefs.set('sabrina-store-log', req.body.data_collection ? 'yes' : 'no');
+    res.redirect(303, Config.BASE_URL + '/config');
 });
 
 router.post('/set-server-password', user.requireLogIn, (req, res, next) => {

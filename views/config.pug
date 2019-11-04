@@ -49,6 +49,21 @@ block content
           div.form-group
             button(type='submit').btn.btn-primary Change
 
+  div.panel.panel-default.config-unit
+    div.panel-heading
+      h2.panel-title Options
+    div.panel-body
+      form(action=Config.BASE_URL + '/config/set-options',method='post',data-toggle='validator')
+        input(type='hidden',name='_csrf',value=csrfToken)
+        div.form-group
+          div.checkbox
+            label(for='setting-data-collection').control-label
+              input(type='checkbox',name='data_collection',value='1',checked=settings.data_collection)#setting-data-collection
+              = _(" Send anonymized commands to the authors of Almond for training.")
+
+        div.form-group
+          button(type='submit').btn.btn-primary Save
+
   //div.panel.panel-default.config-unit
     div.panel-heading
       h2.panel-title Cloud
