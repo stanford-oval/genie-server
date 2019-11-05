@@ -139,17 +139,14 @@ const _gpsApi = {
     _location: null,
     onlocationchanged: null,
 
-    get location() {
-        return this._location;
-    },
-    set location(v) {
+    setLocation(v) {
         this._location = v;
         if (this.onlocationchanged)
             this.onlocationchanged(null, v);
     },
 
     async getCurrentLocation() {
-        return this.location;
+        return this._location;
     }
 };
 
