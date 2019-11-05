@@ -132,6 +132,27 @@ function getCacheDir() {
         return getUserCacheDir() + '/almond-server';
 }
 
+const _gpsApi = {
+    start() {},
+    stop() {},
+
+    _location: null,
+    onlocationchanged: null,
+
+    get location() {
+        return this._location;
+    },
+    set location(v) {
+        this._location = v;
+        if (this.onlocationchanged)
+            this.onlocationchanged(null, v);
+    },
+
+    async getCurrentLocation() {
+        return this.location;
+    }
+};
+
 class ServerPlatform extends Tp.BasePlatform {
     constructor() {
         super();
@@ -246,7 +267,6 @@ class ServerPlatform extends Tp.BasePlatform {
 /*
         // We can use the phone capabilities
         case 'notify':
-        case 'gps':
         case 'audio-manager':
         case 'sms':
         case 'bluetooth':
@@ -257,6 +277,7 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'notify-api':
             return true;
 */
+        case 'gps':
         case 'graphics-api':
         case 'contacts':
         case 'content-api':
@@ -306,14 +327,14 @@ class ServerPlatform extends Tp.BasePlatform {
             return this._contacts;
         case 'smt-solver':
             return CVC4Solver;
+        case 'gps':
+            return _gpsApi;
 
 /*
         case 'notify-api':
         case 'notify':
             return _notifyApi;
 
-        case 'gps':
-            return _gpsApi;
 
         case 'audio-manager':
             return _audioManagerApi;
