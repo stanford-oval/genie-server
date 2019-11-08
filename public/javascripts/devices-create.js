@@ -11,7 +11,7 @@ $(() => {
 
         if (json.type === 'none') {
             const form = $('<form>');
-            form.attr('action', "/devices/create");
+            form.attr('action', "create");
             form.attr('method', "post");
             const csrf = $('<input>');
             csrf.attr('type', 'hidden');
@@ -32,7 +32,7 @@ $(() => {
             switch(json.type) {
             case 'form': {
                 const form = $('<form>');
-                form.attr('action', "/devices/create");
+                form.attr('action', "create");
                 form.attr('method', "post");
                 const csrf = $('<input>');
                 csrf.attr('type', 'hidden');
@@ -63,7 +63,7 @@ $(() => {
                 btn.attr('href', json.href);
                 break;
             case 'oauth2':
-                btn.attr('href', '/devices/oauth2/' + kind);
+                btn.attr('href', 'oauth2/' + kind);
                 break;
             default: // discovery or builtin, ignore
                 break;
