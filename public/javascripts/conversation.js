@@ -155,7 +155,7 @@ $(function() {
         var btn = $('<a>').addClass('message message-button btn btn-default')
             .attr('href', '#').text(title);
         btn.click(function(event) {
-            handleParsedCommand(json);
+            handleParsedCommand(json, title);
             event.preventDefault();
         });
         holder.append(btn);
@@ -182,7 +182,7 @@ $(function() {
         var btn = $('<a>').addClass('message message-yesno btn btn-default')
             .attr('href', '#').text("Yes");
         btn.click(function(event) {
-            handleSpecial('yes');
+            handleSpecial('yes', "Yes");
             event.preventDefault();
         });
         holder.append(btn);
@@ -191,7 +191,7 @@ $(function() {
         btn = $('<a>').addClass('message message-yesno btn btn-default')
             .attr('href', '#').text("No");
         btn.click(function(event) {
-            handleSpecial('no');
+            handleSpecial('no', "No");
             event.preventDefault();
         });
         holder.append(btn);
