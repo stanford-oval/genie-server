@@ -350,7 +350,7 @@ module.exports = class Assistant extends events.EventEmitter {
             await conversation.handleCommand(command.text);
             break;
         case 'parsed':
-            await conversation.handleParsedCommand(command.json);
+            await conversation.handleParsedCommand(command.json, command.title || '');
             break;
         case 'tt':
             await conversation.handleThingTalk(command.code);
