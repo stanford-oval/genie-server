@@ -1,6 +1,6 @@
 {
   "name": "thingengine-server",
-  "version": "1.0.0",
+  "version": "1.7.0",
   "private": true,
   "scripts": {
     "start": "node main.js",
