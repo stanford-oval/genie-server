@@ -291,7 +291,7 @@ $(function() {
     }
     function handleParsedCommand(json, title) {
         updateFeedback(true);
-        ws.send(JSON.stringify({ type: 'parsed', json: json }));
+        ws.send(JSON.stringify({ type: 'parsed', json: json, title: title }));
     }
     function handleThingTalk(tt) {
         updateFeedback(true);
