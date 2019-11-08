@@ -299,6 +299,7 @@ module.exports = class Assistant extends events.EventEmitter {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: true
         });
+        this._mainConversationInitialized = false;
         this._statelessConversation = new Almond(engine, 'stateless', new LocalUser(), new StatelessConversationDelegate(this._platform.locale), {
             sempreUrl: Config.SEMPRE_URL,
             showWelcome: false
@@ -391,7 +392,10 @@ module.exports = class Assistant extends events.EventEmitter {
     }
 
     async startConversation() {
-        await this._mainConversation.start();
+        if (this._speechHandler) {
+            this._mainConversationInitialized = true;
+            await this._mainConversation.start();
+        }
 
         await this._statelessConversation.start();
     }
@@ -419,11 +423,12 @@ module.exports = class Assistant extends events.EventEmitter {
         }));
     }
 
-    getMainConversation() {
-        return this._mainConversation;
-    }
-
     getConversation(id) {
+        if (id === 'main' && !this._mainConversationInitialized) {
+            this._mainConversationInitialized = true;
+            this._mainConversation.start();
+        }
+
         if (id !== undefined && this._conversations[id])
             return this._conversations[id];
         else if (this._lastConversation)
