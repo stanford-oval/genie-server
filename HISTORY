@@ -1,3 +1,10 @@
+1.7.1
+=====
+
+* The main conversation is now delayed until the page is opened
+  if speech is not available, allowing to show the welcome screen
+* Updated dependencies
+
 1.7.0
 =====
 
