@@ -53,7 +53,7 @@
     "coveralls": "^3.0.6",
     "eslint": "^6.0.0",
     "nodemon": "^1.19.4",
-    "nyc": "^14.1.1",
+    "nyc": "^15.0.0",
     "parse5": "^5.1.0",
     "selenium-webdriver": "^4.0.0-alpha.5"
   },
