@@ -14,21 +14,23 @@ information at <https://thingpedia.stanford.edu/about>.
 
 ## Installation
 
-This assumes that you have [node](https://github.com/nodejs/node) and [yarn](https://github.com/yarnpkg/yarn) installed.
+This assumes that you have [node](https://github.com/nodejs/node) and [yarn](https://github.com/yarnpkg/yarn) installed, with at least **2 GB** of available diskspace. Please be sure to be on a **fast internet connection** before going through the installation.
 
 1. Clone this repo on your machine.
 ```
 git clone https://github.com/stanford-oval/almond-server.git
 ```
 
-2. Install all packages. 
+2. Install [mimic](https://github.com/MycroftAI/mimic1).
+
+3. Install all packages. 
 ```
 yarn
 ```
 
-3. Start Almond server.
+4. Start Almond server.
 ```
 yarn start
 ```
 
-4. Navigate to [localhost:3000](http://localhost:3000).
+5. Navigate to [localhost:3000](http://localhost:3000).
