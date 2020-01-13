@@ -2,11 +2,10 @@
 
 .chat-feed {
   display: flex;
-  flex-direction: column;
+  flex-flow: column nowrap;
   flex-grow: 1;
-  justify-content: flex-end;
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
   padding: $default-padding;
 
   /* width */
@@ -27,5 +26,10 @@
   /* Handle on hover */
   &::-webkit-scrollbar-thumb:hover {
     background: #555;
+  }
+
+  // Align messages to bottom
+  > :first-child {
+    margin-top: auto !important;
   }
 }
