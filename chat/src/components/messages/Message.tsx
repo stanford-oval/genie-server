@@ -3,6 +3,13 @@ import React from 'react';
 import Bubble from './Bubble';
 import TextBubble from './TextBubble';
 
+export interface MessageType {
+  key?: number;
+  by: string;
+  data: any;
+  time: Date;
+}
+
 interface Props {
   by: string;
   data: any;

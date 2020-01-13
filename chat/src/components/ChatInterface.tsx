@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import WebSocket from 'isomorphic-ws';
 
 import ChatFooter from './ChatFooter';
-import MessageFeed, { MessageType } from './MessageFeed';
+import ChatFeed from './ChatFeed';
+import { MessageType } from './messages/Message';
 
 const ChatInterface: React.FC = () => {
   const [messageHistory, setMessageHistory] = useState([] as MessageType[]);
@@ -48,7 +49,7 @@ const ChatInterface: React.FC = () => {
 
   return (
     <div>
-      <MessageFeed messages={messageHistory} />
+      <ChatFeed messages={messageHistory} />
       <ChatFooter handleMessageSubmit={handleMessageSubmit} />
     </div>
   );

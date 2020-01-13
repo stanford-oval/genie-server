@@ -1,11 +1,11 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
-interface MessageInputProps {
+interface ChatInputProps {
   handleSubmit: (d: any) => void;
 }
 
-const MessageInput: React.FC<MessageInputProps> = props => {
+const ChatInput: React.FC<ChatInputProps> = props => {
   const { register, handleSubmit, setValue, watch, errors } = useForm();
   const onSubmit = (d: any) => {
     setValue('messageText', '');
@@ -25,4 +25,4 @@ const MessageInput: React.FC<MessageInputProps> = props => {
   );
 };
 
-export default MessageInput;
+export default ChatInput;

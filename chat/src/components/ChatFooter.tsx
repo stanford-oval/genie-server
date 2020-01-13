@@ -1,6 +1,6 @@
 import React from 'react';
 
-import MessageInput from './MessageInput';
+import ChatInput from './ChatInput';
 
 interface ChatFooterProps {
   handleMessageSubmit: (d: any) => void;
@@ -9,7 +9,7 @@ interface ChatFooterProps {
 const ChatFooter: React.FC<ChatFooterProps> = props => {
   return (
     <div>
-      <MessageInput handleSubmit={props.handleMessageSubmit} />
+      <ChatInput handleSubmit={props.handleMessageSubmit} />
     </div>
   );
 };
