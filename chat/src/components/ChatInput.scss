@@ -1,0 +1,28 @@
+@import '../global';
+
+.chat-input {
+  display: flex;
+  width: 100%;
+
+  form {
+    display: flex;
+    flex-grow: 1;
+    input {
+      background-color: color(grey, base);
+      border: none;
+      border-radius: 25px;
+      flex-grow: 1;
+      padding: 10px;
+      padding-left: 15px;
+    }
+  }
+}
+
+.chat-voice-button {
+  background-color: color(primary, base);
+  border: none;
+  border-radius: 40px;
+  color: color(white, base);
+  margin-left: 10px;
+  width: 40px;
+}

@@ -2,7 +2,7 @@ import React from 'react';
 import 'normalize.css';
 
 import ChatInterface from './components/ChatInterface';
-import './App.css';
+import './App.scss';
 
 const App: React.FC = () => {
   return (

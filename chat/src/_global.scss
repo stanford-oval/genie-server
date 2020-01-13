@@ -1,0 +1,40 @@
+$palettes: (
+  black: (
+    base: #2f3640
+  ),
+  grey: (
+    base: #dcdde1,
+    light: #f5f6fa
+  ),
+  primary: (
+    base: #e84118
+  ),
+  red: (
+    base: #e84118
+  ),
+  white: (
+    base: #ffffff,
+    translucent: rgba(255, 255, 255, 0.9),
+  )
+);
+
+@function color($color, $tone) {
+  @warn map-get($palettes,$color);
+
+  @if map-has-key($palettes, $color) {
+    $color: map-get($palettes, $color);
+
+    @if map-has-key($color, $tone) {
+      $tone: map-get($color, $tone);
+      @return $tone;
+    }
+
+    @warn "Unknown tone `#{$tone}` in color";
+    @return null;
+  }
+
+  @warn "Unknown color `#{$color}` in palette";
+  @return null;
+}
+
+$default-padding: 15px;

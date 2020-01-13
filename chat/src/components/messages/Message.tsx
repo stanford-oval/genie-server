@@ -1,7 +1,9 @@
 import React from 'react';
 
-import Bubble from './Bubble';
+import './Message.scss';
 import TextBubble from './TextBubble';
+import userAvatar from '../../images/user_avatar.png';
+import almondAvatar from '../../images/almond_avatar.png';
 
 export interface MessageType {
   key?: number;
@@ -16,27 +18,38 @@ interface Props {
   time: Date;
 }
 
-const renderBubble = (data: any) => {
+const renderBubble = (data: any, fromUser: boolean) => {
   let bubble;
 
   switch (data.type) {
     case 'text':
-      bubble = <TextBubble text={data.text} />;
+      bubble = <TextBubble fromUser={fromUser} text={data.text} />;
+      break;
+    case 'pending':
+      bubble = <TextBubble fromUser={fromUser} text={'...'} />;
       break;
     default:
-      bubble = <TextBubble text={JSON.stringify(data)} />;
+      bubble = <TextBubble fromUser={fromUser} text={JSON.stringify(data)} />;
   }
 
   return bubble;
 };
 
 const Message: React.FC<Props> = props => {
-  const bubble = renderBubble(props.data);
+  if (props.data.type === 'askSpecial') {
+    return <></>;
+  }
+
+  const fromUser = props.by === 'User';
+  const bubble = renderBubble(props.data, fromUser);
   return (
-    <div>
-      <p>{props.by}</p>
+    <div className={`message ${fromUser ? 'message-user' : 'message-other'}`}>
+      {fromUser ? (
+        <img src={userAvatar} className="avatar" />
+      ) : (
+        <img src={almondAvatar} className="avatar" />
+      )}
       {bubble}
-      <p>{props.time.toDateString()}</p>
     </div>
   );
 };

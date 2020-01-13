@@ -1,0 +1,20 @@
+@import '../../global';
+
+.message {
+  display: flex;
+  margin-bottom: $default-padding;
+}
+
+.message-other {
+  flex-direction: row;
+}
+
+.message-user {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  background-color: color(black, base);
+  border-radius: 25px;
+  height: 25px;
+}

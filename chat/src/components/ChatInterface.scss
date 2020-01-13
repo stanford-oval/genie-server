@@ -1,0 +1,8 @@
+@import '../global';
+
+.chat-container {
+  background-color: color(grey, base);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import ChatInput from './ChatInput';
+import './ChatFooter.scss';
 
 interface ChatFooterProps {
   handleMessageSubmit: (d: any) => void;
@@ -8,7 +9,7 @@ interface ChatFooterProps {
 
 const ChatFooter: React.FC<ChatFooterProps> = props => {
   return (
-    <div>
+    <div className="chat-footer">
       <ChatInput handleSubmit={props.handleMessageSubmit} />
     </div>
   );

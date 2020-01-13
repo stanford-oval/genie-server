@@ -5,9 +5,11 @@ import WebSocket from 'isomorphic-ws';
 import ChatFooter from './ChatFooter';
 import ChatFeed from './ChatFeed';
 import { MessageType } from './messages/Message';
+import './ChatInterface.scss';
 
 const ChatInterface: React.FC = () => {
   const [messageHistory, setMessageHistory] = useState([] as MessageType[]);
+  const [waitingForResponse, setWaiting] = useState(false);
 
   const almondURL = 'almond.stanford.edu/me/api/anonymous';
   const headers = {
@@ -17,6 +19,8 @@ const ChatInterface: React.FC = () => {
 
   useEffect(() => {
     socket.current.onmessage = msg => {
+      setWaiting(false);
+
       const incomingMessage: MessageType = {
         by: 'Other',
         data: JSON.parse(msg.data as any),
@@ -34,6 +38,7 @@ const ChatInterface: React.FC = () => {
       type: 'command',
       text
     };
+    setWaiting(true);
     socket.current.send(JSON.stringify(newOutMessage));
 
     const newMessage: MessageType = {
@@ -48,8 +53,11 @@ const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div>
-      <ChatFeed messages={messageHistory} />
+    <div className="chat-container">
+      <ChatFeed
+        messages={messageHistory}
+        waitingForResponse={waitingForResponse}
+      />
       <ChatFooter handleMessageSubmit={handleMessageSubmit} />
     </div>
   );

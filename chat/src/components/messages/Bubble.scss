@@ -1,0 +1,21 @@
+@import '../../global';
+
+.bubble {
+  display: inline-block;
+  margin-left: 10px;
+  margin-right: 10px;
+  max-width: 60%;
+  padding: 10px;
+  word-wrap: break-word;
+}
+
+.user {
+  background-color: color(primary, base);
+  border-radius: 25px 5px 25px 25px;
+  color: color(white, base);
+}
+
+.other {
+  background-color: color(white, base);
+  border-radius: 5px 25px 25px 25px;
+}
