@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { useForm } from 'react-hook-form';
-import { FaMicrophone } from 'react-icons/fa';
 
 import './ChatInput.scss';
+import MicInputButton from './MicInputButton';
 
 interface ChatInputProps {
   handleSubmit: (d: any) => void;
@@ -27,9 +27,7 @@ const ChatInput: React.FC<ChatInputProps> = props => {
         />
         <input type="submit" style={{ display: 'none' }} />
       </form>
-      <button className="chat-voice-button">
-        <FaMicrophone />
-      </button>
+      <MicInputButton submit={props.handleSubmit} />
     </div>
   );
 };
