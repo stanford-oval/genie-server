@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { scroller, animateScroll } from 'react-scroll';
+import { animateScroll } from 'react-scroll';
 
 import Message, { MessageType } from './messages/Message';
 import './ChatFeed.scss';

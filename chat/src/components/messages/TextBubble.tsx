@@ -10,7 +10,7 @@ interface TextBubbleProps {
 
 export default (props: TextBubbleProps) => {
   return (
-    <Bubble fromUser={props.fromUser}>
+    <Bubble fromUser={props.fromUser} padding>
       <p className="text-bubble-content">{props.text}</p>
     </Bubble>
   );

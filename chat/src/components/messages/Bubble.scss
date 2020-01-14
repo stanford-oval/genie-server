@@ -5,8 +5,12 @@
   margin-left: 10px;
   margin-right: 10px;
   max-width: 60%;
-  padding: 10px;
+  overflow: hidden;
   word-wrap: break-word;
+}
+
+.bubble-padding {
+  padding: $bubble-padding;
 }
 
 .user {
