@@ -5,6 +5,7 @@ import RDLBubble from './RDLBubble';
 import TextBubble from './TextBubble';
 import almondAvatar from '../../images/almond_avatar.png';
 import userAvatar from '../../images/user_avatar.png';
+import PictureBubble from './PictureBubble';
 
 export interface MessageType {
   key?: number;
@@ -23,11 +24,16 @@ const renderBubble = (data: any, fromUser: boolean) => {
   let bubble;
 
   switch (data.type) {
+    case 'button':
+      bubble = <button>Show More</button>;
+      break;
     case 'pending':
       bubble = <TextBubble fromUser={fromUser} text={'...'} />;
       break;
+    case 'picture':
+      bubble = <PictureBubble fromUser={fromUser} image={data.url} />
+      break;
     case 'rdl':
-      console.log(data);
       bubble = (
         <RDLBubble
           fromUser={fromUser}

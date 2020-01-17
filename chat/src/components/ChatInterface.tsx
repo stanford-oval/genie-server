@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+import { useImmer } from 'use-immer';
 import WebSocket from 'isomorphic-ws';
 
 import ChatFooter from './ChatFooter';
@@ -8,14 +9,14 @@ import { MessageType } from './messages/Message';
 import './ChatInterface.scss';
 
 const ChatInterface: React.FC = () => {
-  const [messageHistory, setMessageHistory] = useState([] as MessageType[]);
+  const [messageHistory, updateMessageHistory] = useImmer([] as MessageType[]);
   const [waitingForResponse, setWaiting] = useState(false);
 
-  const almondURL = 'almond.stanford.edu/me/api/anonymous';
+  const almondURL = 'almond-dev.stanford.edu/me/api/conversation';
   const headers = {
-    Origin: `https://${almondURL}`
+    Authorization: `Bearer key`,
   };
-  const socket = useRef(new WebSocket(`wss://${almondURL}`, [], { headers }));
+  const socket = useRef(new WebSocket(`wss://${almondURL}?access_token=key`, [], { headers }));
 
   useEffect(() => {
     socket.current.onmessage = msg => {
@@ -26,9 +27,19 @@ const ChatInterface: React.FC = () => {
         data: JSON.parse(msg.data as any),
         time: new Date(Date.now())
       };
-      setMessageHistory(messageHistory.concat([incomingMessage]));
+      updateMessageHistory(draft => {
+        draft.push(incomingMessage)
+        return draft;
+      });
+      console.log(messageHistory)
     };
-  });
+
+    /*
+    socket.current.onerror = e => {
+      console.log(`Socket error. ${e}`);
+    };
+    */
+  }, [messageHistory]);
 
   // Close socket when component is unmounted.
   useEffect(() => () => socket.current.close(), [socket]);
@@ -49,7 +60,10 @@ const ChatInterface: React.FC = () => {
       time: new Date(Date.now()),
       by: 'User'
     };
-    setMessageHistory(messageHistory.concat(newMessage));
+    updateMessageHistory(draft => {
+      draft.push(newMessage)
+      return draft;
+    });
   };
 
   return (

@@ -10,6 +10,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "axios": "^0.19.1",
+    "dotenv": "^8.2.0",
     "inline-worker": "^1.1.0",
     "isomorphic-ws": "^4.0.1",
     "node-sass": "^4.13.0",
@@ -21,7 +22,8 @@
     "react-scripts": "3.3.0",
     "react-scroll": "^1.7.15",
     "react-use-websocket": "^1.2.0",
-    "typescript": "~3.7.2"
+    "typescript": "~3.7.2",
+    "use-immer": "^0.3.5"
   },
   "scripts": {
     "start": "PORT=3001 react-scripts start",
