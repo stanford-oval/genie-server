@@ -110,11 +110,15 @@ function safeMkdirSync(dir) {
 }
 
 function getUserConfigDir() {
+    if (process.platform === 'win32')
+        return process.env.APPDATA;
     if (process.env.XDG_CONFIG_HOME)
         return process.env.XDG_CONFIG_HOME;
     return os.homedir() + '/.config';
 }
 function getUserCacheDir() {
+    if (process.platform === 'win32')
+        return process.env.TEMP;
     if (process.env.XDG_CACHE_HOME)
         return process.env.XDG_CACHE_HOME;
     return os.homedir() + '/.cache';
