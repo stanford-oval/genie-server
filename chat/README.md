@@ -1,44 +1,28 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Almond Chat Interface
 
-## Available Scripts
+![](/images/screenshot.png)
 
-In the project directory, you can run:
+A chat interface for Almond, an open-source virtual assitant developed at Stanford by the [Open Virtual Assistant Lab](https://oval.cs.stanford.edu).
 
-### `yarn start`
+## Setup
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+To use this, first create an Almond developer account [here](https://almond.stanford.edu/user/register). Next, log in to your account and click on [Settings](https://almond.stanford.edu/user/profile) on the top right. Scroll down to "Authorized third-party apps" and click "Issue an Access Token". Copy and paste this access token into a `.env` file under the `REACT_APP_ACCESS_TOKEN` variable like this
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+```
+REACT_APP_ACCESS_TOKEN="eyJhbGsomethingsomethingsomething"
+```
 
-### `yarn test`
+Then, `cd` to this folder (`chat`) from the root directory and run `yarn start`.
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The chat interface should open in your default browser and ALmond should say "Welcome back!". Try replying with "Tell me a joke"!
 
-### `yarn build`
+## Enabling Voice
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+To get voice working, first go to [almond-voice](https://github.com/euirim/almond-voice) and clone the repository. Then, run `yarn start-api:dev`. By default this serves a speech-to-text endpoint at `http://127.0.0.1:8000/rest/stt`. If you change this, remember to set the new endpoint in your `.env` file here as well under the `REACT_APP_STTURL` variable, so your new `.env` file should go something like.
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+```
+REACT_APP_ACCESS_TOKEN="eyJhbGsomethingsomethingsomething"
+REACT_APP_STTURL="http://127.0.0.1:yourport/rest/stt"
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Next, run the chat interface and click on the mic button at the bottom right to start recording. Click again to stop recording after speaking your command.

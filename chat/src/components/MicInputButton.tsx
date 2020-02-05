@@ -27,14 +27,14 @@ const MicInputButton: React.FC<MicInputButtonProps> = props => {
     data.append('audio', blob);
     axios({
       method: 'post',
-      url: 'http://127.0.0.1:4000/audio', // TODO : Modify POST URL here
+      url: process.env.REACT_APP_STTURL || 'http://127.0.0.1:8000/rest/stt',
       data: data,
       headers: { 'Content-Type': 'multipart/form-data' },
     })
       .then(response => {
-        if (response.data.success) props.submit(response.data.command);
+        if (response.data.success) props.submit(response.data.text);
         // Update command
-        else console.log(response.data.command);
+        else console.log(response.data.text);
       })
       .catch(error => {
         // handle error

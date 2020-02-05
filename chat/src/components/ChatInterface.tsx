@@ -13,10 +13,7 @@ const ChatInterface: React.FC = () => {
   const [waitingForResponse, setWaiting] = useState(false);
 
   const almondURL = 'almond-dev.stanford.edu/me/api/conversation';
-  const headers = {
-    Authorization: `Bearer key`,
-  };
-  const socket = useRef(new WebSocket(`wss://${almondURL}?access_token=key`, [], { headers }));
+  const socket = useRef(new WebSocket(`wss://${almondURL}?access_token=${process.env.REACT_APP_ACCESS_TOKEN}`, []));
 
   useEffect(() => {
     socket.current.onmessage = msg => {
