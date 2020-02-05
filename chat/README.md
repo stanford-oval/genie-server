@@ -1,7 +1,5 @@
 # Almond Chat Interface
 
-![](/images/screenshot.png)
-
 A chat interface for Almond, an open-source virtual assitant developed at Stanford by the [Open Virtual Assistant Lab](https://oval.cs.stanford.edu).
 
 ## Setup
