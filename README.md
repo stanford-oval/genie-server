@@ -21,16 +21,22 @@ This assumes that you have [node](https://github.com/nodejs/node) and [yarn](htt
 git clone https://github.com/stanford-oval/almond-server.git
 ```
 
-2. Install [mimic](https://github.com/MycroftAI/mimic1).
+2. Install libpulse.
+```
+# On Ubuntu/Debian
+sudo apt-get install libpulse-dev
+```
 
-3. Install all packages. 
+3. Install [mimic](https://github.com/MycroftAI/mimic1).
+
+4. Install all packages. 
 ```
 yarn
 ```
 
-4. Start Almond server.
+5. Start Almond server.
 ```
 yarn start
 ```
 
-5. Navigate to [localhost:3000](http://localhost:3000).
+6. Navigate to [localhost:3000](http://localhost:3000).

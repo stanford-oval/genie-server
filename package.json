@@ -5,10 +5,12 @@
   "scripts": {
     "start": "node main.js",
     "lint": "eslint ./routes ./service ./util ./browser",
-    "test": "nyc ./tests/everything.sh",
+    "test": "nyc ./tests/everything.sh && react-scripts test",
     "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js",
     "prepare": "(cd node_modules/thingtalk; yarn); (cd node_modules/thingengine-core; yarn; rm -fr node_modules); yarn update-brassau",
-    "coverage": "nyc report --reporter=text-lcov | coveralls"
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "build": "react-scripts build",
+    "eject": "react-scripts eject"
   },
   "resolutions": {},
   "dependencies": {
@@ -41,13 +43,40 @@
     "thingpedia-discovery": "^1.0.0",
     "thingtalk": "~1.8.0",
     "uuid": "^3.1.0",
-    "ws": "^7.1.1"
+    "ws": "^7.1.1",
+    "@fortawesome/fontawesome-svg-core": "^1.2.26",
+    "@fortawesome/free-solid-svg-icons": "^5.12.0",
+    "@fortawesome/react-fontawesome": "^0.1.8",
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
+    "axios": "^0.19.1",
+    "dotenv": "^8.2.0",
+    "inline-worker": "^1.1.0",
+    "isomorphic-ws": "^4.0.1",
+    "node-sass": "^4.13.0",
+    "normalize.css": "^8.0.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-hook-form": "^4.4.8",
+    "react-icons": "^3.8.0",
+    "react-scripts": "3.3.0",
+    "react-scroll": "^1.7.15",
+    "react-use-websocket": "^1.2.0",
+    "typescript": "~3.7.2",
+    "use-immer": "^0.3.5"
   },
   "optionalDependencies": {
     "node-mimic": "^1.0.0",
     "pulseaudio2": "^0.2.0"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.0",
+    "@types/node": "^12.0.0",
+    "@types/react": "^16.9.0",
+    "@types/react-dom": "^16.9.0",
+    "@types/react-scroll": "^1.5.4",
+    "@types/ws": "^6.0.4",
     "@babel/core": "^7.5.5",
     "babelify": "^10.0.0",
     "browserify": "^16.1.1",
@@ -56,6 +85,21 @@
     "nyc": "^14.1.1",
     "parse5": "^5.1.0",
     "selenium-webdriver": "^4.0.0-alpha.4"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "nyc": {
     "exclude": [
