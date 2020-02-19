@@ -40,6 +40,13 @@ router.get('/conversation', user.redirectLogIn, (req, res, next) => {
     res.render('conversation', { page_title: req._("Almond - Chat") });
 });
 
+router.get('/conversation-beta', user.redirectLogIn, (req, res, _) => {
+    res.render(
+        'conversation_beta', 
+        { page_title: req._("Almond - Chat (Experimental)") }
+    );
+});
+
 router.get('/widgets', user.redirectLogIn, (req, res, next) => {
     res.render('brassau', { page_title: req._("Almond - Widgets") });
 });
