@@ -10,4 +10,4 @@ service/platform_config.js
 
 yarn-error.log
 
-react_build/
+public/react_build/

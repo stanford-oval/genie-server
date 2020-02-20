@@ -17,7 +17,7 @@ module.exports = {
   mode: 'development',
   entry: path.resolve(__dirname, 'react', 'index'),
   output: {
-    path: path.resolve(__dirname, 'react_build'),
+    path: path.resolve(__dirname, 'public',  'react_build'),
     filename: 'bundle.js'
   },
   resolve: {
@@ -43,7 +43,7 @@ module.exports = {
       {
         test: /\.(gif|png|jpe?g|svg)$/i,
         use: [
-          'file-loader',
+          'url-loader',
           { loader: 'image-webpack-loader', options: { disable: true } }
         ]
       }

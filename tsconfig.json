@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "outDir": "./react_build",
+    "outDir": "./public/react_build",
     "baseUrl": "./react",
     "lib": [
       "dom",

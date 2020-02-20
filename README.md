@@ -29,9 +29,10 @@ sudo apt-get install libpulse-dev
 
 3. Install [mimic](https://github.com/MycroftAI/mimic1).
 
-4. Install all packages. 
+4. Install all packages and build bundle. 
 ```
 yarn
+yarn build
 ```
 
 5. Start Almond server.

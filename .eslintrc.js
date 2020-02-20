@@ -12,13 +12,18 @@
 
 const env = {
   es6: true,
-  node: true
+  node: true,
+  browser: true,
 };
 
 const parser = '@typescript-eslint/parser';
 
 const parserOptions = {
-  ecmaVersion: 2017
+  ecmaVersion: 2017,
+  sourceType: 'module',
+  ecmaFeatures: {
+    modules: true
+  }
 };
 
 const plugins = ['@typescript-eslint'];
@@ -54,7 +59,7 @@ const rules = {
   'require-atomic-updates': 'off'
 };
 module.exports = {
-  extends: 'eslint:recommended',
+  extends: ['eslint:recommended', 'plugin:react/recommended'],
   env,
   parser,
   parserOptions,
