@@ -19,8 +19,6 @@ $palettes: (
 );
 
 @function color($color, $tone) {
-  @warn map-get($palettes,$color);
-
   @if map-has-key($palettes, $color) {
     $color: map-get($palettes, $color);
 
