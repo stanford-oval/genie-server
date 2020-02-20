@@ -9,3 +9,5 @@ public/javascripts/friendhub.js
 service/platform_config.js
 
 yarn-error.log
+
+react_build/
