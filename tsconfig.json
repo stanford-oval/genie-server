@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
+    "outDir": "./react_build",
+    "baseUrl": "./react",
     "lib": [
       "dom",
       "dom.iterable",
@@ -20,6 +22,6 @@
     "jsx": "react"
   },
   "include": [
-    "src"
+    "react"
   ]
 }
