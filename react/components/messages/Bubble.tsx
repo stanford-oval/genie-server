@@ -7,6 +7,7 @@ interface Props {
   className?: string;
   fromUser: boolean;
   padding?: boolean;
+  visible?: boolean;
 }
 
 export default (props: Props) => {
