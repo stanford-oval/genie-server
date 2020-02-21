@@ -10,7 +10,7 @@ interface ChatFeedProps {
   waitingForResponse: boolean;
 }
 
-const ChatFeed: React.FC<ChatFeedProps> = props => {
+const ChatFeed: React.FC<ChatFeedProps> = (props) => {
   useEffect(() => {
     animateScroll.scrollToBottom({
       containerId: 'feed',
@@ -18,7 +18,7 @@ const ChatFeed: React.FC<ChatFeedProps> = props => {
     });
   }, [props.messages]);
 
-  const messages = props.messages.map(m => (
+  const messages = props.messages.map((m) => (
     <Message key={m.time.getTime()} data={m.data} time={m.time} by={m.by} />
   ));
 

@@ -13,7 +13,7 @@
 const env = {
   es6: true,
   node: true,
-  browser: true,
+  browser: true
 };
 
 const parser = '@typescript-eslint/parser';
@@ -56,10 +56,17 @@ const rules = {
   'arrow-parens': ['error', 'always'],
   'prefer-arrow-callback': 'warn',
   'prefer-numeric-literals': 'error',
-  'require-atomic-updates': 'off'
+  'require-atomic-updates': 'off',
+  'react/prop-types': 'off',
+  'react/display-name': 'off'
 };
 module.exports = {
-  extends: ['eslint:recommended', 'plugin:react/recommended'],
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:react/recommended'
+  ],
   env,
   parser,
   parserOptions,

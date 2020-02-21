@@ -31,7 +31,7 @@ const renderBubble = (data: any, fromUser: boolean) => {
       bubble = <TextBubble fromUser={fromUser} text={'...'} />;
       break;
     case 'picture':
-      bubble = <PictureBubble fromUser={fromUser} image={data.url} />
+      bubble = <PictureBubble fromUser={fromUser} image={data.url} />;
       break;
     case 'rdl':
       bubble = (
@@ -54,10 +54,9 @@ const renderBubble = (data: any, fromUser: boolean) => {
   return bubble;
 };
 
-const Message: React.FC<Props> = props => {
-  if (props.data.type === 'askSpecial') {
+const Message: React.FC<Props> = (props) => {
+  if (props.data.type === 'askSpecial')
     return <></>;
-  }
 
   const fromUser = props.by === 'User';
   const bubble = renderBubble(props.data, fromUser);

@@ -12,23 +12,34 @@ const ChatInterface: React.FC = () => {
   const [messageHistory, updateMessageHistory] = useImmer([] as MessageType[]);
   const [waitingForResponse, setWaiting] = useState(false);
 
-  const almondURL = 'almond-dev.stanford.edu/me/api/conversation';
-  const socket = useRef(new WebSocket(`wss://${almondURL}?access_token=${process.env.REACT_APP_ACCESS_TOKEN}`, []));
+  const almondURL = 'localhost:3000/api/conversation';
+  const socket = useRef(
+    new WebSocket(
+      `ws://${almondURL}`,
+      []
+    )
+  );
 
   useEffect(() => {
-    socket.current.onmessage = msg => {
-      setWaiting(false);
-
+    socket.current.onmessage = (msg): void => {
       const incomingMessage: MessageType = {
         by: 'Other',
         data: JSON.parse(msg.data as any),
         time: new Date(Date.now())
       };
-      updateMessageHistory(draft => {
-        draft.push(incomingMessage)
+
+      // Don't display echoed commands
+      if (incomingMessage.data.type === 'command')
+        return;
+
+      //console.log(incomingMessage);
+      updateMessageHistory((draft) => {
+        draft.push(incomingMessage);
         return draft;
       });
-      console.log(messageHistory)
+
+      setWaiting(false);
+      //console.log(messageHistory);
     };
 
     /*
@@ -39,9 +50,9 @@ const ChatInterface: React.FC = () => {
   }, [messageHistory]);
 
   // Close socket when component is unmounted.
-  useEffect(() => () => socket.current.close(), [socket]);
+  useEffect(() => (): void => socket.current.close(), [socket]);
 
-  const handleMessageSubmit = (text: string) => {
+  const handleMessageSubmit = (text: string): void => {
     const newOutMessage = {
       type: 'command',
       text
@@ -57,8 +68,8 @@ const ChatInterface: React.FC = () => {
       time: new Date(Date.now()),
       by: 'User'
     };
-    updateMessageHistory(draft => {
-      draft.push(newMessage)
+    updateMessageHistory((draft) => {
+      draft.push(newMessage);
       return draft;
     });
   };
