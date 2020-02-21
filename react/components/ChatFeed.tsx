@@ -8,9 +8,10 @@ import './ChatFeed.scss';
 interface ChatFeedProps {
   messages: MessageType[];
   waitingForResponse: boolean;
+  sendMessage: (text: string, json?: any) => void;
 }
 
-const ChatFeed: React.FC<ChatFeedProps> = (props) => {
+const ChatFeed: React.FC<ChatFeedProps> = props => {
   useEffect(() => {
     animateScroll.scrollToBottom({
       containerId: 'feed',
@@ -18,8 +19,14 @@ const ChatFeed: React.FC<ChatFeedProps> = (props) => {
     });
   }, [props.messages]);
 
-  const messages = props.messages.map((m) => (
-    <Message key={m.time.getTime()} data={m.data} time={m.time} by={m.by} />
+  const messages = props.messages.map(m => (
+    <Message
+      key={m.time.getTime()}
+      data={m.data}
+      time={m.time}
+      by={m.by}
+      sendMessage={props.sendMessage}
+    />
   ));
 
   const now = new Date(Date.now());
@@ -33,6 +40,7 @@ const ChatFeed: React.FC<ChatFeedProps> = (props) => {
           data={{ type: 'pending' }}
           time={now}
           by={'Other'}
+          sendMessage={props.sendMessage}
         />
       ) : null}
     </div>

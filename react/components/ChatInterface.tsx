@@ -13,12 +13,7 @@ const ChatInterface: React.FC = () => {
   const [waitingForResponse, setWaiting] = useState(false);
 
   const almondURL = 'localhost:3000/api/conversation';
-  const socket = useRef(
-    new WebSocket(
-      `ws://${almondURL}`,
-      []
-    )
-  );
+  const socket = useRef(new WebSocket(`ws://${almondURL}`, []));
 
   useEffect(() => {
     socket.current.onmessage = (msg): void => {
@@ -29,17 +24,16 @@ const ChatInterface: React.FC = () => {
       };
 
       // Don't display echoed commands
-      if (incomingMessage.data.type === 'command')
-        return;
+      if (incomingMessage.data.type === 'command') return;
 
       //console.log(incomingMessage);
-      updateMessageHistory((draft) => {
+      updateMessageHistory(draft => {
         draft.push(incomingMessage);
         return draft;
       });
 
       setWaiting(false);
-      //console.log(messageHistory);
+      console.log(messageHistory);
     };
 
     /*
@@ -52,11 +46,21 @@ const ChatInterface: React.FC = () => {
   // Close socket when component is unmounted.
   useEffect(() => (): void => socket.current.close(), [socket]);
 
-  const handleMessageSubmit = (text: string): void => {
-    const newOutMessage = {
-      type: 'command',
-      text
+  const handleMessageSubmit = (text: string, json?: any): void => {
+    const newOutMessage: any = {
     };
+
+    if (json) {
+      newOutMessage.type = 'parsed';
+      newOutMessage.json = json;
+    } else {
+      newOutMessage.type = 'command';
+      newOutMessage.text = text;
+    }
+
+    console.log('NEW MESSAGE!');
+    console.log(JSON.stringify(newOutMessage));
+
     setWaiting(true);
     socket.current.send(JSON.stringify(newOutMessage));
 
@@ -68,7 +72,7 @@ const ChatInterface: React.FC = () => {
       time: new Date(Date.now()),
       by: 'User'
     };
-    updateMessageHistory((draft) => {
+    updateMessageHistory(draft => {
       draft.push(newMessage);
       return draft;
     });
@@ -77,6 +81,7 @@ const ChatInterface: React.FC = () => {
   return (
     <div className="chat-container">
       <ChatFeed
+        sendMessage={handleMessageSubmit}
         messages={messageHistory}
         waitingForResponse={waitingForResponse}
       />

@@ -51,9 +51,7 @@ const rules = {
   'arrow-parens': ['error', 'always'],
   'prefer-arrow-callback': 'warn',
   'prefer-numeric-literals': 'error',
-  'require-atomic-updates': 'off',
-  'react/prop-types': 'off',
-  'react/display-name': 'off'
+  'require-atomic-updates': 'off'
 };
 
 const overrides = [
@@ -70,7 +68,11 @@ const overrides = [
       sourceType: 'module'
     },
     plugins: ['react', '@typescript-eslint'],
-    settings: { react: { version: 'detect' } }
+    settings: { react: { version: 'detect' } },
+    rules: {
+      'react/prop-types': 'off',
+      'react/display-name': 'off'
+    }
   }
 ];
 

@@ -7,6 +7,7 @@ import almondAvatar from '../../images/almond_avatar.png';
 import userAvatar from '../../images/user_avatar.png';
 import PictureBubble from './PictureBubble';
 import LinkBubble from './LinkBubble';
+import ButtonBubble from './ButtonBubble';
 
 export interface MessageType {
   key?: number;
@@ -19,14 +20,22 @@ interface Props {
   by: string;
   data: any;
   time: Date;
+  sendMessage: (text: string, json?: any) => void; // force user to send message
 }
 
-const renderBubble = (data: any, fromUser: boolean) => {
+const renderBubble = (data: any, fromUser: boolean, props: Props) => {
   let bubble;
 
   switch (data.type) {
     case 'button':
-      bubble = <button>Show More</button>;
+      bubble = (
+        <ButtonBubble
+          text={data.title}
+          fromUser={fromUser}
+          sendMessage={props.sendMessage}
+          json={data.json}
+        />
+      );
       break;
     case 'link':
       bubble = (
@@ -64,7 +73,7 @@ const Message: React.FC<Props> = props => {
   if (props.data.type === 'askSpecial') return <></>;
 
   const fromUser = props.by === 'User';
-  const bubble = renderBubble(props.data, fromUser);
+  const bubble = renderBubble(props.data, fromUser, props);
   return (
     <div className={`message ${fromUser ? 'message-user' : 'message-other'}`}>
       {fromUser ? (
