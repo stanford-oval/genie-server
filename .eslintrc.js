@@ -16,17 +16,12 @@ const env = {
   browser: true
 };
 
-const parser = '@typescript-eslint/parser';
-
 const parserOptions = {
   ecmaVersion: 2017,
-  sourceType: 'module',
   ecmaFeatures: {
     modules: true
   }
 };
-
-const plugins = ['@typescript-eslint'];
 
 const rules = {
   indent: 'off',
@@ -60,16 +55,29 @@ const rules = {
   'react/prop-types': 'off',
   'react/display-name': 'off'
 };
+
+const overrides = [
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    extends: [
+      'eslint:recommended',
+      'plugin:react/recommended',
+      'plugin:@typescript-eslint/eslint-recommended',
+      'plugin:@typescript-eslint/recommended'
+    ],
+    parser: '@typescript-eslint/parser',
+    parserOptions: {
+      sourceType: 'module'
+    },
+    plugins: ['react', '@typescript-eslint'],
+    settings: { react: { version: 'detect' } }
+  }
+];
+
 module.exports = {
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react/recommended'
-  ],
+  extends: ['eslint:recommended', 'plugin:react/recommended'],
   env,
-  parser,
+  overrides,
   parserOptions,
-  plugins,
   rules
 };

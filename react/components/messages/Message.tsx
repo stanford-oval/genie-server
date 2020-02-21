@@ -6,6 +6,7 @@ import TextBubble from './TextBubble';
 import almondAvatar from '../../images/almond_avatar.png';
 import userAvatar from '../../images/user_avatar.png';
 import PictureBubble from './PictureBubble';
+import LinkBubble from './LinkBubble';
 
 export interface MessageType {
   key?: number;
@@ -26,6 +27,11 @@ const renderBubble = (data: any, fromUser: boolean) => {
   switch (data.type) {
     case 'button':
       bubble = <button>Show More</button>;
+      break;
+    case 'link':
+      bubble = (
+        <LinkBubble fromUser={fromUser} text={data.title} url={data.url} />
+      );
       break;
     case 'pending':
       bubble = <TextBubble fromUser={fromUser} text={'...'} />;
@@ -54,9 +60,8 @@ const renderBubble = (data: any, fromUser: boolean) => {
   return bubble;
 };
 
-const Message: React.FC<Props> = (props) => {
-  if (props.data.type === 'askSpecial')
-    return <></>;
+const Message: React.FC<Props> = props => {
+  if (props.data.type === 'askSpecial') return <></>;
 
   const fromUser = props.by === 'User';
   const bubble = renderBubble(props.data, fromUser);
