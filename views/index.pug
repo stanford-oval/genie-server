@@ -15,7 +15,9 @@ block content
       a(href='/conversation').btn.btn-primary=_("Start a conversation")
       | &nbsp;
       a(href='/apps').btn.btn-default= _("Check your enabled rules")
-
+      p
+        small.text-muted
+          | Try our experimental new #[a(href='/conversation-beta') chat client].
     //if !cloud.isConfigured
       p You did not configure cloud access yet. You should do that&#x20;
         a(href='/config') now
