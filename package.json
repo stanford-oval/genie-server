@@ -1,5 +1,5 @@
 {
-  "name": "thingengine-server",
+  "name": "almond-server",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -8,10 +8,10 @@
     "lint": "eslint ./routes ./service ./util ./browser ./react",
     "test": "nyc ./tests/everything.sh",
     "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js",
-    "prepare": "(cd node_modules/thingtalk; yarn); (cd node_modules/thingengine-core; yarn; rm -fr node_modules); yarn update-brassau",
+    "prepare": "(cd node_modules/thingtalk; yarn); (cd node_modules/thingengine-core; yarn; rm -fr node_modules); yarn update-brassau; webpack --mode production",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "build": "webpack --mode production",
-    "bundle": "webpack",
+    "build-react": "webpack --mode production",
+    "bundle-react": "webpack",
     "check-types": "tsc"
   },
   "resolutions": {},
@@ -69,7 +69,6 @@
     "ws": "^7.1.1"
   },
   "optionalDependencies": {
-    "node-mimic": "^1.0.0",
     "pulseaudio2": "^0.2.0"
   },
   "devDependencies": {

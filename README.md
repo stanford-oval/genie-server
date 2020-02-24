@@ -14,7 +14,7 @@ information at <https://thingpedia.stanford.edu/about>.
 
 ## Installation
 
-This assumes that you have [node](https://github.com/nodejs/node) and [yarn](https://github.com/yarnpkg/yarn) installed, with at least **2 GB** of available diskspace. Please be sure to be on a **fast internet connection** before going through the installation.
+This assumes that you have [node](https://github.com/nodejs/node) and [yarn](https://github.com/yarnpkg/yarn) installed, with at least **600 MB** of available diskspace. Please be sure to be on a **fast internet connection** before going through the installation.
 
 1. Clone this repo on your machine.
 ```
@@ -27,36 +27,18 @@ git clone https://github.com/stanford-oval/almond-server.git
 sudo apt-get install libpulse-dev
 ```
 
-3. Install [mimic](https://github.com/MycroftAI/mimic1).
-
-4. Install all packages and build bundle. 
+3. Install all packages and build bundle. 
 ```
 yarn
-yarn build
+yarn build-react
 ```
 
-5. Start Almond server.
+4. Start Almond server.
 ```
 yarn start
 ```
 
-6. Navigate to [localhost:3000](http://localhost:3000).
-
-## Experimental Chat Interface
-
-While Almond Server already has a chat interface built using jQuery, the Almond team is currently working on an experimental chat interface written in React that you can try.
-
-### Setup
-
-To use this, first create an Almond developer account [here](https://almond.stanford.edu/user/register). Next, log in to your account and click on [Settings](https://almond.stanford.edu/user/profile) on the top right. Scroll down to "Authorized third-party apps" and click "Issue an Access Token". Copy and paste this access token into a `.env` file under the `REACT_APP_ACCESS_TOKEN` variable like this
-
-```
-REACT_APP_ACCESS_TOKEN="eyJhbGsomethingsomethingsomething"
-```
-
-Then, `cd` to this folder (`chat`) from the root directory and run `yarn start`.
-
-The chat interface should open in your default browser and ALmond should say "Welcome back!". Try replying with "Tell me a joke"!
+5. Navigate to [localhost:3000](http://localhost:3000).
 
 ### Enabling Voice
 
