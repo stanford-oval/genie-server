@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "ts-node main.js",
-    "start-chat": "webpack-dev-server --mode development --open --hot",
+    "start": "concurrently --kill-others -n server,frontend 'ts-node main.js' 'webpack --watch'",
     "lint": "eslint ./routes ./service ./util ./browser ./react",
     "test": "nyc ./tests/everything.sh",
     "update-brassau": "browserify -t babelify ./browser/brassau.js -o public/javascripts/brassau.js",
@@ -26,6 +25,7 @@
     "axios": "^0.19.1",
     "body-parser": "^1.17.2",
     "color-scheme": "^1.0.0",
+    "concurrently": "^5.1.0",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.3",
     "csurf": "^1.9.0",
