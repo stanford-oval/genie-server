@@ -33,7 +33,7 @@ const Config = require('../config');
 class LocalUser {
     constructor() {
 
-        this.id = process.getuid();
+        this.id = process.getuid ? process.getuid() : 0;
         this.account = '';//pwnam.name;
         this.name = '';//pwnam.gecos;
     }
