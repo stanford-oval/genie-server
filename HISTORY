@@ -1,3 +1,17 @@
+1.7.3
+=====
+
+* Almond can now run on Windows as a native application (without
+  WSL or docker). This should improve development of Almond on Windows [#45].
+* Updated dependencies. In particular, this brings new support for
+  customizable temperature units. For now, this must be configured
+  manually. A UI will be added in the future [#40, #48].
+
+1.7.2
+=====
+
+* Updated dependencies
+
 1.7.1
 =====
 

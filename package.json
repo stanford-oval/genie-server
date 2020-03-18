@@ -1,6 +1,6 @@
 {
   "name": "thingengine-server",
-  "version": "1.7.1",
+  "version": "1.7.3",
   "private": true,
   "scripts": {
     "start": "node main.js",
@@ -38,7 +38,7 @@
     "thingpedia": "~2.6.0",
     "thingpedia-discovery": "^1.0.0",
     "thingtalk": "~1.9.0",
-    "uuid": "^3.1.0",
+    "uuid": "^7.0.0",
     "ws": "^7.1.1"
   },
   "optionalDependencies": {
@@ -52,8 +52,8 @@
     "browserify": "^16.1.1",
     "coveralls": "^3.0.6",
     "eslint": "^6.0.0",
-    "nodemon": "^2.0.0",
-    "nyc": "^14.1.1",
+    "nodemon": "^2.0.2",
+    "nyc": "^15.0.0",
     "parse5": "^5.1.0",
     "selenium-webdriver": "^4.0.0-alpha.5"
   },
