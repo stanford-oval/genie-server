@@ -3084,13 +3084,6 @@ node-gettext@^2.0.0:
   dependencies:
     lodash.get "^4.4.2"
 
-node-mimic@^1.0.0:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/node-mimic/-/node-mimic-1.0.1.tgz#3f482062301d72b4baf9b7785ab0f8a2662a6152"
-  integrity sha512-U21oMSKDQuVA8IHKxJB9+15lOrB433y72X7X84TgfjwNTBmIl/Uh5a0i1GgPaHeD0jlloUXJ6JJcdZgu/+wYQw==
-  dependencies:
-    bindings "^1.2.1"
-
 node-pre-gyp@^0.11.0:
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.11.0.tgz#db1f33215272f692cd38f03238e3e9b47c5dd054"

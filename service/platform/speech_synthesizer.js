@@ -7,10 +7,8 @@
 // See COPYING for details
 "use strict";
 
-const mimic = require('node-mimic');
-const path = require('path');
-const util = require('util');
-const { ninvoke } = require('./utils');
+const Tp = require('thingpedia');
+const assert = require('assert');
 
 class CancelledError extends Error {
     constructor() {
@@ -19,21 +17,21 @@ class CancelledError extends Error {
     }
 }
 
+const Config = require('../../config');
+
 module.exports = class SpeechSynthesizer {
     constructor(platform) {
+        this._locale = platform.locale;
         this._pulseCtx = platform.getCapability('pulseaudio');
-        this._voiceFile = path.resolve(module.filename, '../../../data/cmu_us_slt.flitevox');
 
         this._queue = [];
         this._speaking = false;
 
         this._outputStream = null;
         this._closeTimeout = null;
-        mimic.init();
     }
 
-    async start() {
-        this._voice = await util.promisify(mimic.loadVoice)(this._voiceFile);
+    start() {
     }
     stop() {
     }
@@ -51,9 +49,25 @@ module.exports = class SpeechSynthesizer {
     }
 
     async _synth(text) {
-        const result = await ninvoke(this._voice, 'textToSpeech', text);
-        result.text = text;
-        return result;
+        const [buffer,] = await Tp.Helpers.Http.post(Config.SEMPRE_URL + '/' + this._locale + '/voice/tts', JSON.stringify({
+            text
+        }), {
+            dataContentType: 'application/json',
+            raw: true
+        });
+
+        const numChannels = buffer.readInt16LE(22);
+        const sampleRate = buffer.readInt32LE(24);
+        // check bytes per sample (we only support S16LE format, which is what everybody uses anyway)
+        assert.strictEqual(buffer.readInt16LE(32), 2);
+
+        console.log(this._numChannels, this._sampleRate);
+
+        // remove the wav header (44 bytes)
+        const sliced = buffer.slice(44, buffer.length);
+        console.log(buffer.length, sliced.length);
+
+        return { buffer: sliced, sampleRate, numChannels, text };
     }
 
     say(text) {
@@ -106,7 +120,7 @@ module.exports = class SpeechSynthesizer {
         this._sampleRate = result.sampleRate;
         this._numChannels = result.numChannels;
         this._outputStream = this._pulseCtx.createPlaybackStream({
-            format: 'S16NE', // signed 16 bit native endian
+            format: 'S16LE', // signed 16 bit little endian
             rate: this._sampleRate,
             channels: this._numChannels,
             stream: 'thingengine-voice-output',

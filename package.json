@@ -43,7 +43,6 @@
   },
   "optionalDependencies": {
     "canberra": "^0.1.0",
-    "node-mimic": "^1.0.0",
     "pulseaudio2": "^0.2.0"
   },
   "devDependencies": {
