@@ -1,3 +1,13 @@
+1.8.0-beta.1
+============
+
+* The Almond platform was updated to the 1.8 series [#54].
+* The wake word implementation was changed to snowboy. This reduced the app
+  on-disk footprint, and made the app easier to install. As part of this
+  change, the wake word is now "computer" [#53].
+* The speech-to-text backend was changed and now uses Microsoft Speech API,
+  significantly improving the voice quality [#53].
+
 1.7.3
 =====
 
