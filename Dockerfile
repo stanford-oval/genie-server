@@ -10,9 +10,15 @@ RUN dnf -y install yarn
 
 RUN mkdir /opt/almond
 COPY . /opt/almond
-RUN rm -rf /opt/almond/node_modules
 WORKDIR /opt/almond
-RUN yarn && rm -fr /root/.cache
+
+# snowboy doesn't like building in docker, due to overlayfs bugs...
+RUN rm -rf /opt/almond/node_modules && \
+    yarn && \
+    ls -al /var/cache && \
+    cp -r /usr/local/share/.cache/yarn/v6/npm-snowboy-1.3.1-220f23f026096fe5290d7919a9f0da93ccd253f2-integrity/node_modules/snowboy/ node_modules/snowboy/ && \
+    (cd node_modules/snowboy/ && yarn run install) && \
+    rm -fr /usr/local/share/.cache
 
 EXPOSE 3000
 ENV THINGENGINE_HOME=/var/lib/almond-server
