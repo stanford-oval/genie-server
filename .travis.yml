@@ -16,7 +16,7 @@ before_install:
 - tar xvf geckodriver-v0.22.0-linux64.tar.gz -C geckodriver/
 - export PATH="`pwd`/cvc4:`pwd`/geckodriver:$PATH"
 - sudo apt-get update -q -y
-- sudo apt-get install -y graphicsmagick realpath libpulse-dev libcanberra-dev libatlas-base-dev unzip
+- sudo apt-get install -y graphicsmagick libpulse-dev libcanberra-dev libatlas-base-dev unzip
 - pulseaudio --start
 script:
 - yarn lint
