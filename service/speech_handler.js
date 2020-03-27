@@ -10,7 +10,7 @@
 const events = require('events');
 
 const SpeechRecognizer = require('./speech_recognizer');
-const DetectorStream = require('./wake-word/mycroft_precise');
+const WakeWordDetector = require('./wake-word/snowboy');
 
 module.exports = class SpeechHandler extends events.EventEmitter {
     constructor(platform) {
@@ -23,6 +23,7 @@ module.exports = class SpeechHandler extends events.EventEmitter {
             this.emit('error', e);
         });
 
+        this._hotwordDetected = false;
         this._autoTrigger = false;
     }
 
@@ -71,14 +72,14 @@ module.exports = class SpeechHandler extends events.EventEmitter {
         });
         this._stream.on('error', (e) => this.emit('error', e));
 
-        this._detector = new DetectorStream();
+        this._detector = new WakeWordDetector();
         this._detector.on('sound', () => {
             if (this._autoTrigger)
                 this._onDetected();
         });
         this._detector.on('hotword', (hotword) => {
             console.log('Hotword ' + hotword + ' detected');
-            this.emit('hotword');
+            this.emit('hotword', hotword);
             this._onDetected();
         });
         this._stream.pipe(this._detector);
