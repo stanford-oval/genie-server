@@ -43,13 +43,10 @@
   },
   "optionalDependencies": {
     "canberra": "^0.1.0",
-    "node-mimic": "^1.0.0",
-    "pulseaudio2": "^0.2.0"
+    "pulseaudio2": "^0.2.0",
+    "snowboy": "^1.3.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.5.5",
-    "babelify": "^10.0.0",
-    "browserify": "^16.1.1",
     "coveralls": "^3.0.6",
     "eslint": "^6.0.0",
     "nodemon": "^2.0.2",
