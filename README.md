@@ -50,8 +50,7 @@ yarn
 
 This will only install the minimal set of dependencies, and will not install any voice support. To enable voice, you must also run (Linux only):
 ```
-dnf -y install pulseaudio-libs-devel mimic-devel python3-numpy python3-scipy portaudio-devel libcanberra-devel
-pip3 install 'tensorflow<2.0.0' 'git+https://github.com/stanford-oval/mycroft-precise'
+dnf -y install pulseaudio-libs-devel libcanberra-devel blas-devel atlas-devel
 ```
 then run `yarn` again to pick up the new dependencies.
 
