@@ -2,7 +2,7 @@ branches:
   except:
   - "/^wip/"
 language: node_js
-dist: xenial
+dist: bionic
 addons:
   firefox: latest-esr
 node_js:
@@ -16,13 +16,8 @@ before_install:
 - tar xvf geckodriver-v0.22.0-linux64.tar.gz -C geckodriver/
 - export PATH="`pwd`/cvc4:`pwd`/geckodriver:$PATH"
 - sudo apt-get update -q -y
-- sudo apt-get install -y graphicsmagick realpath python3 libpulse-dev pulseaudio portaudio19-dev unzip
+- sudo apt-get install -y graphicsmagick realpath libpulse-dev libcanberra-dev libatlas-base-dev unzip
 - pulseaudio --start
-install:
-- travis_retry yarn
-- pyenv global 3.6.7
-- pip3 install tensorflow
-- pip3 install 'git+https://github.com/stanford-oval/mycroft-precise'
 script:
 - yarn lint
 - TZ="America/Los_Angeles" yarn test
