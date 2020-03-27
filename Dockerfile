@@ -1,7 +1,7 @@
 FROM docker.io/fedora:30
 
 # Install all deps in the standard repos
-RUN dnf -y install git curl pulseaudio-libs-devel unzip nodejs make gcc gcc-c++ libcanberra-devel
+RUN dnf -y install git curl pulseaudio-libs-devel unzip nodejs make gcc gcc-c++ libcanberra-devel atlas-devel blas-devel
 
 # Install yarn
 RUN curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
