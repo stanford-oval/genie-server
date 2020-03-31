@@ -26,7 +26,7 @@
     "levelgraph": "^2.0.1",
     "levelup": "^4.1.0",
     "morgan": "^1.8.2",
-    "node-gettext": "^2.0.0",
+    "node-gettext": "^3.0.0",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "pug": "^2.0.0",
