@@ -16,7 +16,11 @@ WORKDIR /opt/almond
 RUN rm -rf /opt/almond/node_modules && \
     yarn && \
     cp -Tr /usr/local/share/.cache/yarn/v6/npm-snowboy-1.3.1-220f23f026096fe5290d7919a9f0da93ccd253f2-integrity/node_modules/snowboy/ node_modules/snowboy/ && \
-    (cd node_modules/snowboy/ && yarn install --ignore-scripts --no-lockfile && yarn run install) && \
+    rm -fr /usr/local/share/.cache
+RUN cd node_modules/snowboy/ && \
+    yarn install --ignore-scripts --no-lockfile && \
+    yarn run node-pre-gyp clean configure && \
+    make -C build/ && \
     rm -fr /usr/local/share/.cache
 
 EXPOSE 3000
