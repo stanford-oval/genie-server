@@ -12,11 +12,13 @@ RUN mkdir /opt/almond
 COPY . /opt/almond
 WORKDIR /opt/almond
 
-# snowboy doesn't like building in docker, due to overlayfs bugs...
+# snowboy doesn't like building in docker, due to overlayfs bugs, so
+# we need to some insisting
 RUN rm -rf /opt/almond/node_modules && \
+    mkdir -p ./node_modules/snowboy/build/Release/.deps/Release/obj.target/snowboy/swig/Node && \
+    touch ./node_modules/snowboy/build/Release/.deps/Release/obj.target/snowboy/swig/Node/snowboy.o.d.raw && \
     yarn && \
-    cp -Tr /usr/local/share/.cache/yarn/v6/npm-snowboy-1.3.1-220f23f026096fe5290d7919a9f0da93ccd253f2-integrity/node_modules/snowboy/ node_modules/snowboy/ && \
-    (cd node_modules/snowboy/ && yarn install --ignore-scripts --no-lockfile && yarn run install) && \
+    ls -al ./node_modules/snowboy/build/Release/snowboy.node && \
     rm -fr /usr/local/share/.cache
 
 EXPOSE 3000
