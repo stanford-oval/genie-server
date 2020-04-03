@@ -26,7 +26,7 @@ podman run -p 3000:3000 --uidmap keep-id \
     stanfordoval/almond-server
 ```
 
-You can now navigate to [127.0.0.1:3000](http://127.0.0.1:3000) to access Almond, or use your voice with the hotword "Almond".
+You can now navigate to [127.0.0.1:3000](http://127.0.0.1:3000) to access Almond, or use your voice with the hotword "computer".
 
 ### I am a Mac!
 
