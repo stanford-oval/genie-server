@@ -11,7 +11,7 @@
   },
   "resolutions": {},
   "dependencies": {
-    "almond-dialog-agent": "~1.8.0-beta.1",
+    "almond-dialog-agent": "~1.8.0",
     "body-parser": "^1.17.2",
     "color-scheme": "^1.0.0",
     "connect-flash": "^0.1.1",
@@ -34,10 +34,10 @@
     "serve-favicon": "^2.4.3",
     "smtlib": "^0.1.1",
     "sqlite3": "^4.0.6",
-    "thingengine-core": "~1.8.0-beta.1",
-    "thingpedia": "~2.7.0-beta.1",
+    "thingengine-core": "~1.8.0",
+    "thingpedia": "~2.7.0",
     "thingpedia-discovery": "^1.0.0",
-    "thingtalk": "~1.10.0-beta.1",
+    "thingtalk": "~1.10.0",
     "uuid": "^7.0.0",
     "ws": "^7.1.1"
   },
