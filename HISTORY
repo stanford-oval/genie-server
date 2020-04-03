@@ -1,3 +1,9 @@
+1.8.0
+=====
+
+* Several attempts were made to make the docker build more reliable
+  (especially around snowboy) [#50, #51, #52, #55, #56, #58] 
+
 1.8.0-beta.1
 ============
 
