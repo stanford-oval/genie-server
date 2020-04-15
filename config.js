@@ -56,8 +56,8 @@ module.exports.HOST_BASED_AUTHENTICATION = process.env.THINGENGINE_HOST_BASED_AU
 module.exports.ENABLE_DB_ENCRYPTION = false;
 
 
-module.exports.SEMPRE_URL = 'https://almond-nl.stanford.edu';
-module.exports.THINGPEDIA_URL = 'https://thingpedia.stanford.edu/thingpedia';
+module.exports.SEMPRE_URL = process.env.THINGENGINE_NLP_URL || 'https://almond-nl.stanford.edu';
+module.exports.THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://thingpedia.stanford.edu/thingpedia';
 module.exports.MS_SPEECH_RECOGNITION_PRIMARY_KEY = 'de1f02817356494483ba502b2ce95f6f';
 module.exports.MS_SPEECH_RECOGNITION_SECONDARY_KEY = '3dc6ce0b832940f0b0c984a1517c457e';
 
