@@ -51,7 +51,7 @@
     "eslint": "^6.0.0",
     "nodemon": "^2.0.2",
     "nyc": "^15.0.0",
-    "parse5": "^5.1.0",
+    "parse5": "^6.0.0",
     "selenium-webdriver": "^4.0.0-alpha.5"
   },
   "nyc": {
