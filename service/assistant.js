@@ -142,6 +142,10 @@ class MainConversationDelegate {
             this._speechSynth.say(rdl.displayTitle);
         this._addMessage(MessageType.RDL, (out) => out.sendRDL(rdl, icon));
     }
+
+    maybeSendChart(chart, icon) {
+        this._addMessage(MessageType.TEXT, (out) => out.maybeSendChart(chart, icon));
+    }
 }
 
 class MainConversation extends Almond {

@@ -235,6 +235,10 @@ class WebsocketAssistantDelegate {
     sendCommand(command) {
         return this._ws.send(JSON.stringify({ type: 'command', text: command }));
     }
+
+    maybeSendChart(chart, icon) {
+        return this._ws.send(JSON.stringify({ type: 'text', text: JSON.stringify(chart.data), icon }));
+    }
 }
 
 router.ws('/conversation', (ws, req, next) => {
