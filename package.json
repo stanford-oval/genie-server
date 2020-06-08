@@ -39,7 +39,7 @@
     "thingpedia-discovery": "^1.0.0",
     "thingtalk": "~1.10.0",
     "uuid": "^8.0.0",
-    "ws": "^7.1.1"
+    "ws": "^7.3.0"
   },
   "optionalDependencies": {
     "canberra": "^0.1.0",
