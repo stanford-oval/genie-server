@@ -23,8 +23,6 @@
     "express-session": "^1.14.0",
     "express-ws": "^4.0.0",
     "gm": "^1.23.1",
-    "levelgraph": "^2.0.1",
-    "levelup": "^4.1.0",
     "morgan": "^1.8.2",
     "node-gettext": "^2.0.0",
     "passport": "^0.4.0",
