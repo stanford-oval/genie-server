@@ -38,7 +38,7 @@
     "thingpedia": "~2.7.0",
     "thingpedia-discovery": "^1.0.0",
     "thingtalk": "~1.10.0",
-    "uuid": "^8.0.0",
+    "uuid": "^8.1.0",
     "ws": "^7.3.0"
   },
   "optionalDependencies": {
