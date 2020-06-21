@@ -94,23 +94,11 @@ router.post('/delete', user.requireLogIn, (req, res, next) => {
 });
 
 router.get('/oauth2/:kind', user.redirectLogIn, (req, res, next) => {
-    const kind = req.params.kind;
-    const engine = req.app.engine;
-    Promise.resolve().then(async () => {
-        const result = await engine.devices.addFromOAuth(kind);
-        if (result !== null) {
-            const [redirect, session] = result;
-            for (let key in session)
-                req.session[key] = session[key];
-            res.redirect(redirect);
-        } else {
-            res.redirect(Config.BASE_URL + '/devices?class=online');
-        }
-    }).catch((e) => {
-        console.log(e.stack);
-        res.status(400).render('error', { page_title: "Almond - Error",
-                                          message: e.message });
-    });
+  const kind = req.params.kind;
+  const redirect = req.protocol + '://' + req.hostname + ':' + req.app.get('port') + Config.BASE_URL + '/devices';
+  const url = `https://thingengine.stanford.edu/proxy?redirect=${redirect}&kind=${kind}`;
+  res.redirect(url);
+
 });
 
 router.get('/oauth2/callback/:kind', user.redirectLogIn, (req, res, next) => {

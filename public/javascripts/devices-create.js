@@ -43,7 +43,7 @@ $(() => {
                 form.attr('id', 'online-account-' + kind);
                 form.attr('aria-expanded', 'false');
 
-                json.fields.forEach(function(field) {
+                json.fields.forEach((field) => {
                     const input = $('<input>').addClass('form-control')
                         .attr('type', field.type).attr('name', field.name);
                     const label = $('<label>').addClass('control-label').text(field.label);
@@ -55,7 +55,7 @@ $(() => {
                             .attr('type', 'submit').text("Configure"));
                 btn.attr('data-toggle', 'online-account-' + kind);
                 form.collapse('hide');
-                btn.on('click', function() { form.collapse('toggle'); });
+                btn.on('click', () => { form.collapse('toggle'); });
                 self.append(form);
                 break;
             }
@@ -76,7 +76,6 @@ $(() => {
     const developerKey = document.body.dataset.developerKey;
     const url = getThingpedia() + '/api/devices?developer_key=' + developerKey;
     $.get(url, (factoryList) => {
-        factoryList = factoryList.filter((f) => f.factory.type !== 'oauth2');
 
         const container = $('#online-account-selector');
 
