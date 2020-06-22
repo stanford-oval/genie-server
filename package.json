@@ -40,7 +40,7 @@
     "ws": "^7.3.0"
   },
   "optionalDependencies": {
-    "canberra": "^0.1.0",
+    "canberra": "^0.1.2",
     "pulseaudio2": "^0.2.0",
     "snowboy": "^1.3.1"
   },
