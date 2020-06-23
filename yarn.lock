@@ -2556,10 +2556,10 @@ ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
-nan@^2.12.1, nan@^2.13.2:
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.0.tgz#7818f722027b2459a86f0295d434d1fc2336c52c"
-  integrity sha512-INOFj37C7k3AfaNTtX8RhsTw7qRy7eLET14cROi9+5HAVbbHuIWUHEauBv5qT4Av2tWasiTY1Jw6puUNqRJXQg==
+nan@^2.12.1, nan@^2.13.2, nan@^2.14.1:
+  version "2.14.1"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.1.tgz#d7be34dfa3105b91494c3147089315eff8874b01"
+  integrity sha512-isWHgVjnFjh2x2yuJ/tj3JbwoHu3UC2dX5G/88Cm24yB6YopVgxvBObDY7n5xW6ExmFhJpSEQqFPvq9zaXc8Jw==
 
 natural-compare@^1.4.0:
   version "1.4.0"
@@ -3159,12 +3159,13 @@ pug@^3.0.0:
     pug-runtime "^3.0.0"
     pug-strip-comments "^2.0.0"
 
-pulseaudio2@^0.2.0:
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/pulseaudio2/-/pulseaudio2-0.2.2.tgz#c9ddc7e89fb3a97bb308fe4e4189808387babef7"
-  integrity sha512-m+XGYEN2wqInITgkWEgmtV68JcinNeZfWdnJ/kIo9lv+O0AVyMrBzfk9DEs12ayDr7+AfVLV96f3iQ4t4Wt//w==
+pulseaudio2@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/pulseaudio2/-/pulseaudio2-0.3.1.tgz#a564355f6d40483c402ee6140222a61fb80f4a72"
+  integrity sha512-xLLL9F0pE8Sk6QAoHYJMkUayy2pEsWFyr7alYeM+Rd2hmub0Vo9mi1pdUsAF4ZRFVr9w2hWHhf/UpmobJ3pZBA==
   dependencies:
     bindings "^1.3.1"
+    nan "^2.14.1"
 
 pump@^3.0.0:
   version "3.0.0"
