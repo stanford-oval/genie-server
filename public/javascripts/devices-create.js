@@ -43,7 +43,8 @@ $(() => {
                 form.attr('id', 'online-account-' + kind);
                 form.attr('aria-expanded', 'false');
 
-                json.fields.forEach((field) => {
+                json.fields.forEach(function(field) {
+
                     const input = $('<input>').addClass('form-control')
                         .attr('type', field.type).attr('name', field.name);
                     const label = $('<label>').addClass('control-label').text(field.label);
@@ -55,7 +56,7 @@ $(() => {
                             .attr('type', 'submit').text("Configure"));
                 btn.attr('data-toggle', 'online-account-' + kind);
                 form.collapse('hide');
-                btn.on('click', () => { form.collapse('toggle'); });
+                btn.on('click', function() { form.collapse('toggle'); });
                 self.append(form);
                 break;
             }
