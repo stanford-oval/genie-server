@@ -11,15 +11,15 @@
 
 const os = require('os');
 const express = require('express');
-var router = express.Router();
+const Genie = require('genie-toolkit');
 
-// FIXME
-const ipAddress = require('thingengine-core/lib/util/ip_address');
 const user = require('../util/user');
 const platform = require('../service/platform');
 
+const router = express.Router();
+
 router.get('/', user.redirectLogIn, (req, res, next) => {
-    ipAddress.getServerName().then((host) => {
+    Genie.IpAddressUtils.getServerName().then((host) => {
         var port = res.app.get('port');
 
         var prefs = platform.getSharedPreferences();

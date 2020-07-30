@@ -13,15 +13,22 @@ const Q = require('q');
 Q.longStackSupport = true;
 process.on('unhandledRejection', (up) => { throw up; });
 
-const Engine = require('thingengine-core');
+const child_process = require('child_process');
+let canberra;
+try {
+    canberra = require('canberra');
+} catch(e) {
+    canberra = null;
+}
+
+const Genie = require('genie-toolkit');
 const WebFrontend = require('./service/frontend');
-const AssistantDispatcher = require('./service/assistant');
 
 const Config = require('./config');
 
 let _stopped = false;
 let _running = false;
-let _engine, _frontend, _ad;
+let _engine, _frontend;
 
 function handleStop() {
     if (_running)
@@ -31,15 +38,58 @@ function handleStop() {
 }
 
 const DEBUG = false;
+const LOCAL_USER = {
+    id: process.getuid ? process.getuid() : 0,
+    account: '', //pwnam.name;
+    name: '', //pwnam.gecos;
+};
 
+const HOTWORD_DETECTED_ID = 1;
 async function init(platform) {
-    _engine = new Engine(platform, { thingpediaUrl: Config.THINGPEDIA_URL });
+    _engine = new Genie.AssistantEngine(platform, { thingpediaUrl: Config.THINGPEDIA_URL });
     _frontend.setEngine(_engine);
 
-    _ad = new AssistantDispatcher(_engine);
-    platform.setAssistant(_ad);
     await _engine.open();
-    await _ad.start();
+
+    const conversation = _engine.assistant.openConversation('main', LOCAL_USER, {
+        showWelcome: true,
+        debug: true,
+        deleteWhenInactive: false,
+        inactivityTimeout: 30000, // pick a low inactivity timeout to turn off the microphone
+        contextResetTimeout: 600000, // but only reset the timeout after 10 minutes (the default)
+    });
+
+    if (platform.hasCapability('sound')) {
+        const speech = new Genie.SpeechHandler(conversation, platform, {
+            subscriptionKey: Config.MS_SPEECH_RECOGNITION_PRIMARY_KEY
+        });
+
+        speech.on('wakeword', (hotword) => {
+            child_process.spawn('xset', ['dpms', 'force', 'on']).on('error', (err) => {
+                console.error(`Failed to wake up the screen: ${err.message}`);
+            });
+        });
+
+        if (canberra) {
+            const eventSoundCtx = new canberra.Context({
+                [canberra.Property.APPLICATION_ID]: 'edu.stanford.Almond',
+            });
+            eventSoundCtx.cache({
+                [canberra.Property.EVENT_ID]: 'message-new-instant'
+            });
+
+            speech.on('wakeword', (hotword) => {
+                eventSoundCtx.play(HOTWORD_DETECTED_ID, {
+                    [canberra.Property.EVENT_ID]: 'message-new-instant'
+                }).catch((e) => {
+                    console.error(`Failed to play hotword detection sound: ${e.message}`);
+                });
+            });
+        }
+
+        speech.start();
+    }
+    await conversation.start();
 }
 
 async function main() {
@@ -71,12 +121,10 @@ async function main() {
             console.log('Ready');
             if (!_stopped) {
                 _running = true;
-                await _ad.startConversation();
                 await _engine.run();
             }
         } finally {
             try {
-                await _ad.stop();
                 await _engine.close();
             } catch(error) {
                 console.log('Exception during stop: ' + error.message);

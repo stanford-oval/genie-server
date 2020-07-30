@@ -11,6 +11,7 @@
 
 const express = require('express');
 const crypto = require('crypto');
+const ThingTalk = require('thingtalk');
 
 const user = require('../util/user');
 const errorHandling = require('../util/error_handling');
@@ -33,25 +34,6 @@ router.use('/', (req, res, next) => {
     next();
 }, user.requireLogIn);
 
-router.get('/parse', (req, res, next) => {
-    let query = req.query.q || null;
-    if (!query) {
-        res.status(400).json({error:'Missing query'});
-        return;
-    }
-
-    const engine = req.app.engine;
-    const assistant = engine.platform.getCapability('assistant');
-    Promise.resolve().then(() => {
-        return assistant.parse(query);
-    }).then((result) => {
-        res.json(result);
-    }).catch((e) => {
-        console.error(e.stack);
-        res.status(500).json({error:e.message});
-    });
-});
-
 router.post('/converse', (req, res, next) => {
     const command = req.body.command;
     if (!command) {
@@ -60,31 +42,18 @@ router.post('/converse', (req, res, next) => {
     }
 
     const engine = req.app.engine;
-    const assistant = engine.platform.getCapability('assistant');
+    const assistant = engine.assistant;
     Promise.resolve().then(() => {
         return assistant.converse(command);
     }).then((result) => {
         res.json(result);
-    }).catch((e) => {
-        console.error(e.stack);
-        res.status(500).json({error:e.message});
-    });
+    }).catch(next);
 });
-
-function describeDevice(d, req) {
-    return {
-        uniqueId: d.uniqueId,
-        name: d.name || req._("Unknown device"),
-        description: d.description || req._("Description not available"),
-        kind: d.kind,
-        ownerTier: d.ownerTier
-    };
-}
 
 router.get('/devices/list', (req, res, next) => {
     const engine = req.app.engine;
     Promise.resolve().then(() => {
-        const result = engine.devices.getAllDevices().map((d) => describeDevice(d, req));
+        const result = engine.getDeviceInfos();
         // sort by name to provide a deterministic result
         result.sort((a, b) => a.name.localeCompare(b.name));
         res.json(result);
@@ -95,199 +64,207 @@ router.post('/devices/create', (req, res, next) => {
     const engine = req.app.engine;
     Promise.resolve().then(async () => {
         const device = await engine.devices.addSerialized(req.body);
-        res.json(describeDevice(device, req));
+        res.json(engine.getDeviceInfo(device.uniqueId));
     }).catch(next);
 });
 
-function describeApp(app) {
+async function createAppAndReturnResults(engine, data) {
+    const app = await engine.createApp(data.code);
+    const results = [];
+    const errors = [];
+
+    const formatter = new ThingTalk.Formatter(engine.platform.locale, engine.platform.timezone, engine.schemas);
+    for await (const value of app.mainOutput) {
+        if (value instanceof Error) {
+            errors.push(value);
+        } else {
+            const messages = await formatter.formatForType(value.outputType, value.outputValue, 'messages');
+            results.push({ raw: value.outputValue, type: value.outputType, formatted: messages });
+        }
+    }
+
     return {
         uniqueId: app.uniqueId,
         description: app.description,
-        error: app.error,
         code: app.code,
-        icon: app.icon ? Config.THINGPEDIA_URL + '/api/devices/icon/' + app.icon : null
+        icon: app.icon ? Config.THINGPEDIA_URL + '/api/devices/icon/' + app.icon : app.icon,
+        results, errors
     };
 }
 
 router.post('/apps/create', (req, res, next) => {
     const engine = req.app.engine;
-    const assistant = engine.platform.getCapability('assistant');
-
     Promise.resolve().then(() => {
-        return assistant.createApp(req.body);
+        return createAppAndReturnResults(engine, req.body);
     }).then((result) => {
         if (result.error)
             res.status(400);
         res.json(result);
-    }).catch((e) => {
-        console.error(e.stack);
-        res.status(500).json({error:e.message});
-    });
+    }).catch(next);
 });
 
 router.get('/apps/list', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
-        return engine.apps.getAllApps();
-    }).then((apps) => {
-        res.json(apps.map(describeApp));
-    }).catch((e) => {
-        console.error(e.stack);
-        res.status(500).json({error:e.message});
-    });
+        res.json(engine.getAppInfo());
+    }).catch(next);
 });
 
 router.get('/apps/get/:appId', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
-        return engine.apps.getApp(req.params.appId);
+        return engine.getAppInfo(req.params.appId, false);
     }).then((app) => {
         if (!app) {
             res.status(404);
-            return { error: 'No such app' };
+            res.json({ error: 'No such app' });
         } else {
-            return describeApp(app);
+            res.json(app);
         }
-    }).then((result) => {
-        res.json(result);
-    }).catch((e) => {
-        console.error(e.stack);
-        res.status(500).json({error:e.message});
-    });
+    }).catch(next);
 });
 
 router.post('/apps/delete/:appId', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
-        return engine.apps.getApp(req.params.appId);
-    }).then((app) => {
-        if (!app) {
+        return engine.deleteApp(req.params.appId);
+    }).then((deleted) => {
+        if (!deleted) {
             res.status(404);
-            return { error: 'No such app' };
+            return res.json({ error: 'No such app' });
         } else {
-            return Promise.resolve(engine.apps.removeApp(app)).then(() => ({status:'ok'}));
+            return res.json({ status:'ok' });
         }
-    }).then((result) => {
-        res.json(result);
-    }).catch((e) => {
-        console.error(e.stack);
-        res.status(500).json({error:e.message});
-    });
+    }).catch(next);
 });
+
+
+class NotificationWrapper {
+    constructor(engine, ws) {
+        this._dispatcher = engine.assistant;
+        this._ws = ws;
+        this._formatter = new ThingTalk.Formatter(engine.platform.locale, engine.platform.timezone, engine.schemas);
+        this._dispatcher.addNotificationOutput(this);
+    }
+
+    destroy() {
+        this._dispatcher.removeNotificationOutput(this);
+    }
+
+    async notify(appId, icon, outputType, outputValue) {
+        const messages = await this._formatter.formatForType(outputType, outputValue, 'messages');
+        await this._ws.send(JSON.stringify({
+            result: {
+                appId: appId,
+                icon: icon ? Config.THINGPEDIA_URL + '/api/devices/icon/' + icon : null,
+                raw: outputValue,
+                type: outputType,
+                formatted: messages
+            }
+        }));
+    }
+
+    async notifyError(appId, icon, error) {
+        await this._ws.send(JSON.stringify({
+            error: {
+                appId: appId,
+                icon: icon ? Config.THINGPEDIA_URL + '/api/devices/icon/' + icon : null,
+                error: error
+            }
+        }));
+    }
+}
 
 router.ws('/results', (ws, req, next) => {
     const engine = req.app.engine;
-    const assistant = engine.platform.getCapability('assistant');
 
     Promise.resolve().then(() => {
+        const wrapper = new NotificationWrapper(engine, ws);
         ws.on('close', () => {
-            assistant.removeOutput(ws);
+            wrapper.destroy(ws);
         });
         ws.on('ping', (data) => ws.pong(data));
-
-        return assistant.addOutput(ws);
     }).catch((error) => {
         console.error('Error in API websocket: ' + error.message);
         ws.close();
     });
 });
 
+
 class WebsocketAssistantDelegate {
     constructor(ws) {
         this._ws = ws;
     }
 
-    send(text, icon) {
-        return this._ws.send(JSON.stringify({ type: 'text', text: text, icon: icon }));
+    setHypothesis() {
+        // voice doesn't go through SpeechHandler, hence hypotheses don't go through here!
     }
 
-    sendPicture(url, icon) {
-        return this._ws.send(JSON.stringify({ type: 'picture', url: url, icon: icon }));
+    setExpected(what) {
+        this._ws.send(JSON.stringify({ type: 'askSpecial', ask: what }));
     }
 
-    sendRDL(rdl, icon) {
-        return this._ws.send(JSON.stringify({ type: 'rdl', rdl: rdl, icon: icon }));
-    }
-
-    sendChoice(idx, what, title, text) {
-        return this._ws.send(JSON.stringify({ type: 'choice', idx: idx, title: title, text: text }));
-    }
-
-    sendButton(title, json) {
-        return this._ws.send(JSON.stringify({ type: 'button', title: title, json: json }));
-    }
-
-    sendLink(title, url) {
-        return this._ws.send(JSON.stringify({ type: 'link', title: title, url: url }));
-    }
-
-    sendAskSpecial(what) {
-        return this._ws.send(JSON.stringify({ type: 'askSpecial', ask: what }));
-    }
-
-    sendHypothesis(hypothesis) {
-        return this._ws.send(JSON.stringify({ type: 'hypothesis', hypothesis: hypothesis }));
-    }
-
-    sendCommand(command) {
-        return this._ws.send(JSON.stringify({ type: 'command', text: command }));
+    addMessage(msg) {
+         this._ws.send(JSON.stringify(msg));
     }
 }
 
+const LOCAL_USER = {
+    id: process.getuid ? process.getuid() : 0,
+    account: '', //pwnam.name;
+    name: '', //pwnam.gecos;
+};
+
 router.ws('/conversation', (ws, req, next) => {
-    const engine = req.app.engine;
-    const assistant = engine.platform.getCapability('assistant');
+    Promise.resolve(async () => {
+        const engine = req.app.engine;
+        const assistant = engine.platform.getCapability('assistant');
 
-    const delegate = new WebsocketAssistantDelegate(ws);
-    const isMain = req.host === '127.0.0.1';
+        const delegate = new WebsocketAssistantDelegate(ws);
+        const isMain = req.host === '127.0.0.1';
 
-    let opened = false;
-    const id = 'web-' + makeRandom(16);
-    ws.on('error', (err) => {
-        console.error(err);
-        ws.close();
-    });
-    ws.on('close', () => {
-        if (opened) {
-            if (isMain)
-                conversation.removeOutput(delegate);
-            else
-                assistant.closeConversation(id);
-        }
-        opened = false;
-    });
-
-    let conversation;
-    if (isMain) {
-        conversation = assistant.getConversation('main');
-        conversation.addOutput(delegate);
-        opened = true;
-    } else {
-        conversation = assistant.openConversation(id, delegate);
-        opened = true;
-        conversation.start();
-    }
-
-    ws.on('message', (data) => {
-        Promise.resolve().then(() => {
-            const parsed = JSON.parse(data);
-            switch(parsed.type) {
-            case 'command':
-                return conversation.handleCommand(parsed.text);
-            case 'parsed':
-                return conversation.handleParsedCommand(parsed.json, parsed.title);
-            case 'tt':
-                return conversation.handleThingTalk(parsed.code);
-            default:
-                throw new Error('Invalid command type ' + parsed.type);
-            }
-        }).catch((e) => {
-            console.error(e.stack);
-            ws.send(JSON.stringify({ type: 'error', error:e.message }));
+        let opened = false;
+        const conversationId = isMain ? 'main' : req.query.conversationId || 'web-' + makeRandom(16);
+        ws.on('error', (err) => {
+            console.error(err);
+            ws.close();
         });
+        ws.on('close', () => {
+            if (opened)
+                conversation.removeOutput(delegate);
+            opened = false;
+        });
+
+        const conversation = await assistant.getOrOpenConversation(conversationId, LOCAL_USER, {
+            showWelcome: true,
+            debug: true,
+        });
+        opened = true;
+
+        ws.on('message', (data) => {
+            Promise.resolve().then(() => {
+                const parsed = JSON.parse(data);
+                switch(parsed.type) {
+                case 'command':
+                    return conversation.handleCommand(parsed.text);
+                case 'parsed':
+                    return conversation.handleParsedCommand(parsed.json, parsed.title);
+                case 'tt':
+                    return conversation.handleThingTalk(parsed.code);
+                default:
+                    throw new Error('Invalid command type ' + parsed.type);
+                }
+            }).catch((e) => {
+                console.error(e.stack);
+                ws.send(JSON.stringify({ type: 'error', error:e.message }));
+            });
+        });
+    }).catch((e) => {
+        console.error('Error in API websocket: ' + e.message);
+        ws.close();
     });
 });
 

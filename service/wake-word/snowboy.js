@@ -36,7 +36,7 @@ module.exports = class SnowboyDetectorStream extends stream.Writable {
             this.emit('sound');
         });
         this._detector.on('hotword', (index, hotword, buffer) => {
-            this.emit('hotword', hotword);
+            this.emit('wakeword', hotword);
         });
     }
 

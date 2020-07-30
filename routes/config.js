@@ -11,17 +11,17 @@
 
 const Q = require('q');
 const express = require('express');
-var router = express.Router();
+const Genie = require('genie-toolkit');
 
-// FIXME
-const ipAddress = require('thingengine-core/lib/util/ip_address');
 const user = require('../util/user');
 const platform = require('../service/platform');
 
 const Config = require('../config');
 
+const router = express.Router();
+
 function config(req, res, next, userData, cloudData) {
-    return ipAddress.getServerName().then((host) => {
+    return Genie.IpAddressUtils.getServerName().then((host) => {
         var port = res.app.get('port');
         var serverAddress = 'http://' +
             (host.indexOf(':') >= 0 ? '[' + host + ']' : host)
@@ -34,7 +34,7 @@ function config(req, res, next, userData, cloudData) {
         var qrcodeTarget = 'https://thingengine.stanford.edu/qrcode/' + host + '/'
             + port + '/' + authToken;
 
-        var ipAddresses = ipAddress.getServerAddresses(host);
+        var ipAddresses = Genie.IpAddressUtils.getServerAddresses(host);
         res.render('config', {
             page_title: "Configure Almond",
             csrfToken: req.csrfToken(),
@@ -80,7 +80,7 @@ router.post('/set-server-password', user.requireLogIn, (req, res, next) => {
         if (typeof req.body['password'] !== 'string' ||
             req.body['password'].length < 8 ||
             req.body['password'].length > 255)
-            throw new Error("You must specifiy a valid password (of at least 8 characters)");
+            throw new Error("You must specify a valid password (of at least 8 characters)");
 
         if (req.body['confirm-password'] !== req.body['password'])
             throw new Error("The password and the confirmation do not match");
