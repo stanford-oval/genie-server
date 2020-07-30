@@ -34,7 +34,6 @@ try {
 } catch(e) {
     PulseAudio = null;
 }
-const CVC4Solver = require('smtlib').LocalCVC4Solver;
 
 const BluezBluetooth = require('./bluez');
 const MediaPlayer = require('./media_player');
@@ -280,7 +279,6 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'graphics-api':
         case 'content-api':
         case 'assistant':
-        case 'smt-solver':
             return true;
 
         case 'gettext':
@@ -322,8 +320,6 @@ class ServerPlatform extends Tp.BasePlatform {
             return _contentApi;
         case 'graphics-api':
             return _graphicsApi;
-        case 'smt-solver':
-            return CVC4Solver;
         case 'gps':
             return _gpsApi;
 

@@ -31,7 +31,6 @@
     "pug": "^3.0.0",
     "q": "^1.5.0",
     "serve-favicon": "^2.4.3",
-    "smtlib": "^0.1.1",
     "sqlite3": "^5.0.0",
     "thingpedia": "~2.8.0-beta.2",
     "thingpedia-discovery": "^1.0.0",
