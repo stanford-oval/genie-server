@@ -38,7 +38,6 @@ const CVC4Solver = require('smtlib').LocalCVC4Solver;
 
 const BluezBluetooth = require('./bluez');
 const MediaPlayer = require('./media_player');
-const Contacts = require('./contacts');
 const _graphicsApi = require('./graphics');
 
 let WakeWordDetector;
@@ -86,7 +85,6 @@ const _contentApi = {
         });
     }
 }
-const _contactApi = JavaAPI.makeJavaAPI('Contacts', ['lookup'], [], []);
 const _telephoneApi = JavaAPI.makeJavaAPI('Telephone', ['call', 'callEmergency'], [], []);
 */
 
@@ -203,7 +201,6 @@ class ServerPlatform extends Tp.BasePlatform {
         }
 
         this._media = new MediaPlayer();
-        this._contacts = new Contacts();
 
         this._sqliteKey = null;
         this._origin = null;
@@ -281,7 +278,6 @@ class ServerPlatform extends Tp.BasePlatform {
 */
         case 'gps':
         case 'graphics-api':
-        case 'contacts':
         case 'content-api':
         case 'assistant':
         case 'smt-solver':
@@ -326,8 +322,6 @@ class ServerPlatform extends Tp.BasePlatform {
             return _contentApi;
         case 'graphics-api':
             return _graphicsApi;
-        case 'contacts':
-            return this._contacts;
         case 'smt-solver':
             return CVC4Solver;
         case 'gps':
