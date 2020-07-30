@@ -46,7 +46,11 @@ const LOCAL_USER = {
 
 const HOTWORD_DETECTED_ID = 1;
 async function init(platform) {
-    _engine = new Genie.AssistantEngine(platform, { thingpediaUrl: Config.THINGPEDIA_URL });
+    _engine = new Genie.AssistantEngine(platform, {
+        cloudSyncUrl: Config.CLOUD_SYNC_URL,
+        thingpediaUrl: Config.THINGPEDIA_URL,
+        nluModelUrl: Config.SEMPRE_URL,
+    });
     _frontend.setEngine(_engine);
 
     await _engine.open();
