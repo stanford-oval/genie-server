@@ -88,9 +88,13 @@ async function init(platform) {
             const eventSoundCtx = new canberra.Context({
                 [canberra.Property.APPLICATION_ID]: 'edu.stanford.Almond',
             });
-            eventSoundCtx.cache({
-                [canberra.Property.EVENT_ID]: 'message-new-instant'
-            });
+            try {
+                eventSoundCtx.cache({
+                    [canberra.Property.EVENT_ID]: 'message-new-instant'
+                });
+            } catch (e) {
+                console.error(`Failed to cache event sound: ${e.message}`);
+            }
 
             speech.on('wakeword', (hotword) => {
                 eventSoundCtx.play(HOTWORD_DETECTED_ID, {
