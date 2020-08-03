@@ -215,6 +215,8 @@ $(function() {
         console.log('received ' + event.data);
         switch (parsed.type) {
         case 'text':
+        case 'result':
+            // FIXME: support more type of results
             textMessage(parsed.text, parsed.icon);
             currentGrid = null;
             break;
@@ -226,12 +228,6 @@ $(function() {
 
         case 'rdl':
             rdl(parsed.rdl, parsed.icon);
-            currentGrid = null;
-            break;
-
-        case 'result':
-            // FIXME: support more type of results
-            textMessage(parsed.fallback, parsed.icon);
             currentGrid = null;
             break;
 
@@ -261,7 +257,7 @@ $(function() {
         case 'command':
             $('#input').val('');
             collapseButtons();
-            appendUserMessage(parsed.text);
+            appendUserMessage(parsed.command);
             break;
         }
 

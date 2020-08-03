@@ -19,10 +19,9 @@ the container to run as your regular user (and thus access PulseAudio from your 
 
 To run, use the command:
 ```bash
-podman run -p 3000:3000 --uidmap keep-id \
+podman run --name almond -p 3000:3000 --uidmap keep-id \
     -v /dev/shm:/dev/shm \
     -v $XDG_RUNTIME_DIR/pulse:/run/pulse \
-    -v ${XDG_CONFIG_HOME:-$HOME/.config}/almond-server:/var/lib/almond-server \
     stanfordoval/almond-server
 ```
 
@@ -33,12 +32,8 @@ You can now navigate to [127.0.0.1:3000](http://127.0.0.1:3000) to access Almond
 Voice support is only available on Linux. On Mac or Windows, you can use the following docker command:
 
 ```bash
-docker run -p 3000:3000 \
-    -v $HOME/.almond-server:/var/lib/almond-server \
-    stanfordoval/almond-server:latest-portable
+docker run --name almond -p 3000:3000 stanfordoval/almond-server:latest-portable
 ```
-
-Change the `-v` line to a different path to save the almond-server configuration files in a different directory than `$HOME/.almond-server`.
 
 ## Development setup
 

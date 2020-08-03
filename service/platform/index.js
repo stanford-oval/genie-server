@@ -2,11 +2,21 @@
 //
 // This file is part of Almond
 //
-// Copyright 2015-2018 The Board of Trustees of the Leland Stanford Junior University
+// Copyright 2019-2020 The Board of Trustees of the Leland Stanford Junior University
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-//
-// See COPYING for details
 "use strict";
 
 // Server platform
@@ -24,18 +34,17 @@ try {
 } catch(e) {
     PulseAudio = null;
 }
-const CVC4Solver = require('smtlib').LocalCVC4Solver;
 
 const BluezBluetooth = require('./bluez');
-let SpeechSynthesizer;
-try {
-    SpeechSynthesizer = require('./speech_synthesizer');
-} catch(e) {
-    SpeechSynthesizer = null;
-}
 const MediaPlayer = require('./media_player');
-const Contacts = require('./contacts');
 const _graphicsApi = require('./graphics');
+
+let WakeWordDetector;
+try {
+    WakeWordDetector = require('../wake-word/snowboy');
+} catch(e) {
+    WakeWordDetector = null;
+}
 
 var _unzipApi = {
     unzip(zipPath, dir) {
@@ -75,7 +84,6 @@ const _contentApi = {
         });
     }
 }
-const _contactApi = JavaAPI.makeJavaAPI('Contacts', ['lookup'], [], []);
 const _telephoneApi = JavaAPI.makeJavaAPI('Telephone', ['call', 'callEmergency'], [], []);
 */
 
@@ -158,13 +166,12 @@ class ServerPlatform extends Tp.BasePlatform {
     constructor() {
         super();
 
-        this._assistant = null;
-
         this._gettext = new Gettext();
 
         this._filesDir = getFilesDir();
         safeMkdirSync(this._filesDir);
-        this._locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || 'en-US';
+        // TODO support other locales
+        this._locale = 'en-US';
         // normalize this._locale to something that Intl can grok
         this._locale = this._locale.split(/[-_.@]/).slice(0,2).join('-');
 
@@ -179,29 +186,23 @@ class ServerPlatform extends Tp.BasePlatform {
             this._dbusSystem = DBus.systemBus();
         else
             this._dbusSystem = null;
+
         this._btApi = null;
+        this._wakeWordDetector = null;
         if (PulseAudio) {
             this._pulse = new PulseAudio({
-                client: "thingengine-platform-server"
+                client: "almond-server"
             });
-            if (SpeechSynthesizer)
-                this._tts = new SpeechSynthesizer(this);
-            else
-                this._tts = null;
+            if (WakeWordDetector)
+                this._wakeWordDetector = new WakeWordDetector();
         } else {
             this._pulse = null;
-            this._tts = null;
         }
 
         this._media = new MediaPlayer();
-        this._contacts = new Contacts();
 
         this._sqliteKey = null;
         this._origin = null;
-    }
-
-    setAssistant(ad) {
-        this._assistant = ad;
     }
 
     get type() {
@@ -225,13 +226,7 @@ class ServerPlatform extends Tp.BasePlatform {
     // (eg we don't need discovery on the cloud, and we don't need graphdb,
     // messaging or the apps on the phone client)
     hasFeature(feature) {
-        switch(feature) {
-        case 'ui':
-            return false;
-
-        default:
-            return true;
-        }
+        return true;
     }
 
     getPlatformDevice() {
@@ -254,8 +249,6 @@ class ServerPlatform extends Tp.BasePlatform {
             return this._dbusSession !== null;
         case 'dbus-system':
             return this._dbusSystem !== null;
-        case 'text-to-speech':
-            return this._tts !== null;
 
         case 'bluetooth':
             return this._dbusSystem !== null;
@@ -263,8 +256,12 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'media-player':
             return true;
 
-        case'pulseaudio':
+        case 'pulseaudio':
+        case 'sound':
             return this._pulse !== null;
+
+        case 'wakeword-detector':
+            return this._wakeWordDetector !== null;
 /*
         // We can use the phone capabilities
         case 'notify':
@@ -280,10 +277,8 @@ class ServerPlatform extends Tp.BasePlatform {
 */
         case 'gps':
         case 'graphics-api':
-        case 'contacts':
         case 'content-api':
         case 'assistant':
-        case 'smt-solver':
             return true;
 
         case 'gettext':
@@ -308,26 +303,23 @@ class ServerPlatform extends Tp.BasePlatform {
             return this._dbusSession;
         case 'dbus-system':
             return this._dbusSystem;
-        case 'text-to-speech':
-            return this._tts;
         case 'bluetooth':
             if (this._dbusSystem === null)
                 return null;
             if (!this._btApi)
                 this._btApi = new BluezBluetooth(this);
             return this._btApi;
-        case 'pulseaudio':
+        case 'sound':
+        case 'pulseaudio': // legacy name for "sound"
             return this._pulse;
+        case 'wakeword-detector':
+            return this._wakeWordDetector;
         case 'media-player':
             return this._media;
         case 'content-api':
             return _contentApi;
         case 'graphics-api':
             return _graphicsApi;
-        case 'contacts':
-            return this._contacts;
-        case 'smt-solver':
-            return CVC4Solver;
         case 'gps':
             return _gpsApi;
 
@@ -357,9 +349,6 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'telephone':
             return _telephoneApi;
 */
-
-        case 'assistant':
-            return this._assistant;
 
         case 'gettext':
             return this._gettext;
