@@ -218,7 +218,7 @@ class WebsocketAssistantDelegate {
     }
 
     addMessage(msg) {
-         this._ws.send(JSON.stringify(msg));
+        this._ws.send(JSON.stringify(msg));
     }
 }
 
@@ -229,15 +229,14 @@ const LOCAL_USER = {
 };
 
 router.ws('/conversation', (ws, req, next) => {
-    Promise.resolve(async () => {
+    Promise.resolve().then(async () => {
         const engine = req.app.engine;
-        const assistant = engine.platform.getCapability('assistant');
 
         const delegate = new WebsocketAssistantDelegate(ws);
         const isMain = req.host === '127.0.0.1';
 
         let opened = false;
-        const conversationId = isMain ? 'main' : req.query.conversationId || 'web-' + makeRandom(16);
+        const conversationId = isMain ? 'main' : (req.query.conversationId || 'web-' + makeRandom(16));
         ws.on('error', (err) => {
             console.error(err);
             ws.close();
@@ -248,10 +247,11 @@ router.ws('/conversation', (ws, req, next) => {
             opened = false;
         });
 
-        const conversation = await assistant.getOrOpenConversation(conversationId, LOCAL_USER, {
+        const conversation = await engine.assistant.getOrOpenConversation(conversationId, LOCAL_USER, {
             showWelcome: true,
             debug: true,
         });
+        await conversation.addOutput(delegate, true);
         opened = true;
 
         ws.on('message', (data) => {

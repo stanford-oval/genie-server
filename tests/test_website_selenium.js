@@ -104,6 +104,17 @@ async function testHomepage(driver) {
     assert.strictEqual(await title.getText(), 'It works!');
 }
 
+// there is some randomness in what message we pick
+const WELCOME_MESSAGES = [
+    `Hi, what can I do for you?`,
+    `Hi, how can I help you?`,
+    `Hello, what can I do for you?`,
+    `Hello, how can I help you?`,
+    `Hi! What can I do for you?`,
+    `Hi! How can I help you?`,
+    `Hello! What can I do for you?`,
+    `Hello! How can I help you?`,
+];
 
 async function testMyConversation(driver) {
     await driver.get(BASE_URL + '/conversation');
@@ -118,8 +129,9 @@ async function testMyConversation(driver) {
 
     let messages = await driver.findElements(WD.By.css('.message'));
     assert.strictEqual(messages.length, 1);
-    assert.strictEqual(await messages[0].getText(), `Welcome back!`);
+    assert(WELCOME_MESSAGES.includes(await messages[0].getText()));
 
+    // todo: use a better test
     await inputEntry.sendKeys('no', WD.Key.ENTER);
 
     const ourInput = await driver.wait(
@@ -129,20 +141,8 @@ async function testMyConversation(driver) {
 
     const response = await driver.wait(
         WD.until.elementLocated(WD.By.css('.from-almond:nth-child(3) .message')),
-        10000);
-    assert.strictEqual(await response.getText(), 'No way!');
-
-    /*await inputEntry.sendKeys('hello', WD.Key.ENTER);
-
-    const ourInput2 = await driver.wait(
-        WD.until.elementLocated(WD.By.css('.message.from-user:nth-child(3)')),
-        10000);
-    assert.strictEqual(await ourInput2.getText(), 'hello');
-
-    const response2 = await driver.wait(
-        WD.until.elementLocated(WD.By.css('.from-almond:nth-child(4) .message')),
-        10000);
-    assert.strictEqual(await response2.getText(), 'Hi!');*/
+        60000);
+    assert.strictEqual(await response.getText(), 'Sorry, I did not understand that. Can you rephrase it?');
 }
 
 async function main() {

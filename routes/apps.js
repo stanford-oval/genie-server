@@ -35,7 +35,7 @@ router.get('/', user.redirectLogIn, (req, res, next) => {
 });
 
 router.post('/delete', user.requireLogIn, (req, res, next) => {
-    Promise.resolve(async () => {
+    Promise.resolve().then(async () => {
         const engine = req.app.engine;
 
         const id = req.body.id;
