@@ -90,6 +90,7 @@ async function init(platform) {
             });
             try {
                 eventSoundCtx.cache({
+                    'media.role': 'voice-assistant',
                     [canberra.Property.EVENT_ID]: 'message-new-instant'
                 });
             } catch (e) {
@@ -98,6 +99,7 @@ async function init(platform) {
 
             speech.on('wakeword', (hotword) => {
                 eventSoundCtx.play(HOTWORD_DETECTED_ID, {
+                    'media.role': 'voice-assistant',
                     [canberra.Property.EVENT_ID]: 'message-new-instant'
                 }).catch((e) => {
                     console.error(`Failed to play hotword detection sound: ${e.message}`);
