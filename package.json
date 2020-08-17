@@ -34,7 +34,7 @@
     "sqlite3": "^5.0.0",
     "thingpedia": "~2.8.0-beta.2",
     "thingpedia-discovery": "^1.0.0",
-    "thingtalk": "~1.11.0-beta.2",
+    "thingtalk": "~1.11.0-beta.3",
     "uuid": "^8.2.0",
     "ws": "^7.3.1"
   },

@@ -3994,10 +3994,10 @@ thingtalk-units@^0.1.0:
   resolved "https://registry.yarnpkg.com/thingtalk-units/-/thingtalk-units-0.1.0.tgz#c3b69bc0c7d0a3ba5bfad3ccf02dc1c291d1abc8"
   integrity sha512-rV5/jZw9fBk3OgYi/HrA1LsTmD5w0gYDlsc1US3/ePR5szaUxwMUtN8UAPYaUorOiW0Qcjm1plvssOC97EkedQ==
 
-thingtalk@~1.11.0-beta.2:
-  version "1.11.0-beta.2"
-  resolved "https://registry.yarnpkg.com/thingtalk/-/thingtalk-1.11.0-beta.2.tgz#9cb76fd952209d37971199107ff9854d8123d61c"
-  integrity sha512-OPIfUvQqORzYJK7sLpMAMWhW0bDwcBxhiwgTYaypkbs343APqL6gPZjfPtVgYfpv9gk8kS7+73jqYzNsagoH8w==
+thingtalk@~1.11.0-beta.2, thingtalk@~1.11.0-beta.3:
+  version "1.11.0-beta.3"
+  resolved "https://registry.yarnpkg.com/thingtalk/-/thingtalk-1.11.0-beta.3.tgz#f9f4c0c77cdff52c1a0c82ab1e8601ffa4b3a528"
+  integrity sha512-kl3wk2B91dr6jEkWZLZipQs760Qanu9SP3b+NYK8bhWtIrHnZApyo45t9glmvjWlLdtvNjYMOa0V/6J5H/iQbQ==
   dependencies:
     adt "~0.7.2"
     byline "^5.0.0"
