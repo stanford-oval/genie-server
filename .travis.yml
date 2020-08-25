@@ -17,5 +17,5 @@ before_install:
 - pulseaudio --start
 script:
 - yarn lint
-- TZ="America/Los_Angeles" yarn test
+- LOCALE="en-US" TZ="America/Los_Angeles" yarn test
 after_success: yarn run coverage

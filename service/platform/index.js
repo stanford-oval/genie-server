@@ -170,12 +170,8 @@ class ServerPlatform extends Tp.BasePlatform {
 
         this._filesDir = getFilesDir();
         safeMkdirSync(this._filesDir);
-        // TODO support other locales
-        this._locale = 'en-US';
-        // normalize this._locale to something that Intl can grok
-        this._locale = this._locale.split(/[-_.@]/).slice(0,2).join('-');
 
-        this._gettext.setLocale(this._locale);
+        this._setLocale();
         this._timezone = process.env.TZ;
         this._prefs = new Tp.Helpers.FilePreferences(this._filesDir + '/prefs.db');
         this._cacheDir = getCacheDir();
@@ -392,6 +388,16 @@ class ServerPlatform extends Tp.BasePlatform {
         return this._filesDir + '/sqlite.db';
     }
 
+    _setLocale() {
+        let locale = 'en-US';
+        if (process.env.LOCALE)
+            locale = process.env.LOCALE;
+        this._locale = locale;
+        // normalize this._locale to something that Intl can grok
+        this._locale = this._locale.split(/[-_.@]/).slice(0, 2).join('-');
+        this._gettext.setLocale(this._locale);
+    }
+
     _setSqliteKey(key) {
         this._sqliteKey = key.toString('hex');
     }
@@ -449,4 +455,5 @@ class ServerPlatform extends Tp.BasePlatform {
         return true;
     }
 }
+
 module.exports = new ServerPlatform;

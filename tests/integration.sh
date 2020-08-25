@@ -10,7 +10,7 @@ set -o pipefail
 srcdir=`dirname $0`/..
 srcdir=`realpath $srcdir`
 
-workdir=`mktemp -t -d almondhome-integration-XXXXXX`
+workdir=`mktemp -d almondhome-integration-XXXXXX`
 workdir=`realpath $workdir`
 on_error() {
     test -n "$serverpid" && kill $serverpid || true
