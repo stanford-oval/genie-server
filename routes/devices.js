@@ -78,18 +78,9 @@ router.post('/delete', user.requireLogIn, (req, res, next) => {
 
 router.get('/oauth2/:kind', user.redirectLogIn, (req, res, next) => {
     const kind = req.params.kind;
-    const engine = req.app.engine;
-    Promise.resolve().then(async () => {
-        const result = await engine.startOAuth(kind);
-        if (result !== null) {
-            const [redirect, session] = result;
-            for (let key in session)
-                req.session[key] = session[key];
-            res.redirect(redirect);
-        } else {
-            res.redirect(Config.BASE_URL + '/devices?class=online');
-        }
-    }).catch(next);
+    const redirect = encodeURIComponent(req.protocol + '://' + req.hostname + Config.BASE_URL);
+    const url = Config.CLOUD_SYNC_URL + `/proxy?redirect=${redirect}&kind=${kind}`;
+    res.redirect(url);
 });
 
 router.get('/oauth2/callback/:kind', user.redirectLogIn, (req, res, next) => {
