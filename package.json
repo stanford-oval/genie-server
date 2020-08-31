@@ -32,7 +32,7 @@
     "q": "^1.5.0",
     "serve-favicon": "^2.4.3",
     "sqlite3": "^5.0.0",
-    "thingpedia": "~2.8.0-beta.2",
+    "thingpedia": "~2.8.0-beta.4",
     "thingpedia-discovery": "^1.0.0",
     "thingtalk": "~1.11.0-beta.2",
     "uuid": "^8.2.0",
