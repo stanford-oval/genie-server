@@ -78,7 +78,8 @@ router.post('/delete', user.requireLogIn, (req, res, next) => {
 
 router.get('/oauth2/:kind', user.redirectLogIn, (req, res, next) => {
     const kind = req.params.kind;
-    const redirect = encodeURIComponent(req.protocol + '://' + req.hostname + Config.BASE_URL);
+
+    const redirect = encodeURIComponent(req.app.engine.platform.getOrigin() + Config.BASE_URL);
     const url = Config.CLOUD_SYNC_URL + `/proxy?redirect=${redirect}&kind=${kind}`;
     res.redirect(url);
 });

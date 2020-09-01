@@ -31,6 +31,14 @@
 module.exports.BASE_URL = process.env.THINGENGINE_BASE_URL || '';
 
 /**
+  Set this to true if Almond is served behind a reverse proxy.
+
+  If true, Almond will trust the X-Forwarded-* headers, the default host-based authentication
+  will be "proxied-ip", and the default origin will not use a port.
+*/
+module.exports.HAS_REVERSE_PROXY = !!process.env.THINGENGINE_HAS_REVERSE_PROXY;
+
+/**
   Enable host-based authentication.
 
   Host-based authentication is an alternative authentication scheme that allows connections
@@ -52,7 +60,8 @@ module.exports.BASE_URL = process.env.THINGENGINE_BASE_URL || '';
 
   NOTE: host-based authentication is not compatible with DB encryption.
 */
-module.exports.HOST_BASED_AUTHENTICATION = process.env.THINGENGINE_HOST_BASED_AUTHENTICATION || 'proxied-ip';
+module.exports.HOST_BASED_AUTHENTICATION = process.env.THINGENGINE_HOST_BASED_AUTHENTICATION ||
+    (module.exports.HAS_REVERSE_PROXY ? 'proxied-ip' : 'local-ip');
 
 /**
   Enable password-based DB encryption.

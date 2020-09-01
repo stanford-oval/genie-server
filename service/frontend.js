@@ -69,7 +69,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
         this._app.set('port', process.env.PORT || 3000);
         this._app.set('views', path.join(__dirname, '../views'));
         this._app.set('view engine', 'pug');
-        if (Config.HOST_BASED_AUTHENTICATION === 'proxied-ip')
+        if (Config.HAS_REVERSE_PROXY)
             this._app.set('trust proxy', true);
         //this._app.use(favicon());
         this._app.use(logger('dev'));
@@ -101,7 +101,13 @@ module.exports = class WebFrontend extends events.EventEmitter {
         user.initializePassport();
 
         this._app.use((req, res, next) => {
-            this._platform._setOrigin(req.protocol + '://' + req.hostname + ':' + this._app.get('port') + Config.BASE_URL);
+            let port = ':' + this._app.get('port');
+            if (Config.HAS_REVERSE_PROXY ||
+                (req.protocol === 'http' && port === ':80') ||
+                (req.protocol === 'https' && port === ':443'))
+                port = '';
+            this._platform._setOrigin(req.protocol + '://' + req.hostname + port);
+
             if (req.user) {
                 res.locals.authenticated = true;
                 res.locals.user = { username: req.user, isConfigured: true };

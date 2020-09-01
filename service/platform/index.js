@@ -46,6 +46,8 @@ try {
     WakeWordDetector = null;
 }
 
+const Config = require('../../config');
+
 var _unzipApi = {
     unzip(zipPath, dir) {
         var args = ['-uo', zipPath, '-d', dir];
@@ -419,14 +421,17 @@ class ServerPlatform extends Tp.BasePlatform {
         return this._prefs.set('developer-key', key);
     }
 
-    // Return a server/port URL that can be used to refer to this
-    // installation. This is primarily used for OAuth redirects, and
-    // so must match what the upstream services accept.
     _setOrigin(origin) {
         this._origin = origin;
     }
 
+    getOAuthRedirect() {
+        return Config.CLOUD_SYNC_URL;
+    }
+
     getOrigin() {
+        if (process.env.THINGENGINE_ORIGIN)
+            return process.env.THINGENGINE_ORIGIN;
         return this._origin;
     }
 

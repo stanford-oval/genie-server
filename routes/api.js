@@ -35,7 +35,7 @@ function makeRandom(bytes) {
 var router = express.Router();
 
 router.use('/', (req, res, next) => {
-    const compareTo = req.protocol + '://' + req.hostname + ':' + req.app.get('port');
+    const compareTo = req.app.engine.platform.getOrigin();
     if (req.headers.origin && req.headers.origin !== compareTo) {
         res.status(403).send('Forbidden Cross Origin Request');
         return;
