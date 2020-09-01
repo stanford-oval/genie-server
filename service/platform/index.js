@@ -191,20 +191,26 @@ class ServerPlatform extends Tp.BasePlatform {
 
         this._btApi = null;
         this._wakeWordDetector = null;
-        if (PulseAudio) {
-            this._pulse = new PulseAudio({
-                client: "almond-server"
-            });
-            if (WakeWordDetector)
-                this._wakeWordDetector = new WakeWordDetector();
-        } else {
-            this._pulse = null;
-        }
 
         this._media = new MediaPlayer();
 
         this._sqliteKey = null;
         this._origin = null;
+    }
+
+    _ensurePulseAudio() {
+        if (this._pulse !== undefined)
+            return;
+
+        if (PulseAudio) {
+            this._pulse = new PulseAudio();
+            this._pulse.on('error', (err) => { console.error('error on PulseAudio', err); });
+
+            if (WakeWordDetector)
+                this._wakeWordDetector = new WakeWordDetector();
+        } else {
+            this._pulse = null;
+        }
     }
 
     get type() {
@@ -260,9 +266,11 @@ class ServerPlatform extends Tp.BasePlatform {
 
         case 'pulseaudio':
         case 'sound':
+            this._ensurePulseAudio();
             return this._pulse !== null;
 
         case 'wakeword-detector':
+            this._ensurePulseAudio();
             return this._wakeWordDetector !== null;
 /*
         // We can use the phone capabilities
@@ -313,8 +321,10 @@ class ServerPlatform extends Tp.BasePlatform {
             return this._btApi;
         case 'sound':
         case 'pulseaudio': // legacy name for "sound"
+            this._ensurePulseAudio();
             return this._pulse;
         case 'wakeword-detector':
+            this._ensurePulseAudio();
             return this._wakeWordDetector;
         case 'media-player':
             return this._media;
