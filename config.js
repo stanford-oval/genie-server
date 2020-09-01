@@ -52,7 +52,7 @@ module.exports.BASE_URL = process.env.THINGENGINE_BASE_URL || '';
 
   NOTE: host-based authentication is not compatible with DB encryption.
 */
-module.exports.HOST_BASED_AUTHENTICATION = process.env.THINGENGINE_HOST_BASED_AUTHENTICATION || 'local-ip';
+module.exports.HOST_BASED_AUTHENTICATION = process.env.THINGENGINE_HOST_BASED_AUTHENTICATION || 'proxied-ip';
 
 /**
   Enable password-based DB encryption.
