@@ -30,7 +30,7 @@ module.exports = class SnowboyDetectorStream extends stream.Writable {
         let models = new snowboy.Models();
         models.add({
              file: path.resolve(path.dirname(module.filename), '../../data/wake-word/snowboy/computer.umdl'),
-             sensitivity: '0.6',
+             sensitivity: 0.4,
              hotwords : 'computer'
         });
 

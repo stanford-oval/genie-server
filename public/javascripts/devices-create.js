@@ -44,6 +44,7 @@ $(() => {
                 form.attr('aria-expanded', 'false');
 
                 json.fields.forEach(function(field) {
+
                     const input = $('<input>').addClass('form-control')
                         .attr('type', field.type).attr('name', field.name);
                     const label = $('<label>').addClass('control-label').text(field.label);
@@ -76,7 +77,6 @@ $(() => {
     const developerKey = document.body.dataset.developerKey;
     const url = getThingpedia() + '/api/devices?developer_key=' + developerKey;
     $.get(url, (factoryList) => {
-        factoryList = factoryList.filter((f) => f.factory.type !== 'oauth2');
 
         const container = $('#online-account-selector');
 

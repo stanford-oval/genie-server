@@ -70,7 +70,7 @@ async function init(platform) {
         debug: true,
         deleteWhenInactive: false,
         inactivityTimeout: 30000, // pick a low inactivity timeout to turn off the microphone
-        contextResetTimeout: 600000, // but only reset the timeout after 10 minutes (the default)
+        contextResetTimeout: 30000,
     });
 
     if (platform.hasCapability('sound')) {
