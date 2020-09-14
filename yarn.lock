@@ -4040,10 +4040,15 @@ thingtalk-units@^0.1.0:
   resolved "https://registry.yarnpkg.com/thingtalk-units/-/thingtalk-units-0.1.0.tgz#c3b69bc0c7d0a3ba5bfad3ccf02dc1c291d1abc8"
   integrity sha512-rV5/jZw9fBk3OgYi/HrA1LsTmD5w0gYDlsc1US3/ePR5szaUxwMUtN8UAPYaUorOiW0Qcjm1plvssOC97EkedQ==
 
-thingtalk@~1.11.0-beta.2, thingtalk@~1.11.0-beta.4:
-  version "1.11.0-beta.5"
-  resolved "https://registry.yarnpkg.com/thingtalk/-/thingtalk-1.11.0-beta.5.tgz#0cbc2a90827af30d6807e9f8a3cf2f528144b622"
-  integrity sha512-tf2I+mRNEjKlH8LnD+CwESTvMuj6A0JlKv5KdQfJGg/cu7Q+rlKVA9DLkWtGjDE/LA/KsIVGlbCvC7OROgJL8Q==
+thingtalk-units@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/thingtalk-units/-/thingtalk-units-0.2.0.tgz#b14cd56d5a2178b24c81d42c7174c8d10f1110b9"
+  integrity sha512-t2KE6EVVOxiD6qKREMxkB+sU0xb1elRWrxwyiJwA/a9LHurU5chZSGjkFdjDrtTypyfIV36yvhXQBQLrmwhFgQ==
+
+thingtalk@~1.11.0-beta.2, thingtalk@~1.11.0-beta.4, thingtalk@~1.11.0-rc.1:
+  version "1.11.0-rc.1"
+  resolved "https://registry.yarnpkg.com/thingtalk/-/thingtalk-1.11.0-rc.1.tgz#30761ed9abccbf57fdb71d62ad5a6073a37545d2"
+  integrity sha512-cWoNoscEhOFijS9EwfI2TGAsH6sarp7pyuF7v9Wv/9o+e19WbVLY5kEMA4il6m2PG+yh/gmXKVBBSx7GNlCFnQ==
   dependencies:
     adt "~0.7.2"
     byline "^5.0.0"
@@ -4051,7 +4056,7 @@ thingtalk@~1.11.0-beta.2, thingtalk@~1.11.0-beta.4:
     semver "^7.3.2"
     smtlib "^0.1.1"
     string-interp "^0.3.1"
-    thingtalk-units "^0.1.0"
+    thingtalk-units "^0.2.0"
 
 through@2, "through@>=2.2.7 <3", through@^2.3.8, through@~2.3, through@~2.3.4:
   version "2.3.8"
