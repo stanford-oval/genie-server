@@ -2,7 +2,7 @@ FROM docker.io/fedora:31
 
 # Install all deps in the standard repos
 RUN dnf -y module install nodejs:10 && \
-    dnf -y install git curl pulseaudio-libs-devel unzip nodejs make gcc gcc-c++ libcanberra-devel atlas-devel blas-devel python-unversioned-command
+    dnf -y install git curl pulseaudio-libs-devel unzip nodejs make gcc gcc-c++ libcanberra-devel atlas-devel blas-devel python2
 
 # Install yarn
 RUN curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
@@ -19,7 +19,7 @@ RUN rm -rf /opt/almond/node_modules && \
     rm -fr /usr/local/share/.cache
 RUN cd node_modules/snowboy/ && \
     yarn install --ignore-scripts --no-lockfile && \
-    yarn run node-pre-gyp clean configure && \
+    PYTHON=python2 yarn run node-pre-gyp clean configure && \
     make -C build/ && \
     rm -fr /usr/local/share/.cache
 
