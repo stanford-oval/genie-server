@@ -21,12 +21,9 @@
 
 const express = require('express');
 const crypto = require('crypto');
-const ThingTalk = require('thingtalk');
 
 const user = require('../util/user');
 const errorHandling = require('../util/error_handling');
-
-const Config = require('../config');
 
 function makeRandom(bytes) {
     return crypto.randomBytes(bytes).toString('hex');
@@ -78,34 +75,11 @@ router.post('/devices/create', (req, res, next) => {
     }).catch(next);
 });
 
-async function createAppAndReturnResults(engine, data) {
-    const app = await engine.createApp(data.code);
-    const results = [];
-    const errors = [];
-
-    const formatter = new ThingTalk.Formatter(engine.platform.locale, engine.platform.timezone, engine.schemas);
-    for await (const value of app.mainOutput) {
-        if (value instanceof Error) {
-            errors.push(value);
-        } else {
-            const messages = await formatter.formatForType(value.outputType, value.outputValue, 'messages');
-            results.push({ raw: value.outputValue, type: value.outputType, formatted: messages });
-        }
-    }
-
-    return {
-        uniqueId: app.uniqueId,
-        description: app.description,
-        code: app.code,
-        icon: app.icon ? Config.THINGPEDIA_URL + '/api/devices/icon/' + app.icon : app.icon,
-        results, errors
-    };
-}
 
 router.post('/apps/create', (req, res, next) => {
     const engine = req.app.engine;
     Promise.resolve().then(() => {
-        return createAppAndReturnResults(engine, req.body);
+        return engine.createAppAndReturnResults(req.body.code);
     }).then((result) => {
         if (result.error)
             res.status(400);
@@ -156,7 +130,6 @@ class NotificationWrapper {
     constructor(engine, ws) {
         this._dispatcher = engine.assistant;
         this._ws = ws;
-        this._formatter = new ThingTalk.Formatter(engine.platform.locale, engine.platform.timezone, engine.schemas);
         this._dispatcher.addNotificationOutput(this);
     }
 
@@ -164,27 +137,12 @@ class NotificationWrapper {
         this._dispatcher.removeNotificationOutput(this);
     }
 
-    async notify(appId, icon, outputType, outputValue) {
-        const messages = await this._formatter.formatForType(outputType, outputValue, 'messages');
-        await this._ws.send(JSON.stringify({
-            result: {
-                appId: appId,
-                icon: icon ? Config.THINGPEDIA_URL + '/api/devices/icon/' + icon : null,
-                raw: outputValue,
-                type: outputType,
-                formatted: messages
-            }
-        }));
+    async notify(data) {
+        await this._ws.send(JSON.stringify(data));
     }
 
-    async notifyError(appId, icon, error) {
-        await this._ws.send(JSON.stringify({
-            error: {
-                appId: appId,
-                icon: icon ? Config.THINGPEDIA_URL + '/api/devices/icon/' + icon : null,
-                error: error
-            }
-        }));
+    async notifyError(data) {
+        await this._ws.send(JSON.stringify(data));
     }
 }
 
