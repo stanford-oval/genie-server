@@ -84,6 +84,12 @@ async function init(platform) {
             });
         });
 
+        const prefs = platform.getSharedPreferences();
+        const enableVoiceInput = prefs.get('enable-voice-input');
+        const enableVoiceOutput = prefs.get('enable-voice-output');
+        speech.setVoiceInput(enableVoiceInput === undefined ? true : enableVoiceInput);
+        speech.setVoiceOutput(enableVoiceOutput === undefined ? true : enableVoiceOutput);
+
         if (canberra) {
             const eventSoundCtx = new canberra.Context({
                 [canberra.Property.APPLICATION_ID]: 'edu.stanford.Almond',
