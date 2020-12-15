@@ -26,9 +26,11 @@ const Genie = require('genie-toolkit');
 const user = require('../util/user');
 const platform = require('../service/platform');
 
+const conversationHandler = require('./conversation');
+
 const router = express.Router();
 
-router.get('/', user.redirectLogIn, (req, res, next) => {
+router.get('/', user.requireLogIn, (req, res, next) => {
     Genie.IpAddressUtils.getServerName().then((host) => {
         var port = res.app.get('port');
 
@@ -46,11 +48,13 @@ router.get('/', user.redirectLogIn, (req, res, next) => {
     }).catch(next);
 });
 
-router.get('/conversation', user.redirectLogIn, (req, res, next) => {
+router.get('/conversation', user.requireLogIn, (req, res, next) => {
     res.render('conversation', { page_title: req._("Almond - Chat") });
 });
 
-router.get('/listen', user.redirectLogIn, (req, res, next) => {
+router.ws('/ws/conversation', user.requireLogIn, conversationHandler);
+
+router.get('/listen', user.requireLogIn, (req, res, next) => {
     res.render('listen', {
         page_title: req._("Almond - Listen"),
         csrfToken: req.csrfToken()

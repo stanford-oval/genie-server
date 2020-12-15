@@ -25,12 +25,14 @@ var router = express.Router();
 const user = require('../util/user');
 const Config = require('../config');
 
-router.get('/', user.redirectLogIn, (req, res, next) => {
+router.use(user.requireLogIn);
+
+router.get('/', (req, res, next) => {
     res.render('devices_list', { page_title: 'Almond - My Goods',
                                  devices: req.app.engine.getDeviceInfos() });
 });
 
-router.get('/create', user.redirectLogIn, (req, res, next) => {
+router.get('/create', (req, res, next) => {
     if (req.query.class && ['online', 'physical', 'data'].indexOf(req.query.class) < 0) {
         res.status(404).render('error', { page_title: req._("Thingpedia - Error"),
                                           message: req._("Invalid device class") });
@@ -43,15 +45,23 @@ router.get('/create', user.redirectLogIn, (req, res, next) => {
                                  });
 });
 
-router.post('/create', user.requireLogIn, (req, res, next) => {
+router.post('/create', (req, res, next) => {
     const engine = req.app.engine;
     Promise.resolve().then(async () => {
         if (typeof req.body['kind'] !== 'string' ||
-            req.body['kind'].length === 0)
-            throw new Error("You must choose one kind of device");
+            req.body['kind'].length === 0) {
+            res.status(400).render('error', { page_title: "Almond - Error",
+                                              message: "Missing or invalid parameter kind" });
+            return;
+        }
 
         delete req.body['_csrf'];
-        await engine.devices.addSerialized(req.body);
+        try {
+            await engine.devices.addSerialized(req.body);
+        } catch(e) {
+            e.status = 400;
+            throw e;
+        }
         if (req.session['device-redirect-to']) {
             res.redirect(303, req.session['device-redirect-to']);
             delete req.session['device-redirect-to'];
@@ -61,7 +71,7 @@ router.post('/create', user.requireLogIn, (req, res, next) => {
     }).catch(next);
 });
 
-router.post('/delete', user.requireLogIn, (req, res, next) => {
+router.post('/delete', (req, res, next) => {
     const engine = req.app.engine;
     Promise.resolve().then(async () => {
         const id = req.body.id;
@@ -72,11 +82,11 @@ router.post('/delete', user.requireLogIn, (req, res, next) => {
                                               message: "Not found." });
             return;
         }
-        res.redirect(Config.BASE_URL + '/devices');
+        res.redirect(303, Config.BASE_URL + '/devices');
     }).catch(next);
 });
 
-router.get('/oauth2/:kind', user.redirectLogIn, (req, res, next) => {
+router.get('/oauth2/:kind', (req, res, next) => {
     const kind = req.params.kind;
 
     const redirect = encodeURIComponent(req.app.engine.platform.getOrigin() + Config.BASE_URL);
@@ -84,7 +94,7 @@ router.get('/oauth2/:kind', user.redirectLogIn, (req, res, next) => {
     res.redirect(url);
 });
 
-router.get('/oauth2/callback/:kind', user.redirectLogIn, (req, res, next) => {
+router.get('/oauth2/callback/:kind', (req, res, next) => {
     const kind = req.params.kind;
     const engine = req.app.engine;
     Promise.resolve().then(async () => {

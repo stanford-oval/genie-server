@@ -22,9 +22,15 @@
 const Q = require('q');
 const express = require('express');
 const passport = require('passport');
+const crypto = require('crypto');
 
 const user = require('../util/user');
+const platform = require('../service/platform');
 const Config = require('../config');
+
+function makeRandom(bytes) {
+    return crypto.randomBytes(bytes).toString('hex');
+}
 
 var router = express.Router();
 
@@ -97,14 +103,13 @@ router.get('/login', (req, res, next) => {
     });
 });
 
-
 router.post('/login', passport.authenticate('local', { failureRedirect: Config.BASE_URL + '/user/login',
                                                        failureFlash: true }), (req, res, next) => {
     user.unlock(req, req.body.password);
     // Redirection back to the original page
     var redirect_to = req.session.redirect_to || (Config.BASE_URL + '/');
     delete req.session.redirect_to;
-    res.redirect(redirect_to);
+    res.redirect(303, redirect_to);
 });
 
 router.get('/logout', (req, res, next) => {
@@ -112,5 +117,15 @@ router.get('/logout', (req, res, next) => {
     res.redirect(Config.BASE_URL + '/');
 });
 
+
+router.post('/token', user.requireLogIn, (req, res, next) => {
+    const prefs = platform.getSharedPreferences();
+    let accessToken = prefs.get('access-token');
+    if (!accessToken) {
+        accessToken = makeRandom(32);
+        prefs.set('access-token', accessToken);
+    }
+    res.json({ result: 'ok', token: accessToken });
+});
 
 module.exports = router;

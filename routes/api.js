@@ -20,14 +20,12 @@
 "use strict";
 
 const express = require('express');
-const crypto = require('crypto');
+const passport = require('passport');
 
 const user = require('../util/user');
 const errorHandling = require('../util/error_handling');
 
-function makeRandom(bytes) {
-    return crypto.randomBytes(bytes).toString('hex');
-}
+const conversationHandler = require('./conversation');
 
 var router = express.Router();
 
@@ -39,7 +37,7 @@ router.use('/', (req, res, next) => {
     }
 
     next();
-}, user.requireLogIn);
+}, passport.authenticate(['host-based', 'bearer']), user.requireLogIn);
 
 router.post('/converse', (req, res, next) => {
     const command = req.body.command;
@@ -91,7 +89,7 @@ router.get('/apps/list', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
-        res.json(engine.getAppInfo());
+        res.json(engine.getAppInfos());
     }).catch(next);
 });
 
@@ -162,79 +160,7 @@ router.ws('/results', (ws, req, next) => {
 });
 
 
-class WebsocketAssistantDelegate {
-    constructor(ws) {
-        this._ws = ws;
-    }
-
-    setHypothesis() {
-        // voice doesn't go through SpeechHandler, hence hypotheses don't go through here!
-    }
-
-    setExpected(what) {
-        this._ws.send(JSON.stringify({ type: 'askSpecial', ask: what }));
-    }
-
-    addMessage(msg) {
-        this._ws.send(JSON.stringify(msg));
-    }
-}
-
-const LOCAL_USER = {
-    id: process.getuid ? process.getuid() : 0,
-    account: '', //pwnam.name;
-    name: '', //pwnam.gecos;
-};
-
-router.ws('/conversation', (ws, req, next) => {
-    Promise.resolve().then(async () => {
-        const engine = req.app.engine;
-
-        const delegate = new WebsocketAssistantDelegate(ws);
-        const isMain = req.host === '127.0.0.1';
-
-        let opened = false;
-        const conversationId = isMain ? 'main' : (req.query.conversationId || 'web-' + makeRandom(16));
-        ws.on('error', (err) => {
-            console.error(err);
-            ws.close();
-        });
-        ws.on('close', () => {
-            if (opened)
-                conversation.removeOutput(delegate);
-            opened = false;
-        });
-
-        const conversation = await engine.assistant.getOrOpenConversation(conversationId, LOCAL_USER, {
-            showWelcome: true,
-            debug: true,
-        });
-        await conversation.addOutput(delegate, true);
-        opened = true;
-
-        ws.on('message', (data) => {
-            Promise.resolve().then(() => {
-                const parsed = JSON.parse(data);
-                switch(parsed.type) {
-                case 'command':
-                    return conversation.handleCommand(parsed.text);
-                case 'parsed':
-                    return conversation.handleParsedCommand(parsed.json, parsed.title);
-                case 'tt':
-                    return conversation.handleThingTalk(parsed.code);
-                default:
-                    throw new Error('Invalid command type ' + parsed.type);
-                }
-            }).catch((e) => {
-                console.error(e.stack);
-                ws.send(JSON.stringify({ type: 'error', error:e.message }));
-            });
-        });
-    }).catch((e) => {
-        console.error('Error in API websocket: ' + e.message);
-        ws.close();
-    });
-});
+router.ws('/conversation', conversationHandler);
 
 // if nothing handled the route, return a 404
 router.use('/', (req, res) => {
