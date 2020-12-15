@@ -52,7 +52,8 @@ router.get('/conversation', user.requireLogIn, (req, res, next) => {
     res.render('conversation', { page_title: req._("Almond - Chat") });
 });
 
-router.ws('/ws/conversation', user.requireLogIn, conversationHandler);
+router.use('/ws/conversation', user.requireLogIn);
+router.ws('/ws/conversation', conversationHandler);
 
 router.get('/listen', user.requireLogIn, (req, res, next) => {
     res.render('listen', {

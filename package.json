@@ -47,7 +47,9 @@
     "eslint": "^7.14.0",
     "nodemon": "^2.0.6",
     "nyc": "^15.1.0",
-    "parse5": "^6.0.0",
+    "parse5": "^6.0.1",
+    "form-data": "^3.0.0",
+    "tough-cookie": "^4.0.0",
     "selenium-webdriver": "^4.0.0-alpha.5"
   },
   "nyc": {

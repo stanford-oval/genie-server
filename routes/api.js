@@ -136,11 +136,11 @@ class NotificationWrapper {
     }
 
     async notify(data) {
-        await this._ws.send(JSON.stringify(data));
+        await this._ws.send(JSON.stringify({ result: data }));
     }
 
     async notifyError(data) {
-        await this._ws.send(JSON.stringify(data));
+        await this._ws.send(JSON.stringify({ error: data }));
     }
 }
 

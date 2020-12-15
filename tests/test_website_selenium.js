@@ -88,13 +88,27 @@ async function checkAllImages(driver) {
     }));
 }
 
-/*async function fillFormField(driver, id, ...value) {
-    const entry = await driver.findElement(WD.By.id(id));
+async function fillFormField(driver, selector, ...value) {
+    const entry = await driver.findElement(WD.By.css(selector));
     await entry.sendKeys(...value);
-}*/
+}
+
+async function login(driver) {
+    await driver.wait(
+        WD.until.elementLocated(WD.By.css('input[type=password][name=password]')),
+        30000);
+
+    // this would look nicer in WebTalk
+
+    await fillFormField(driver, 'input[type=password][name=password]', '12345678');
+    const submit = await driver.findElement(WD.By.css('button[type=submit]'));
+    await submit.click();
+}
 
 async function testHomepage(driver) {
     await driver.get(BASE_URL + '/');
+
+    await login(driver);
 
     const title = await driver.wait(
         WD.until.elementLocated(WD.By.css('.jumbotron.text-center > h1')),
@@ -119,6 +133,8 @@ const WELCOME_MESSAGES = [
 async function testMyConversation(driver) {
     await driver.get(BASE_URL + '/conversation');
 
+    await login(driver);
+
     const inputEntry = await driver.wait(
         WD.until.elementLocated(WD.By.id('input')),
         30000);
@@ -128,19 +144,21 @@ async function testMyConversation(driver) {
     await driver.sleep(5000);
 
     let messages = await driver.findElements(WD.By.css('.message'));
-    assert.strictEqual(messages.length, 1);
+    // there might be more messages depending on how many notifications got processed
+    // from the previous integration test
+    assert(messages.length >= 1);
     assert(WELCOME_MESSAGES.includes(await messages[0].getText()));
 
     // todo: use a better test
     await inputEntry.sendKeys('no', WD.Key.ENTER);
 
     const ourInput = await driver.wait(
-        WD.until.elementLocated(WD.By.css('.message.from-user:nth-child(2)')),
+        WD.until.elementLocated(WD.By.css(`.message.from-user:nth-child(${messages.length + 1})`)),
         10000);
     assert.strictEqual(await ourInput.getText(), 'no');
 
     const response = await driver.wait(
-        WD.until.elementLocated(WD.By.css('.from-almond:nth-child(3) .message')),
+        WD.until.elementLocated(WD.By.css(`.from-almond:nth-child(${messages.length + 2}) .message`)),
         60000);
     assert.strictEqual(await response.getText(), 'Sorry, I did not understand that. Can you rephrase it?');
 }
