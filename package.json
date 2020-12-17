@@ -22,7 +22,7 @@
     "express": "^4.15.3",
     "express-session": "^1.17.1",
     "express-ws": "^4.0.0",
-    "genie-toolkit": "github:stanford-oval/genie-toolkit#wip/thingpedia-fixes",
+    "genie-toolkit": "github:stanford-oval/genie-toolkit#next",
     "gm": "^1.23.1",
     "morgan": "^1.8.2",
     "node-gettext": "^3.0.0",
@@ -33,7 +33,7 @@
     "q": "^1.5.0",
     "serve-favicon": "^2.4.3",
     "sqlite3": "^5.0.0",
-    "thingpedia": "~2.8.0",
+    "thingpedia": "~2.9.0-alpha.1",
     "uuid": "^8.3.1",
     "ws": "^7.4.0"
   },
@@ -44,13 +44,13 @@
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
-    "eslint": "^7.14.0",
+    "eslint": "^7.16.0",
+    "form-data": "^3.0.0",
     "nodemon": "^2.0.6",
     "nyc": "^15.1.0",
     "parse5": "^6.0.1",
-    "form-data": "^3.0.0",
-    "tough-cookie": "^4.0.0",
-    "selenium-webdriver": "^4.0.0-alpha.5"
+    "selenium-webdriver": "^4.0.0-alpha.8",
+    "tough-cookie": "^4.0.0"
   },
   "nyc": {
     "exclude": [
