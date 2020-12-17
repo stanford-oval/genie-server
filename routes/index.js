@@ -52,7 +52,15 @@ router.get('/conversation', user.requireLogIn, (req, res, next) => {
     res.render('conversation', { page_title: req._("Almond - Chat") });
 });
 
-router.use('/ws/conversation', user.requireLogIn);
+router.use('/ws/conversation', (req, res, next) => {
+    const compareTo = req.app.engine.platform.getOrigin();
+    if (req.headers.origin && req.headers.origin !== compareTo) {
+        res.status(403).send('Forbidden Cross Origin Request');
+        return;
+    }
+
+    next();
+}, user.requireLogIn);
 router.ws('/ws/conversation', conversationHandler);
 
 router.get('/listen', user.requireLogIn, (req, res, next) => {

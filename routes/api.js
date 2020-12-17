@@ -29,15 +29,7 @@ const conversationHandler = require('./conversation');
 
 var router = express.Router();
 
-router.use('/', (req, res, next) => {
-    const compareTo = req.app.engine.platform.getOrigin();
-    if (req.headers.origin && req.headers.origin !== compareTo) {
-        res.status(403).send('Forbidden Cross Origin Request');
-        return;
-    }
-
-    next();
-}, passport.authenticate(['host-based', 'bearer']), user.requireLogIn);
+router.use('/', passport.authenticate(['host-based', 'bearer']), user.requireLogIn);
 
 router.post('/converse', (req, res, next) => {
     const command = req.body.command;
