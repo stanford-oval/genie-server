@@ -39,16 +39,21 @@ docker run --name almond -p 3000:3000 stanfordoval/almond-server:latest-portable
 
 To develop almond-server, you should clone this repository, then install the dependencies with:
 
+```bash
+dnf -y install nodejs make gcc-c++ GraphicsMagick unzip # Fedora/RHEL
+apt -y install nodejs build-essential make g++ graphicsmagick unzip # Ubuntu/Debian
 ```
-yarn
+
+You can then build the repository with:
+```
+npm install
 ```
 
 This will only install the minimal set of dependencies, and will not install any voice support. To enable voice, you must also run (Linux only):
 ```
-dnf -y install pulseaudio-libs-devel libcanberra-devel blas-devel atlas-devel
+dnf -y install pulseaudio pulseaudio-libs-devel libcanberra-devel blas-devel atlas-devel # Fedora/RHEL
+dnf -y install pulseaudio libpulse-dev libcanberra-dev libatlas-base-dev unzip # Ubuntu/Debian
 ```
-then run `yarn` again to pick up the new dependencies.
+then run `npm install` again to pick up the new dependencies.
 
-(The above command is for the Fedora Linux distribution. Other distribution have similar commands.)
-
-After installing the dependencies locally, the server can be started using `yarn start`. 
+After installing the dependencies locally, the server can be started using `npm start`. 
