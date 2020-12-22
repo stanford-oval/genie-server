@@ -21,7 +21,10 @@
 
 const crypto = require('crypto');
 const util = require('util');
+const passport = require('passport');
 const BaseStrategy = require('passport-strategy');
+const LocalStrategy = require('passport-local').Strategy;
+const BearerStrategy = require('passport-http-bearer').Strategy;
 
 const platform = require('../service/platform');
 const Config = require('../config');
@@ -29,24 +32,24 @@ const Config = require('../config');
 // a model of user based on sharedpreferences
 const model = {
     isConfigured() {
-        var prefs = platform.getSharedPreferences();
-        var user = prefs.get('server-login');
+        const prefs = platform.getSharedPreferences();
+        const user = prefs.get('server-login');
         return user !== undefined;
     },
 
     get() {
-        var prefs = platform.getSharedPreferences();
-        var user = prefs.get('server-login');
+        const prefs = platform.getSharedPreferences();
+        const user = prefs.get('server-login');
         if (user === undefined)
             throw new Error("Login not configured yet");
         return user;
     },
 
     set(salt, sqliteKeySalt, passwordHash) {
-        var prefs = platform.getSharedPreferences();
-        var user = { password: passwordHash,
-                     salt: salt,
-                     sqliteKeySalt: sqliteKeySalt };
+        const prefs = platform.getSharedPreferences();
+        const user = { password: passwordHash,
+                       salt: salt,
+                       sqliteKeySalt: sqliteKeySalt };
         prefs.set('server-login', user);
         return user;
     }
@@ -79,9 +82,6 @@ class HostBasedStrategy extends BaseStrategy {
     }
 }
 
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-
 function makeRandom() {
     return crypto.randomBytes(32).toString('hex');
 }
@@ -102,13 +102,31 @@ function initializePassport() {
 
     passport.use(new HostBasedStrategy());
 
+    passport.use(new BearerStrategy((accessToken, done) => {
+        Promise.resolve().then(() => {
+            try {
+                const prefs = platform.getSharedPreferences();
+                const expectedAccessToken = prefs.get('access-token');
+                if (crypto.timingSafeEqual(new Buffer(accessToken, 'hex'), new Buffer(expectedAccessToken, 'hex')))
+                    return [model.get(), null];
+                return [false, "Invalid access token"];
+            } catch(e) {
+                return [false, e.message];
+            }
+        }).then((result) => {
+            done(null, result[0], { message: result[1] });
+        }, (err) => {
+            done(err);
+        });
+    }));
+
     passport.use(new LocalStrategy((username, password, done) => {
         Promise.resolve().then(() => {
             try {
                 var user = model.get();
 
                 return hashPassword(user.salt, password).then((hash) => {
-                    if (hash !== user.password)
+                    if (!crypto.timingSafeEqual(new Buffer(hash, 'hex'), new Buffer(user.password, 'hex')))
                         return [false, "Invalid username or password"];
 
                     return ['local', null];
@@ -147,34 +165,27 @@ module.exports = {
     },
 
     /* Middleware to check if the user is logged in before performing an
-     * action. If not, the user will be redirected to an error page.
-     *
-     * To be used for POST actions, where redirectLogin would not work.
+     * action. If not, the user will be redirected to login.
      */
     requireLogIn(req, res, next) {
         if (!model.isConfigured()) {
-            res.status(401).render('configuration_required',
-                                   { page_title: "Almond - Error" });
+            if (req.method === 'GET' || req.method === 'HEAD') {
+                req.session.redirect_to = req.originalUrl;
+                res.redirect(Config.BASE_URL + '/user/configure');
+            } else {
+                res.status(401).render('configuration_required',
+                                       { page_title: "Almond - Error" });
+            }
         } else if (!req.user) {
-            res.status(401).render('login_required',
+            if (req.method === 'GET' || req.method === 'HEAD') {
+                req.session.redirect_to = req.originalUrl;
+                res.redirect(Config.BASE_URL + '/user/login');
+            } else {
+                res.status(401).render('login_required',
                                    { page_title: "Almond - Error" });
+            }
         } else {
             next();
         }
     },
-
-    /* Middleware to insert user log in page
-     * After logging in, the user will be redirected to the original page
-     */
-    redirectLogIn(req, res, next) {
-        if (!model.isConfigured()) {
-            req.session.redirect_to = req.originalUrl;
-            res.redirect(Config.BASE_URL + '/user/configure');
-        } else if (!req.user) {
-            req.session.redirect_to = req.originalUrl;
-            res.redirect(Config.BASE_URL + '/user/login');
-        } else {
-            next();
-        }
-    }
 };

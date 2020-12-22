@@ -26,9 +26,11 @@ const Genie = require('genie-toolkit');
 const user = require('../util/user');
 const platform = require('../service/platform');
 
+const conversationHandler = require('./conversation');
+
 const router = express.Router();
 
-router.get('/', user.redirectLogIn, (req, res, next) => {
+router.get('/', user.requireLogIn, (req, res, next) => {
     Genie.IpAddressUtils.getServerName().then((host) => {
         var port = res.app.get('port');
 
@@ -46,11 +48,22 @@ router.get('/', user.redirectLogIn, (req, res, next) => {
     }).catch(next);
 });
 
-router.get('/conversation', user.redirectLogIn, (req, res, next) => {
+router.get('/conversation', user.requireLogIn, (req, res, next) => {
     res.render('conversation', { page_title: req._("Almond - Chat") });
 });
 
-router.get('/listen', user.redirectLogIn, (req, res, next) => {
+router.use('/ws/conversation', (req, res, next) => {
+    const compareTo = req.app.engine.platform.getOrigin();
+    if (req.headers.origin && req.headers.origin !== compareTo) {
+        res.status(403).send('Forbidden Cross Origin Request');
+        return;
+    }
+
+    next();
+}, user.requireLogIn);
+router.ws('/ws/conversation', conversationHandler);
+
+router.get('/listen', user.requireLogIn, (req, res, next) => {
     res.render('listen', {
         page_title: req._("Almond - Listen"),
         csrfToken: req.csrfToken()

@@ -30,6 +30,8 @@ const Config = require('../config');
 
 const router = express.Router();
 
+router.use(user.requireLogIn);
+
 function config(req, res, next, userData, cloudData) {
     return Genie.IpAddressUtils.getServerName().then((host) => {
         var port = res.app.get('port');
@@ -74,17 +76,17 @@ function config(req, res, next, userData, cloudData) {
     });
 }
 
-router.get('/', user.redirectLogIn, (req, res, next) => {
+router.get('/', (req, res, next) => {
     config(req, res, next, {}, {}).catch(next);
 });
 
-router.post('/set-options', user.requireLogIn, (req, res, next) => {
+router.post('/set-options', (req, res, next) => {
     const prefs = platform.getSharedPreferences();
     prefs.set('sabrina-store-log', req.body.data_collection ? 'yes' : 'no');
     res.redirect(303, Config.BASE_URL + '/config');
 });
 
-router.post('/set-server-password', user.requireLogIn, (req, res, next) => {
+router.post('/set-server-password', (req, res, next) => {
     var password;
     try {
         if (typeof req.body['password'] !== 'string' ||

@@ -25,7 +25,9 @@ var router = express.Router();
 const user = require('../util/user');
 const Config = require('../config');
 
-router.get('/', user.redirectLogIn, (req, res, next) => {
+router.use(user.requireLogIn);
+
+router.get('/', (req, res, next) => {
     const engine = req.app.engine;
 
     res.render('apps_list', { page_title: 'Almond - My Rules',
@@ -34,7 +36,7 @@ router.get('/', user.redirectLogIn, (req, res, next) => {
                               apps: engine.getAppInfos() });
 });
 
-router.post('/delete', user.requireLogIn, (req, res, next) => {
+router.post('/delete', (req, res, next) => {
     Promise.resolve().then(async () => {
         const engine = req.app.engine;
 
