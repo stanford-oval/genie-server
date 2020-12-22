@@ -19,7 +19,6 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 "use strict";
 
-const assert = require('assert');
 const { assertHttpError, assertRedirect, assertLoginRequired, sessionRequest } = require('./scaffold');
 const { login, startSession } = require('./login');
 

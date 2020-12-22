@@ -73,6 +73,8 @@ router.post('/apps/create', (req, res, next) => {
     }).then((result) => {
         if (result.error)
             res.status(400);
+        if (result.icon)
+            result.icon = 'https://thingpedia.stanford.edu/thingpedia/api/devices/icon/' + result.icon;
         res.json(result);
     }).catch(next);
 });
@@ -128,10 +130,14 @@ class NotificationWrapper {
     }
 
     async notify(data) {
+        if (data.icon)
+            data.icon = 'https://thingpedia.stanford.edu/thingpedia/api/devices/icon/' + data.icon;
         await this._ws.send(JSON.stringify({ result: data }));
     }
 
     async notifyError(data) {
+        if (data.icon)
+            data.icon = 'https://thingpedia.stanford.edu/thingpedia/api/devices/icon/' + data.icon;
         await this._ws.send(JSON.stringify({ error: data }));
     }
 }
