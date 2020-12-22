@@ -16,6 +16,6 @@ before_install:
 - sudo apt-get install -y pulseaudio graphicsmagick libpulse-dev libcanberra-dev libatlas-base-dev unzip
 - pulseaudio --start
 script:
-- yarn lint
-- LOCALE="en-US" TZ="America/Los_Angeles" yarn test
-after_success: yarn run coverage
+- npm run lint
+- LOCALE="en-US" TZ="America/Los_Angeles" npm test
+after_success: npm run coverage
