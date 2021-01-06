@@ -1,5 +1,5 @@
 "use strict";
-$(function() {
+$(() => {
     var thingpediaUrl = document.body.dataset.thingpediaUrl;
     var url = new URL('ws/conversation', location.href);
     if (url.protocol === 'https:')
@@ -78,7 +78,7 @@ $(function() {
     function almondMessage(icon) {
         var msg = $('<span>').addClass('message-container from-almond');
         icon = icon || 'org.thingpedia.builtin.thingengine.builtin';
-        var src = thingpediaUrl + '/api/devices/icon/' + icon;
+        var src = thingpediaUrl + '/api/v3/devices/icon/' + icon;
         msg.append($('<img>').addClass('icon').attr('src', src));
         container.append(msg);
         return msg;
@@ -141,7 +141,7 @@ $(function() {
         var holder = $('<div>').addClass('col-xs-12 col-sm-6');
         var btn = $('<a>').addClass('message message-choice btn btn-default')
             .attr('href', '#').text(title);
-        btn.click(function(event) {
+        btn.click((event) => {
             handleChoice(idx);
             event.preventDefault();
         });
@@ -154,7 +154,7 @@ $(function() {
         var holder = $('<div>').addClass('col-xs-12 col-sm-6');
         var btn = $('<a>').addClass('message message-button btn btn-default')
             .attr('href', '#').text(title);
-        btn.click(function(event) {
+        btn.click((event) => {
             handleParsedCommand(json, title);
             event.preventDefault();
         });
@@ -181,7 +181,7 @@ $(function() {
         var holder = $('<div>').addClass('col-xs-6 col-sm-4 col-md-3');
         var btn = $('<a>').addClass('message message-yesno btn btn-default')
             .attr('href', '#').text("Yes");
-        btn.click(function(event) {
+        btn.click((event) => {
             handleSpecial('yes', "Yes");
             event.preventDefault();
         });
@@ -305,7 +305,7 @@ $(function() {
             .text(text));
     }
 
-    $('#input-form').submit(function(event) {
+    $('#input-form').submit((event) => {
         var text = $('#input').val();
         if (currCommand !== "")
           pastCommandsUp.push(currCommand);
@@ -320,11 +320,11 @@ $(function() {
         handleCommand(text);
         event.preventDefault();
     });
-    $('#cancel').click(function() {
+    $('#cancel').click(() => {
         handleSpecial('nevermind', "Cancel.");
     });
 
-    $('#input-form').on('keydown', function(event) { // button is pressed
+    $('#input-form').on('keydown', (event) => { // button is pressed
       if (event.keyCode === 38) {  // Up
         // removes last item from array pastCommandsUp, displays it as currCommand, adds current input text to pastCommandsDown
         currCommand = pastCommandsUp.pop();
