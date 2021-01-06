@@ -46,7 +46,8 @@ async function testMyDevices(bob, nobody) {
 
     await assertRedirect(sessionRequest('/devices/create', 'POST', {
         kind: 'org.thingpedia.rss',
-        url: 'https://almond.stanford.edu/blog/feed.rss'
+        url: 'https://almond.stanford.edu/blog/feed.rss',
+        name: 'almond blog'
     }, bob, { followRedirects: false }), '/devices');
 
     await assertLoginRequired(sessionRequest('/devices/delete', 'POST', { id: 'foo' }, nobody));
@@ -57,7 +58,7 @@ async function testMyDevices(bob, nobody) {
     await assertHttpError(sessionRequest('/devices/delete', 'POST', { id: 'com.foo' }, bob),
         404, 'Not found.');
 
-    await sessionRequest('/devices/delete', 'POST', { id: 'org.thingpedia.rss-url:https://almond.stanford.edu/blog/feed.rss' }, bob);
+    await sessionRequest('/devices/delete', 'POST', { id: 'org.thingpedia.rss-name:almond blog-url:https://almond.stanford.edu/blog/feed.rss' }, bob);
 }
 
 async function main() {
