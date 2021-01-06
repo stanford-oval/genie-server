@@ -42,7 +42,7 @@ async function testMyApiCreateGetApp(auth) {
     assert(result.uniqueId.startsWith('uuid-'));
     assert.strictEqual(result.description, 'get generate 10 byte of fake data with count equal to 2 and then notify you');
     assert.strictEqual(result.code, '@org.thingpedia.builtin.test.get_data(count=2, size=10byte);');
-    assert.strictEqual(result.icon, 'https://thingpedia.stanford.edu/thingpedia/api/devices/icon/org.thingpedia.builtin.test');
+    assert.strictEqual(result.icon, 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test');
     assert.deepStrictEqual(result.errors, []);
 
     assert.deepStrictEqual(result.results, [{
@@ -85,7 +85,7 @@ async function testMyApiCreateWhenApp(auth) {
     assert(result.uniqueId.startsWith('uuid-'));
     assert.strictEqual(result.description, 'notify you when generate 10 byte of fake data change');
     assert.strictEqual(result.code, 'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));');
-    assert.strictEqual(result.icon, 'https://thingpedia.stanford.edu/thingpedia/api/devices/icon/org.thingpedia.builtin.test');
+    assert.strictEqual(result.icon, 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test');
     assert.deepStrictEqual(result.results, []);
     assert.deepStrictEqual(result.errors, []);
 
@@ -103,7 +103,7 @@ async function testMyApiCreateWhenApp(auth) {
                       raw: { data: '!!!!!!!!!!', size: 10 },
                       type: 'org.thingpedia.builtin.test:get_data',
                       formatted: [ '!!!!!!!!!!' ],
-                      icon: 'https://thingpedia.stanford.edu/thingpedia/api/devices/icon/org.thingpedia.builtin.test' }
+                      icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test' }
                 });
             } else {
                 assert.deepStrictEqual(parsed, { result:
@@ -111,7 +111,7 @@ async function testMyApiCreateWhenApp(auth) {
                       raw: { data: '""""""""""', size: 10 },
                       type: 'org.thingpedia.builtin.test:get_data',
                       formatted: [ '""""""""""' ],
-                      icon: 'https://thingpedia.stanford.edu/thingpedia/api/devices/icon/org.thingpedia.builtin.test' }
+                      icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test' }
                 });
             }
             if (++count === 2) {
