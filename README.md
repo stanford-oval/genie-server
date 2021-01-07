@@ -19,9 +19,10 @@ the container to run as your regular user (and thus access PulseAudio from your 
 
 To run, use the command:
 ```bash
-podman run --name almond -p 3000:3000 --uidmap keep-id \
+podman run --name almond -p 3000:3000 \
     -v /dev/shm:/dev/shm \
     -v $XDG_RUNTIME_DIR/pulse:/run/pulse \
+    --security-opt label=disable \
     stanfordoval/almond-server
 ```
 

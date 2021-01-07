@@ -1,19 +1,18 @@
-FROM docker.io/fedora:30
+FROM docker.io/fedora:33
 
 # Install all deps in the standard repos
-RUN dnf -y install git unzip nodejs make gcc gcc-c++
-
-# Install yarn
-RUN curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
-RUN dnf -y install yarn
+RUN dnf -y install git zip unzip nodejs make gcc gcc-c++ gettext findutils
 
 RUN mkdir /opt/almond
-COPY . /opt/almond
-RUN rm -rf /opt/almond/node_modules
+
+RUN useradd almond && \
+   chown almond:almond /opt/almond
+USER almond
+COPY --chown=almond:almond . /opt/almond
 WORKDIR /opt/almond
-RUN yarn && rm -fr /root/.cache
+
+RUN npm ci && rm -fr /home/almond/.cache && rm -fr /home/almond/.npm
+RUN mkdir /home/almond/.cache
 
 EXPOSE 3000
-ENV THINGENGINE_HOME=/var/lib/almond-server
-
-ENTRYPOINT [ "yarn", "start"]
+ENTRYPOINT ["npm", "start"]
