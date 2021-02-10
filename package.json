@@ -32,7 +32,7 @@
     "pug": "^3.0.0",
     "q": "^1.5.0",
     "serve-favicon": "^2.4.3",
-    "thingpedia": "~2.9.0-alpha.1",
+    "thingpedia": "^2.9.0-alpha.2",
     "uuid": "^8.3.1",
     "ws": "^7.4.3"
   },
