@@ -401,8 +401,8 @@ $(() => {
       }
     });
 
-    $('#recording-toggle').change((event) => {
-        if ($('#recording-toggle').prop('checked')) {
+    $('#recording-toggle').click(() => {
+        if ($('#recording-toggle').is(':checked')) {
             $('#recording-warning').modal('toggle');
         } else {
             recording = false;
@@ -416,15 +416,16 @@ $(() => {
         $.post('/api/conversation/startRecording', '_csrf=' + document.body.dataset.csrfToken);
         $('#save-log').removeClass('hidden');
         $('#recording-warning').modal('toggle');
+        $('#recording-toggle').prop('checked', true);
     });
 
 
     $('#recording-warning').on('hidden.bs.modal', () => {
-        $('#recording-toggle').attr('checked', false);
+        $('#recording-toggle').prop('checked', false);
     });
 
     $('#cancel-recording').click(() => {
-        $('#recording-toggle').attr('checked', false);
+        $('#recording-toggle').prop('checked', false);
         $('#recording-warning').modal('toggle');
     });
 
