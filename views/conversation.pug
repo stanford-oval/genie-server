@@ -28,8 +28,11 @@ block content
       div.modal-content
         div.modal-body
           h4= _("Warning:")
-          p= _("After enabling recording, all conversation including the agent response will be logged. You can stop recording at any point of the conversation, and download the log locally.")
-          p= _("Conversation logs help us improve our natural language and services. You can send them to mobisocial@lists.stanford.edu.")
+          p
+            = _("While recording is active, all your commands and all the replies from Almond will be stored. ")
+            = _("The recording will include your account and device names, as well as the results from performing actions on your accounts.")
+            = _("The recording will be stored locally and you will have the option to download it.")
+          p= _("Please do not include any private information in any recording you plan to share with others, such as a bug report.")
         div.modal-footer
           button.btn.btn-primary#confirm-recording= _("Confirm")
           button.btn.btn-default#cancel-recording= _("Cancel")
