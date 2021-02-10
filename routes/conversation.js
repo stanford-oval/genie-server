@@ -67,13 +67,13 @@ module.exports = function conversationHandler(ws, req, next) {
                 conversation.removeOutput(delegate);
             opened = false;
         });
-
         const conversation = await engine.assistant.getOrOpenConversation(conversationId, LOCAL_USER, {
             showWelcome: true,
             debug: true,
         });
         await conversation.addOutput(delegate, true);
         opened = true;
+        ws.send(JSON.stringify({ type: 'id', id : conversation.id }));
 
         ws.on('message', (data) => {
             Promise.resolve().then(() => {

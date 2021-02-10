@@ -157,7 +157,6 @@ router.ws('/results', (ws, req, next) => {
     });
 });
 
-
 router.ws('/conversation', conversationHandler);
 
 // if nothing handled the route, return a 404

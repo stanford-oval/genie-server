@@ -161,6 +161,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
         this._app.use('/user', require('../routes/user'));
         this._app.use('/config', require('../routes/config'));
         this._app.use('/devices', require('../routes/devices'));
+        this._app.use('/recording', require('../routes/recording'));
 
         this._app.use((req, res) => {
             // if we get here, we have a 404 response

@@ -10,10 +10,31 @@ $(() => {
 
     var ws;
     var open = false;
+    var recording = false;
 
     var pastCommandsUp = []; // array accessed by pressing up arrow
     var pastCommandsDown = []; // array accessed by pressing down arrow
     var currCommand = ""; // current command between pastCommandsUp and pastCommandsDown
+
+    var conversationId = null;
+
+    function refreshToolbar() {
+        const saveButton = $('#save-log');
+        $.get('/recording/status/' + conversationId).then((res) => {
+            if (res.status === 'on') {
+                recording = true;
+                $('#recording-toggle').attr("checked", true);
+                saveButton.removeClass('hidden');
+            } else {
+                recording = false;
+                $('#recording-toggle').attr("checked", false);
+            }
+        });
+        $.get('/recording/log/' + conversationId).then((res) => {
+            if (res)
+                saveButton.removeClass('hidden');
+        });
+    }
 
     function updateFeedback(thinking) {
         if (!ws || !open) {
@@ -36,6 +57,7 @@ $(() => {
 
         function connect() {
             ws = new WebSocket(url);
+
             ws.onmessage = function(event) {
                 if (!open) {
                     open = true;
@@ -43,6 +65,7 @@ $(() => {
                     updateFeedback(false);
                 }
                 onWebsocketMessage(event);
+                refreshToolbar();
             };
 
             ws.onclose = function() {
@@ -81,7 +104,48 @@ $(() => {
         var src = thingpediaUrl + '/api/v3/devices/icon/' + icon;
         msg.append($('<img>').addClass('icon').attr('src', src));
         container.append(msg);
+
+        if (recording)
+            addVoteButtons();
         return msg;
+    }
+
+    function addVoteButtons() {
+        const upvote = $('<i>').addClass('far fa-thumbs-up').attr('id', 'upvoteLast');
+        const downvote = $('<i>').addClass('far fa-thumbs-down').attr('id', 'downvoteLast');
+        const comment = $('<i>').addClass('far fa-comment-alt').attr('id', 'commentLast')
+            .attr('data-toggle', 'modal')
+            .attr('data-target', '#comment-popup');
+        upvote.click((event) => {
+            $.post('/recording/vote/up', {
+                id: conversationId,
+                _csrf: document.body.dataset.csrfToken
+            }).then((res) => {
+                if (res.status === 'ok') {
+                    upvote.attr('class', 'fa fa-thumbs-up');
+                    downvote.attr('class', 'far fa-thumbs-down');
+                }
+            });
+            event.preventDefault();
+        });
+        downvote.click((event) => {
+            $.post('/recording/vote/down', {
+                id: conversationId,
+                _csrf: document.body.dataset.csrfToken
+            }).then((res) => {
+                if (res.status === 'ok') {
+                    upvote.attr('class', 'far fa-thumbs-up');
+                    downvote.attr('class', 'fa fa-thumbs-down');
+                }
+            });
+            event.preventDefault();
+        });
+        const div = $('<span>').addClass('comment-options');
+        div.append(upvote);
+        div.append(downvote);
+        div.append(comment);
+        container.append(div);
+        return div;
     }
 
     function maybeScroll(container) {
@@ -201,6 +265,7 @@ $(() => {
 
     function collapseButtons() {
         $('.message-button, .message-choice, .message-yesno').remove();
+        $('.comment-options').remove();
     }
 
     function syncKeyboardType(ask) {
@@ -259,6 +324,10 @@ $(() => {
             collapseButtons();
             appendUserMessage(parsed.command);
             break;
+
+        case 'id':
+            conversationId = parsed.id;
+            return;
         }
 
         updateFeedback(false);
@@ -340,5 +409,66 @@ $(() => {
           pastCommandsUp.push($('#input').val());
         $('#input').val(currCommand);
       }
+    });
+
+    $('#recording-toggle').click(() => {
+        if ($('#recording-toggle').is(':checked')) {
+            $('#recording-warning').modal('toggle');
+        } else {
+            recording = false;
+            $.post('/recording/stop', {
+                id: conversationId,
+                _csrf: document.body.dataset.csrfToken
+            });
+            $.post('/recording/save', {
+                id: conversationId,
+                _csrf: document.body.dataset.csrfToken
+            });
+        }
+    });
+
+    $('#confirm-recording').click(() => {
+        recording = true;
+        $.post('/recording/start', {
+            id: conversationId,
+            _csrf: document.body.dataset.csrfToken
+        });
+        $('#save-log').removeClass('hidden');
+        $('#recording-warning').modal('toggle');
+        $('#recording-toggle').prop('checked', true);
+    });
+
+
+    $('#recording-warning').on('hidden.bs.modal', () => {
+        $('#recording-toggle').prop('checked', false);
+    });
+
+    $('#cancel-recording').click(() => {
+        $('#recording-toggle').prop('checked', false);
+        $('#recording-warning').modal('toggle');
+    });
+
+    $('#save-log').click(() => {
+        $.post('/recording/save', {
+            id: conversationId,
+            _csrf: document.body.dataset.csrfToken
+        }).then((res) => {
+            if (res.status === 'ok')
+                window.open("/recording/log/" + conversationId, "Almond Conversation Log");
+        });
+    });
+
+    $('#comment-popup').submit((event) => {
+        event.preventDefault();
+        $.post('/recording/comment', {
+            id: conversationId,
+            comment: $('#comment-block').val(),
+            _csrf: document.body.dataset.csrfToken
+        }).then((res) => {
+            if (res.status === 'ok') {
+                $('#commentLast').attr('class', 'fa fa-comment-alt');
+                $('#comment-popup').modal('toggle');
+            }
+        });
     });
 });
