@@ -10,10 +10,31 @@ $(() => {
 
     var ws;
     var open = false;
+    var recording = false;
 
     var pastCommandsUp = []; // array accessed by pressing up arrow
     var pastCommandsDown = []; // array accessed by pressing down arrow
     var currCommand = ""; // current command between pastCommandsUp and pastCommandsDown
+
+    function refreshToolbar() {
+        const saveButton = $('#save-log');
+        $.get('/api/conversation/recording').then((res) => {
+            if (res.status === 'on') {
+                recording = true;
+                $('#recording-toggle').attr("checked", true);
+                saveButton.removeClass('hidden');
+            } else {
+                recording = false;
+                $('#recording-toggle').attr("checked", false);
+            }
+        });
+        $.get('/api/conversation/log').then((res) => {
+            if (res)
+                saveButton.removeClass('hidden');
+        });
+    }
+
+    refreshToolbar();
 
     function updateFeedback(thinking) {
         if (!ws || !open) {
@@ -36,6 +57,8 @@ $(() => {
 
         function connect() {
             ws = new WebSocket(url);
+            refreshToolbar();
+
             ws.onmessage = function(event) {
                 if (!open) {
                     open = true;
@@ -81,7 +104,42 @@ $(() => {
         var src = thingpediaUrl + '/api/v3/devices/icon/' + icon;
         msg.append($('<img>').addClass('icon').attr('src', src));
         container.append(msg);
+
+        if (recording)
+            vote();
         return msg;
+    }
+
+    function vote() {
+        const upvote = $('<i>').addClass('far fa-thumbs-up').attr('id', 'upvoteLast');
+        const downvote = $('<i>').addClass('far fa-thumbs-down').attr('id', 'downvoteLast');
+        const comment = $('<i>').addClass('far fa-comment-alt').attr('id', 'commentLast')
+            .attr('data-toggle', 'modal')
+            .attr('data-target', '#comment-popup');
+        upvote.click((event) => {
+            $.post('/api/conversation/vote/up').then((res) => {
+                if (res.status === 'ok') {
+                    upvote.attr('class', 'fa fa-thumbs-up');
+                    downvote.attr('class', 'far fa-thumbs-down');
+                }
+            });
+            event.preventDefault();
+        });
+        downvote.click((event) => {
+            $.post('/api/conversation/vote/down').then((res) => {
+                if (res.status === 'ok') {
+                    upvote.attr('class', 'far fa-thumbs-up');
+                    downvote.attr('class', 'fa fa-thumbs-down');
+                }
+            });
+            event.preventDefault();
+        });
+        const div = $('<span>').addClass('comment-options');
+        div.append(upvote);
+        div.append(downvote);
+        div.append(comment);
+        container.append(div);
+        return div;
     }
 
     function maybeScroll(container) {
@@ -201,6 +259,7 @@ $(() => {
 
     function collapseButtons() {
         $('.message-button, .message-choice, .message-yesno').remove();
+        $('.comment-options').remove();
     }
 
     function syncKeyboardType(ask) {
@@ -340,5 +399,34 @@ $(() => {
           pastCommandsUp.push($('#input').val());
         $('#input').val(currCommand);
       }
+    });
+
+    $('#recording-toggle').change(() => {
+        if ($('#recording-toggle').prop('checked')) {
+            recording = true;
+            $.post('/api/conversation/startRecording', '_csrf=' + document.body.dataset.csrfToken);
+            $('#save-log').removeClass('hidden');
+        } else {
+            recording = false;
+            $.post('/api/conversation/endRecording', '_csrf=' + document.body.dataset.csrfToken);
+            $.post('/api/conversation/save');
+        }
+    });
+
+    $('#save-log').click(() => {
+        $.post('/api/conversation/save').then((res) => {
+            if (res.status === 'ok')
+                window.open("/api/conversation/log", "Almond Conversation Log");
+        });
+    });
+
+    $('#comment-popup').submit((event) => {
+        event.preventDefault();
+        $.post('/api/conversation/comment', { comment: $('#comment-block').val() }).then((res) => {
+            if (res.status === 'ok') {
+                $('#commentLast').attr('class', 'fa fa-comment-alt');
+                $('#comment-popup').modal('toggle');
+            }
+        });
     });
 });
