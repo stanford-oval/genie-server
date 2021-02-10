@@ -19,7 +19,6 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 "use strict";
 
-const fs = require('fs');
 const express = require('express');
 const passport = require('passport');
 
@@ -158,126 +157,7 @@ router.ws('/results', (ws, req, next) => {
     });
 });
 
-
 router.ws('/conversation', conversationHandler);
-
-router.post('/conversation/startRecording', (req, res, next) => {
-    const engine = req.app.engine;
-
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
-    }).then((conversation) => {
-        if (!conversation) {
-            res.status(404);
-            return res.json({ error: 'No conversation found' });
-        } else {
-            conversation.startRecording();
-            return res.json({ status: 'ok' });
-        }
-    }).catch(next);
-});
-
-router.post('/conversation/endRecording', (req, res, next) => {
-    const engine = req.app.engine;
-
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
-    }).then((conversation) => {
-        if (!conversation) {
-            res.status(404);
-            return res.json({ error: 'No conversation found' });
-        } else {
-            conversation.endRecording();
-            return res.json({ status:'ok' });
-        }
-    }).catch(next);
-});
-
-router.get('/conversation/recording', (req, res, next) => {
-    const engine = req.app.engine;
-
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
-    }).then((conversation) => {
-        if (!conversation) {
-            res.status(404);
-            res.json({ error: 'No conversation found' });
-        } else {
-            res.json({ status: conversation.inRecordingMode ? 'on' : 'off' });
-        }
-    }).catch(next);
-});
-
-router.post('/conversation/vote/:vote', (req, res, next) => {
-    const engine = req.app.engine;
-
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
-    }).then((conversation) => {
-        if (!['up', 'down'].includes(req.params.vote)) {
-            res.status(400);
-            return res.json({ error: 'Invalid voting option' });
-        } else if (!conversation) {
-            res.status(404);
-            return res.json({ error: 'No conversation found' });
-        } else {
-            conversation.voteLast(req.params.vote);
-            return res.json({ status:'ok' });
-        }
-    }).catch(next);
-});
-
-router.post('/conversation/comment', (req, res, next) => {
-    const engine = req.app.engine;
-    const command = req.body.comment;
-    if (!command) {
-        res.status(400).json({ error: 'Missing comment' });
-        return;
-    }
-
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
-    }).then((conversation) => {
-        if (!conversation) {
-            res.status(404);
-            return res.json({ error: 'No conversation found' });
-        } else {
-            conversation.commentLast(req.body.comment);
-            return res.json({ status:'ok' });
-        }
-    }).catch(next);
-});
-
-router.post('/conversation/save', (req, res, next) => {
-    const engine = req.app.engine;
-
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
-    }).then((conversation) => {
-        if (!conversation) {
-            res.status(404);
-            return res.json({ error: 'No conversation found' });
-        } else {
-            return conversation.saveLog().then(() => res.json({ status:'ok' }));
-        }
-    }).catch(next);
-});
-
-router.get('/conversation/log', (req, res, next) => {
-    const engine = req.app.engine;
-
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
-    }).then((conversation) => {
-        if (!conversation || !conversation.log) {
-            res.status(404);
-            res.json({ error: 'No conversation found' });
-        } else {
-            res.set('Content-Type', 'text/plain');
-            fs.createReadStream(conversation.log).pipe(res);
-        }
-    }).catch(next);
-});
 
 // if nothing handled the route, return a 404
 router.use('/', (req, res) => {

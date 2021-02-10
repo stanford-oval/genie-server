@@ -18,7 +18,7 @@ $(() => {
 
     function refreshToolbar() {
         const saveButton = $('#save-log');
-        $.get('/api/conversation/recording').then((res) => {
+        $.get('/recording/status', '_csrf=' + document.body.dataset.csrfToken).then((res) => {
             if (res.status === 'on') {
                 recording = true;
                 $('#recording-toggle').attr("checked", true);
@@ -28,7 +28,7 @@ $(() => {
                 $('#recording-toggle').attr("checked", false);
             }
         });
-        $.get('/api/conversation/log').then((res) => {
+        $.get('/recording/log').then((res) => {
             if (res)
                 saveButton.removeClass('hidden');
         });
@@ -106,18 +106,18 @@ $(() => {
         container.append(msg);
 
         if (recording)
-            vote();
+            addVoteButtons();
         return msg;
     }
 
-    function vote() {
+    function addVoteButtons() {
         const upvote = $('<i>').addClass('far fa-thumbs-up').attr('id', 'upvoteLast');
         const downvote = $('<i>').addClass('far fa-thumbs-down').attr('id', 'downvoteLast');
         const comment = $('<i>').addClass('far fa-comment-alt').attr('id', 'commentLast')
             .attr('data-toggle', 'modal')
             .attr('data-target', '#comment-popup');
         upvote.click((event) => {
-            $.post('/api/conversation/vote/up').then((res) => {
+            $.post('/recording/vote/up', '_csrf=' + document.body.dataset.csrfToken).then((res) => {
                 if (res.status === 'ok') {
                     upvote.attr('class', 'fa fa-thumbs-up');
                     downvote.attr('class', 'far fa-thumbs-down');
@@ -126,7 +126,7 @@ $(() => {
             event.preventDefault();
         });
         downvote.click((event) => {
-            $.post('/api/conversation/vote/down').then((res) => {
+            $.post('/recording/vote/down', '_csrf=' + document.body.dataset.csrfToken).then((res) => {
                 if (res.status === 'ok') {
                     upvote.attr('class', 'far fa-thumbs-up');
                     downvote.attr('class', 'fa fa-thumbs-down');
@@ -406,14 +406,14 @@ $(() => {
             $('#recording-warning').modal('toggle');
         } else {
             recording = false;
-            $.post('/api/conversation/endRecording', '_csrf=' + document.body.dataset.csrfToken);
-            $.post('/api/conversation/save');
+            $.post('/recording/stop', '_csrf=' + document.body.dataset.csrfToken);
+            $.post('/recording/save', '_csrf=' + document.body.dataset.csrfToken);
         }
     });
 
     $('#confirm-recording').click(() => {
         recording = true;
-        $.post('/api/conversation/startRecording', '_csrf=' + document.body.dataset.csrfToken);
+        $.post('/recording/start', '_csrf=' + document.body.dataset.csrfToken);
         $('#save-log').removeClass('hidden');
         $('#recording-warning').modal('toggle');
         $('#recording-toggle').prop('checked', true);
@@ -430,15 +430,18 @@ $(() => {
     });
 
     $('#save-log').click(() => {
-        $.post('/api/conversation/save').then((res) => {
+        $.post('/recording/save', '_csrf=' + document.body.dataset.csrfToken).then((res) => {
             if (res.status === 'ok')
-                window.open("/api/conversation/log", "Almond Conversation Log");
+                window.open("/recording/log", "Almond Conversation Log");
         });
     });
 
     $('#comment-popup').submit((event) => {
         event.preventDefault();
-        $.post('/api/conversation/comment', { comment: $('#comment-block').val() }).then((res) => {
+        $.post('/recording/comment', {
+            comment: $('#comment-block').val(),
+            _csrf: document.body.dataset.csrfToken
+        }).then((res) => {
             if (res.status === 'ok') {
                 $('#commentLast').attr('class', 'fa fa-comment-alt');
                 $('#comment-popup').modal('toggle');
