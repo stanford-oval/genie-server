@@ -401,16 +401,31 @@ $(() => {
       }
     });
 
-    $('#recording-toggle').change(() => {
+    $('#recording-toggle').change((event) => {
         if ($('#recording-toggle').prop('checked')) {
-            recording = true;
-            $.post('/api/conversation/startRecording', '_csrf=' + document.body.dataset.csrfToken);
-            $('#save-log').removeClass('hidden');
+            $('#recording-warning').modal('toggle');
         } else {
             recording = false;
             $.post('/api/conversation/endRecording', '_csrf=' + document.body.dataset.csrfToken);
             $.post('/api/conversation/save');
         }
+    });
+
+    $('#confirm-recording').click(() => {
+        recording = true;
+        $.post('/api/conversation/startRecording', '_csrf=' + document.body.dataset.csrfToken);
+        $('#save-log').removeClass('hidden');
+        $('#recording-warning').modal('toggle');
+    });
+
+
+    $('#recording-warning').on('hidden.bs.modal', () => {
+        $('#recording-toggle').attr('checked', false);
+    });
+
+    $('#cancel-recording').click(() => {
+        $('#recording-toggle').attr('checked', false);
+        $('#recording-warning').modal('toggle');
     });
 
     $('#save-log').click(() => {

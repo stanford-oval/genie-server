@@ -23,13 +23,27 @@ block content
             div.form-group
               button(type='submit').btn.btn-primary= _("Comment")
 
-  div
+  div.modal#recording-warning
+    div.modal-dialog
+      div.modal-content
+        div.modal-body
+          h4= _("Warning:")
+          p= _("After enabling recording, all conversation including the agent response will be logged. You can stop recording at any point of the conversation, and download the log locally.")
+          p= _("Conversation logs help us improve our natural language and services. You can send them to mobisocial@lists.stanford.edu.")
+        div.modal-footer
+          button.btn.btn-primary#confirm-recording= _("Confirm")
+          button.btn.btn-default#cancel-recording= _("Cancel")
+
+  div#toolbar
     div.form-inline
-      label(for='recording-toggle').control-label
-        input(type='checkbox')#recording-toggle
-        = _(" Recording conversation")
-      button.hidden.btn.btn-primary#save-log
-        = _("Save & Download Log")
+      div.checkbox-inline
+        label(for='recording-toggle').control-label
+          input(type='checkbox')#recording-toggle
+          = _("Record conversation")
+      div.form-group.hidden#save-log
+        i.far.fa-save#save-button
+        span= _("Save & Download Log")
+
   div#conversation.single
     div#chat
     div#input-block
