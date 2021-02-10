@@ -6,7 +6,7 @@ dist: bionic
 addons:
   firefox: latest-esr
 node_js:
-- '10'
+- '12'
 before_install:
 - mkdir geckodriver/
 - wget https://github.com/mozilla/geckodriver/releases/download/v0.22.0/geckodriver-v0.22.0-linux64.tar.gz

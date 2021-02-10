@@ -1,7 +1,7 @@
 FROM docker.io/fedora:33
 
 # Install all deps in the standard repos
-RUN dnf -y module install nodejs:10 && \
+RUN dnf -y module install nodejs:12 && \
     dnf -y install git curl pulseaudio-libs-devel zip unzip nodejs make \
                    gcc gcc-c++ gettext libcanberra-devel atlas-devel blas-devel \
                    python2 findutils
