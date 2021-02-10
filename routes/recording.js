@@ -32,7 +32,7 @@ router.post('/start', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
+        return engine.assistant.getConversation(req.body.id);
     }).then((conversation) => {
         if (!conversation) {
             res.status(404);
@@ -48,7 +48,7 @@ router.post('/stop', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
+        return engine.assistant.getConversation(req.body.id);
     }).then((conversation) => {
         if (!conversation) {
             res.status(404);
@@ -60,11 +60,11 @@ router.post('/stop', (req, res, next) => {
     }).catch(next);
 });
 
-router.get('/status', (req, res, next) => {
+router.get('/status/:id', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
+        return engine.assistant.getConversation(req.params.id);
     }).then((conversation) => {
         if (!conversation) {
             res.status(404);
@@ -79,7 +79,7 @@ router.post('/vote/:vote', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
+        return engine.assistant.getConversation(req.body.id);
     }).then((conversation) => {
         if (!['up', 'down'].includes(req.params.vote)) {
             res.status(400);
@@ -103,7 +103,7 @@ router.post('/comment', (req, res, next) => {
     }
 
     Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
+        return engine.assistant.getConversation(req.body.id);
     }).then((conversation) => {
         if (!conversation) {
             res.status(404);
@@ -119,7 +119,7 @@ router.post('/save', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
+        return engine.assistant.getConversation(req.body.id);
     }).then((conversation) => {
         if (!conversation) {
             res.status(404);
@@ -130,11 +130,11 @@ router.post('/save', (req, res, next) => {
     }).catch(next);
 });
 
-router.get('/log', (req, res, next) => {
+router.get('/log/:id', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
-        return engine.assistant.getConversation();
+        return engine.assistant.getConversation(req.params.id);
     }).then((conversation) => {
         if (!conversation || !conversation.log) {
             res.status(404);

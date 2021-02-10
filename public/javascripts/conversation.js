@@ -16,9 +16,11 @@ $(() => {
     var pastCommandsDown = []; // array accessed by pressing down arrow
     var currCommand = ""; // current command between pastCommandsUp and pastCommandsDown
 
+    var conversationId = null;
+
     function refreshToolbar() {
         const saveButton = $('#save-log');
-        $.get('/recording/status', '_csrf=' + document.body.dataset.csrfToken).then((res) => {
+        $.get('/recording/status/' + conversationId).then((res) => {
             if (res.status === 'on') {
                 recording = true;
                 $('#recording-toggle').attr("checked", true);
@@ -28,13 +30,11 @@ $(() => {
                 $('#recording-toggle').attr("checked", false);
             }
         });
-        $.get('/recording/log').then((res) => {
+        $.get('/recording/log/' + conversationId).then((res) => {
             if (res)
                 saveButton.removeClass('hidden');
         });
     }
-
-    refreshToolbar();
 
     function updateFeedback(thinking) {
         if (!ws || !open) {
@@ -57,7 +57,6 @@ $(() => {
 
         function connect() {
             ws = new WebSocket(url);
-            refreshToolbar();
 
             ws.onmessage = function(event) {
                 if (!open) {
@@ -66,6 +65,7 @@ $(() => {
                     updateFeedback(false);
                 }
                 onWebsocketMessage(event);
+                refreshToolbar();
             };
 
             ws.onclose = function() {
@@ -117,7 +117,10 @@ $(() => {
             .attr('data-toggle', 'modal')
             .attr('data-target', '#comment-popup');
         upvote.click((event) => {
-            $.post('/recording/vote/up', '_csrf=' + document.body.dataset.csrfToken).then((res) => {
+            $.post('/recording/vote/up', {
+                id: conversationId,
+                _csrf: document.body.dataset.csrfToken
+            }).then((res) => {
                 if (res.status === 'ok') {
                     upvote.attr('class', 'fa fa-thumbs-up');
                     downvote.attr('class', 'far fa-thumbs-down');
@@ -126,7 +129,10 @@ $(() => {
             event.preventDefault();
         });
         downvote.click((event) => {
-            $.post('/recording/vote/down', '_csrf=' + document.body.dataset.csrfToken).then((res) => {
+            $.post('/recording/vote/down', {
+                id: conversationId,
+                _csrf: document.body.dataset.csrfToken
+            }).then((res) => {
                 if (res.status === 'ok') {
                     upvote.attr('class', 'far fa-thumbs-up');
                     downvote.attr('class', 'fa fa-thumbs-down');
@@ -318,6 +324,10 @@ $(() => {
             collapseButtons();
             appendUserMessage(parsed.command);
             break;
+
+        case 'id':
+            conversationId = parsed.id;
+            return;
         }
 
         updateFeedback(false);
@@ -406,14 +416,23 @@ $(() => {
             $('#recording-warning').modal('toggle');
         } else {
             recording = false;
-            $.post('/recording/stop', '_csrf=' + document.body.dataset.csrfToken);
-            $.post('/recording/save', '_csrf=' + document.body.dataset.csrfToken);
+            $.post('/recording/stop', {
+                id: conversationId,
+                _csrf: document.body.dataset.csrfToken
+            });
+            $.post('/recording/save', {
+                id: conversationId,
+                _csrf: document.body.dataset.csrfToken
+            });
         }
     });
 
     $('#confirm-recording').click(() => {
         recording = true;
-        $.post('/recording/start', '_csrf=' + document.body.dataset.csrfToken);
+        $.post('/recording/start', {
+            id: conversationId,
+            _csrf: document.body.dataset.csrfToken
+        });
         $('#save-log').removeClass('hidden');
         $('#recording-warning').modal('toggle');
         $('#recording-toggle').prop('checked', true);
@@ -430,15 +449,19 @@ $(() => {
     });
 
     $('#save-log').click(() => {
-        $.post('/recording/save', '_csrf=' + document.body.dataset.csrfToken).then((res) => {
+        $.post('/recording/save', {
+            id: conversationId,
+            _csrf: document.body.dataset.csrfToken
+        }).then((res) => {
             if (res.status === 'ok')
-                window.open("/recording/log", "Almond Conversation Log");
+                window.open("/recording/log/" + conversationId, "Almond Conversation Log");
         });
     });
 
     $('#comment-popup').submit((event) => {
         event.preventDefault();
         $.post('/recording/comment', {
+            id: conversationId,
             comment: $('#comment-block').val(),
             _csrf: document.body.dataset.csrfToken
         }).then((res) => {
