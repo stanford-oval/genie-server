@@ -70,7 +70,7 @@ router.get('/status/:id', (req, res, next) => {
             res.status(404);
             res.json({ error: 'No conversation found' });
         } else {
-            res.json({ status: conversation.inRecordingMode ? 'on' : 'off' });
+            res.json({ status: conversation.inRecordingMode() ? 'on' : 'off' });
         }
     }).catch(next);
 });
