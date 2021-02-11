@@ -111,6 +111,7 @@ $(() => {
     }
 
     function addVoteButtons() {
+        $('.comment-options').remove();
         const upvote = $('<i>').addClass('far fa-thumbs-up').attr('id', 'upvoteLast');
         const downvote = $('<i>').addClass('far fa-thumbs-down').attr('id', 'downvoteLast');
         const comment = $('<i>').addClass('far fa-comment-alt').attr('id', 'commentLast')
