@@ -23,11 +23,11 @@ $(() => {
         $.get('/recording/status/' + conversationId).then((res) => {
             if (res.status === 'on') {
                 recording = true;
-                $('#recording-toggle').attr("checked", true);
+                $('#recording-toggle').prop("checked", true);
                 saveButton.removeClass('hidden');
             } else {
                 recording = false;
-                $('#recording-toggle').attr("checked", false);
+                $('#recording-toggle').prop("checked", false);
             }
         });
         $.get('/recording/log/' + conversationId).then((res) => {
@@ -111,6 +111,7 @@ $(() => {
     }
 
     function addVoteButtons() {
+        $('.comment-options').remove();
         const upvote = $('<i>').addClass('far fa-thumbs-up').attr('id', 'upvoteLast');
         const downvote = $('<i>').addClass('far fa-thumbs-down').attr('id', 'downvoteLast');
         const comment = $('<i>').addClass('far fa-comment-alt').attr('id', 'commentLast')
