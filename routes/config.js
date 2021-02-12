@@ -69,7 +69,9 @@ function config(req, res, next, userData, cloudData) {
                 id: cloudId
             },
             settings: {
-                data_collection: prefs.get('sabrina-store-log') === 'yes'
+                data_collection: prefs.get('sabrina-store-log') === 'yes',
+                voice_input: prefs.get('enable-voice-input') === undefined ? true : prefs.get('enable-voice-input'),
+                voice_output: prefs.get('enable-voice-output') === undefined ? true : prefs.get('enable-voice-output'),
             },
             qrcodeTarget: qrcodeTarget
         });
@@ -83,6 +85,8 @@ router.get('/', (req, res, next) => {
 router.post('/set-options', (req, res, next) => {
     const prefs = platform.getSharedPreferences();
     prefs.set('sabrina-store-log', req.body.data_collection ? 'yes' : 'no');
+    prefs.set('enable-voice-input', !!req.body.voice_input);
+    prefs.set('enable-voice-output', !!req.body.voice_output);
     res.redirect(303, Config.BASE_URL + '/config');
 });
 

@@ -64,9 +64,21 @@ block content
               != _("Almond is a research project from Stanford University. If you would like to participate to help us, you can allow us to collect the commands that you type. We only collect what you type, not your data, or what Almond replies. Please review the <a href='https://oval.cs.stanford.edu/almond-consent-form.html'>Consent Form</a> and keep it for your records before agreeing.")
 
         div.form-group
+          div.checkbox
+            label(for='setting-voice-input').control-label
+              input(type='checkbox',name='voice_input',value='1',checked=settings.voice_input)#setting-voice-input
+              = _(" Enable voice input (wake word activation and speech to text).")
+
+        div.form-group
+          div.checkbox
+            label(for='setting-voice-output').control-label
+              input(type='checkbox',name='voice_output',value='1',checked=settings.voice_output)#setting-voice-output
+              = _(" Enable voice output (text to speech).")
+
+        div.form-group
           button(type='submit').btn.btn-primary Save
 
-  //div.panel.panel-default.config-unit
+  //-div.panel.panel-default.config-unit
     div.panel-heading
       h2.panel-title Cloud
     div.panel-body
@@ -102,7 +114,7 @@ block content
         //p Don't have an account yet?
           a(href='https://thingengine.stanford.edu/user/register') Register now!
 
-  div.panel.panel-default.config-unit
+  //-div.panel.panel-default.config-unit
     div.panel-heading
       h2.panel-title Phone
     div.panel-body
