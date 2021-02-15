@@ -130,7 +130,7 @@ router.post('/save', (req, res, next) => {
     }).catch(next);
 });
 
-router.get('/log/:id', (req, res, next) => {
+router.get('/log/:id.txt', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
@@ -143,6 +143,24 @@ router.get('/log/:id', (req, res, next) => {
             res.set('Content-Type', 'text/plain');
             res.set('Content-Disposition', `attachment; filename="log-${conversation.id}.txt"`);
             fs.createReadStream(conversation.log).pipe(res);
+        }
+    }).catch(next);
+});
+
+router.get('/log/:id', (req, res, next) => {
+    const engine = req.app.engine;
+
+    Promise.resolve().then(() => {
+        return engine.assistant.getConversation(req.params.id);
+    }).then((conversation) => {
+        if (!conversation || !conversation.log) {
+            res.status(404);
+            res.json({ error: 'No conversation found' });
+        } else {
+            res.json({
+                status: 'ok',
+                log: fs.readFileSync(conversation.log, 'utf-8')
+            });
         }
     }).catch(next);
 });

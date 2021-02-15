@@ -455,9 +455,27 @@ $(() => {
             id: conversationId,
             _csrf: document.body.dataset.csrfToken
         }).then((res) => {
-            if (res.status === 'ok')
-                window.open("/recording/log/" + conversationId, "Almond Conversation Log");
+            if (res.status === 'ok') {
+                $.get('/recording/log/' + conversationId).then((res) => {
+                    if (res.status === 'ok') {
+                        $('#recording-log').text(res.log);
+                        const email = 'oval-bug-reports@lists.stanford.edu';
+                        const subject = 'Almond Conversation Log';
+                        const body = encodeURIComponent(res.log);
+                        $('#recording-share').prop('href', `mailto:${email}?subject=${subject}&body=${body}`);
+                        $('#recording-save').modal('toggle');
+                    }
+                });
+            }
         });
+    });
+
+    $('#recording-download').click(() => {
+        window.open("/recording/log/" + conversationId + '.txt', "Almond Conversation Log");
+    });
+
+    $('#recording-save-done').click(() => {
+        $('#recording-save').modal('toggle');
     });
 
     $('#comment-popup').submit((event) => {
