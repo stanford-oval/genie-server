@@ -413,9 +413,23 @@ $(() => {
       }
     });
 
+    function startRecording() {
+        recording = true;
+        $.post('/recording/start', {
+            id: conversationId,
+            _csrf: document.body.dataset.csrfToken
+        });
+        $('#save-log').removeClass('hidden');
+    }
+
     $('#recording-toggle').click(() => {
         if ($('#recording-toggle').is(':checked')) {
-            $('#recording-warning').modal('toggle');
+            $.get('/recording/warned').then((res) => {
+                if (res.warned === 'yes')
+                    startRecording();
+                else
+                    $('#recording-warning').modal('toggle');
+            });
         } else {
             recording = false;
             $.post('/recording/stop', {
@@ -430,12 +444,7 @@ $(() => {
     });
 
     $('#confirm-recording').click(() => {
-        recording = true;
-        $.post('/recording/start', {
-            id: conversationId,
-            _csrf: document.body.dataset.csrfToken
-        });
-        $('#save-log').removeClass('hidden');
+        startRecording();
         $('#recording-warning').modal('toggle');
         $('#recording-toggle').prop('checked', true);
     });
