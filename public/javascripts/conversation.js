@@ -1,5 +1,6 @@
 "use strict";
 $(() => {
+    var baseUrl = document.body.dataset.baseUrl;
     var thingpediaUrl = document.body.dataset.thingpediaUrl;
     var url = new URL('ws/conversation', location.href);
     if (url.protocol === 'https:')
@@ -20,7 +21,7 @@ $(() => {
 
     function refreshToolbar() {
         const saveButton = $('#save-log');
-        $.get('/recording/status/' + conversationId).then((res) => {
+        $.get(baseUrl + '/recording/status/' + conversationId).then((res) => {
             if (res.status === 'on') {
                 recording = true;
                 $('#recording-toggle').prop("checked", true);
@@ -30,7 +31,7 @@ $(() => {
                 $('#recording-toggle').prop("checked", false);
             }
         });
-        $.get('/recording/log/' + conversationId).then((res) => {
+        $.get(baseUrl + '/recording/log/' + conversationId).then((res) => {
             if (res)
                 saveButton.removeClass('hidden');
         });
@@ -119,7 +120,7 @@ $(() => {
             .attr('data-toggle', 'modal')
             .attr('data-target', '#comment-popup');
         upvote.click((event) => {
-            $.post('/recording/vote/up', {
+            $.post(baseUrl + '/recording/vote/up', {
                 id: conversationId,
                 _csrf: document.body.dataset.csrfToken
             }).then((res) => {
@@ -131,7 +132,7 @@ $(() => {
             event.preventDefault();
         });
         downvote.click((event) => {
-            $.post('/recording/vote/down', {
+            $.post(baseUrl + '/recording/vote/down', {
                 id: conversationId,
                 _csrf: document.body.dataset.csrfToken
             }).then((res) => {
@@ -415,7 +416,7 @@ $(() => {
 
     function startRecording() {
         recording = true;
-        $.post('/recording/start', {
+        $.post(baseUrl + '/recording/start', {
             id: conversationId,
             _csrf: document.body.dataset.csrfToken
         });
@@ -424,7 +425,7 @@ $(() => {
 
     $('#recording-toggle').click(() => {
         if ($('#recording-toggle').is(':checked')) {
-            $.get('/recording/warned').then((res) => {
+            $.get(baseUrl + '/recording/warned').then((res) => {
                 if (res.warned === 'yes')
                     startRecording();
                 else
@@ -432,11 +433,11 @@ $(() => {
             });
         } else {
             recording = false;
-            $.post('/recording/stop', {
+            $.post(baseUrl + '/recording/stop', {
                 id: conversationId,
                 _csrf: document.body.dataset.csrfToken
             });
-            $.post('/recording/save', {
+            $.post(baseUrl + '/recording/save', {
                 id: conversationId,
                 _csrf: document.body.dataset.csrfToken
             });
@@ -460,12 +461,12 @@ $(() => {
     });
 
     $('#save-log').click(() => {
-        $.post('/recording/save', {
+        $.post(baseUrl + '/recording/save', {
             id: conversationId,
             _csrf: document.body.dataset.csrfToken
         }).then((res) => {
             if (res.status === 'ok') {
-                $.get('/recording/log/' + conversationId).then((res) => {
+                $.get(baseUrl + '/recording/log/' + conversationId).then((res) => {
                     if (res.status === 'ok') {
                         $('#recording-log').text(res.log);
                         const email = 'oval-bug-reports@lists.stanford.edu';
@@ -480,7 +481,7 @@ $(() => {
     });
 
     $('#recording-download').click(() => {
-        window.open("/recording/log/" + conversationId + '.txt', "Almond Conversation Log");
+        window.open(baseUrl + '/recording/log/' + conversationId + '.txt', "Almond Conversation Log");
     });
 
     $('#recording-save-done').click(() => {
@@ -489,7 +490,7 @@ $(() => {
 
     $('#comment-popup').submit((event) => {
         event.preventDefault();
-        $.post('/recording/comment', {
+        $.post(baseUrl + '/recording/comment', {
             id: conversationId,
             comment: $('#comment-block').val(),
             _csrf: document.body.dataset.csrfToken
