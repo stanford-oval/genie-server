@@ -23,7 +23,6 @@ const fs = require('fs');
 const express = require('express');
 
 const user = require('../util/user');
-const platform = require('../service/platform');
 
 const router = express.Router();
 
