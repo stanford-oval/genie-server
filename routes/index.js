@@ -19,36 +19,15 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 "use strict";
 
-const os = require('os');
 const express = require('express');
-const Genie = require('genie-toolkit');
 
 const user = require('../util/user');
-const platform = require('../service/platform');
 
 const conversationHandler = require('./conversation');
 
 const router = express.Router();
 
 router.get('/', user.requireLogIn, (req, res, next) => {
-    Genie.IpAddressUtils.getServerName().then((host) => {
-        var port = res.app.get('port');
-
-        var prefs = platform.getSharedPreferences();
-        var cloudId = prefs.get('cloud-id');
-        var authToken = prefs.get('auth-token');
-
-        if (host !== os.hostname())
-            var name = os.hostname() + " (" + host + ")";
-        res.render('index', { page_title: "Almond - The Open Virtual Assistant",
-                              server: { name: name,
-                                        port: port,
-                                        initialSetup: authToken === undefined },
-                              cloud: { isConfigured: cloudId !== undefined } });
-    }).catch(next);
-});
-
-router.get('/conversation', user.requireLogIn, (req, res, next) => {
     res.render('conversation', { page_title: req._("Almond - Chat") });
 });
 
