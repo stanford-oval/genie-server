@@ -23,36 +23,19 @@ block content
             div.form-group
               button(type='submit').btn.btn-primary= _("Comment")
 
-  div.modal#recording-warning
-    div.modal-dialog
-      div.modal-content
-        div.modal-body
-          h4= _("Warning:")
-          p
-            = _("While recording is active, all your commands and all the replies from Almond will be stored. ")
-            = _("The recording will include your account and device names, as well as the results from performing actions on your accounts. ")
-            = _("The recording will be stored locally and you will have the option to download it.")
-          p= _("Please do not include any private information in any recording you plan to share with others, such as a bug report.")
-        div.modal-footer
-          button.btn.btn-primary#confirm-recording= _("Confirm")
-          button.btn.btn-default#cancel-recording= _("Cancel")
-
   div#toolbar
     div.form-inline
-      div.checkbox-inline
-        label(for='recording-toggle').control-label
-          input(type='checkbox')#recording-toggle
-          = _("Record conversation")
-      div.form-group.hidden#save-log
+      div.form-group#save-log
         i.far.fa-save#save-button
-        span= _("Save")
+        span= _("Save Conversation Log")
 
   div.modal#recording-save
     div.modal-dialog
       div.modal-content
         div.modal-body
-          p= _("Conversation log updated.")
+          p= _("The conversation log has been updated.")
           pre#recording-log
+          p.small= _("Privacy warning: The log may include your account and device names, as well as the results from performing actions on your accounts.")
         div.modal-footer
           button.btn.btn-primary#recording-download= _("Download")
           a.btn.btn-primary#recording-share= _("Share with Almond Team")

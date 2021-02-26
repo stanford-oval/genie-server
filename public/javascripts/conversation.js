@@ -11,7 +11,6 @@ $(() => {
 
     var ws;
     var open = false;
-    var recording = false;
 
     var pastCommandsUp = []; // array accessed by pressing up arrow
     var pastCommandsDown = []; // array accessed by pressing down arrow
@@ -19,24 +18,6 @@ $(() => {
 
     var conversationId = null;
     var lastMessageId = -1;
-
-    function refreshToolbar() {
-        const saveButton = $('#save-log');
-        $.get(baseUrl + '/recording/status/' + conversationId).then((res) => {
-            if (res.status === 'on') {
-                recording = true;
-                $('#recording-toggle').prop("checked", true);
-                saveButton.removeClass('hidden');
-            } else {
-                recording = false;
-                $('#recording-toggle').prop("checked", false);
-            }
-        });
-        $.get(baseUrl + '/recording/log/' + conversationId).then((res) => {
-            if (res)
-                saveButton.removeClass('hidden');
-        });
-    }
 
     function updateConnectionFeedback() {
         if (!ws || !open) {
@@ -60,6 +41,7 @@ $(() => {
             $('#input-form-group .spinner-container').addClass('hidden');
     }
 
+
     (function() {
         var reconnectTimeout = 100;
 
@@ -73,7 +55,6 @@ $(() => {
                     updateConnectionFeedback();
                 }
                 onWebsocketMessage(event);
-                refreshToolbar();
             };
 
             ws.onclose = function() {
@@ -114,8 +95,7 @@ $(() => {
         msg.append($('<img>').addClass('icon').attr('src', src));
         container.append(msg);
 
-        if (recording)
-            addVoteButtons();
+        addVoteButtons();
         return msg;
     }
 
@@ -217,7 +197,7 @@ $(() => {
         var btn = $('<a>').addClass('message message-choice btn btn-default')
             .attr('href', '#').text(title);
         btn.click((event) => {
-            handleChoice(idx);
+            handleChoice(idx, title);
             event.preventDefault();
         });
         holder.append(btn);
@@ -428,52 +408,6 @@ $(() => {
           pastCommandsUp.push($('#input').val());
         $('#input').val(currCommand);
       }
-    });
-
-    function startRecording() {
-        recording = true;
-        $.post(baseUrl + '/recording/start', {
-            id: conversationId,
-            _csrf: document.body.dataset.csrfToken
-        });
-        $('#save-log').removeClass('hidden');
-    }
-
-    $('#recording-toggle').click(() => {
-        if ($('#recording-toggle').is(':checked')) {
-            $.get(baseUrl + '/recording/warned').then((res) => {
-                if (res.warned === 'yes')
-                    startRecording();
-                else
-                    $('#recording-warning').modal('toggle');
-            });
-        } else {
-            recording = false;
-            $.post(baseUrl + '/recording/stop', {
-                id: conversationId,
-                _csrf: document.body.dataset.csrfToken
-            });
-            $.post(baseUrl + '/recording/save', {
-                id: conversationId,
-                _csrf: document.body.dataset.csrfToken
-            });
-        }
-    });
-
-    $('#confirm-recording').click(() => {
-        startRecording();
-        $('#recording-warning').modal('toggle');
-        $('#recording-toggle').prop('checked', true);
-    });
-
-
-    $('#recording-warning').on('hidden.bs.modal', () => {
-        $('#recording-toggle').prop('checked', false);
-    });
-
-    $('#cancel-recording').click(() => {
-        $('#recording-toggle').prop('checked', false);
-        $('#recording-warning').modal('toggle');
     });
 
     $('#save-log').click(() => {
