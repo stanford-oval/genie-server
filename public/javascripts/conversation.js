@@ -18,6 +18,7 @@ $(() => {
     var currCommand = ""; // current command between pastCommandsUp and pastCommandsDown
 
     var conversationId = null;
+    var lastMessageId = -1;
 
     function refreshToolbar() {
         const saveButton = $('#save-log');
@@ -72,6 +73,7 @@ $(() => {
             ws.onclose = function() {
                 console.error('Web socket closed');
                 ws = undefined;
+                open = false;
                 updateFeedback(false);
 
                 // reconnect immediately if the connection previously succeeded, otherwise
@@ -281,6 +283,24 @@ $(() => {
     function onWebsocketMessage(event) {
         var parsed = JSON.parse(event.data);
         console.log('received ' + event.data);
+
+        if (parsed.type === 'id') {
+            conversationId = parsed.id;
+            return;
+        }
+
+        if (parsed.type === 'askSpecial') {
+            syncKeyboardType(parsed.ask);
+            syncCancelButton(parsed);
+            if (parsed.ask === 'yesno')
+                yesnoMessage();
+            return;
+        }
+
+        if (parsed.id <= lastMessageId)
+            return;
+        lastMessageId = parsed.id;
+
         switch (parsed.type) {
         case 'text':
         case 'result':
@@ -311,13 +331,6 @@ $(() => {
             linkMessage(parsed.title, parsed.url);
             break;
 
-        case 'askSpecial':
-            syncKeyboardType(parsed.ask);
-            syncCancelButton(parsed);
-            if (parsed.ask === 'yesno')
-                yesnoMessage();
-            break;
-
         case 'hypothesis':
             $('#input').val(parsed.hypothesis);
             break;
@@ -327,10 +340,6 @@ $(() => {
             collapseButtons();
             appendUserMessage(parsed.command);
             break;
-
-        case 'id':
-            conversationId = parsed.id;
-            return;
         }
 
         updateFeedback(false);
