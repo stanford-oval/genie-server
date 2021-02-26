@@ -33,8 +33,6 @@ router.post('/start', (req, res, next) => {
     const engine = req.app.engine;
 
     Promise.resolve().then(() => {
-        const prefs = platform.getSharedPreferences();
-        prefs.set('recording-warning-shown', 'yes');
         return engine.assistant.getConversation(req.body.id);
     }).then((conversation) => {
         if (!conversation) {
@@ -60,13 +58,6 @@ router.post('/stop', (req, res, next) => {
             conversation.endRecording();
             return res.json({ status:'ok' });
         }
-    }).catch(next);
-});
-
-router.get('/warned', (req, res, next) => {
-    Promise.resolve().then(async () => {
-        const prefs = platform.getSharedPreferences();
-        res.json({ warned: prefs.get('recording-warning-shown') === 'yes' ? 'yes' : 'no' });
     }).catch(next);
 });
 
