@@ -209,7 +209,7 @@ $(() => {
         var btn = $('<a>').addClass('message message-choice btn btn-default')
             .attr('href', '#').text(title);
         btn.click((event) => {
-            handleChoice(idx);
+            handleChoice(idx, title);
             event.preventDefault();
         });
         holder.append(btn);
