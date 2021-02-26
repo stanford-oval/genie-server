@@ -17,8 +17,9 @@ $(() => {
     var currCommand = ""; // current command between pastCommandsUp and pastCommandsDown
 
     var conversationId = null;
+    var lastMessageId = -1;
 
-    function updateFeedback(thinking) {
+    function updateConnectionFeedback() {
         if (!ws || !open) {
             $('#input-form-group').addClass('has-warning');
             $('#input-form-group .spinner-container').addClass('hidden');
@@ -28,6 +29,12 @@ $(() => {
 
         $('#input-form-group').removeClass('has-warning');
         $('#input-form-group .glyphicon-warning-sign, #input-form-group .help-block').addClass('hidden');
+    }
+
+    function updateSpinner(thinking) {
+        if (!ws || !open)
+            return;
+
         if (thinking)
             $('#input-form-group .spinner-container').removeClass('hidden');
         else
@@ -45,7 +52,7 @@ $(() => {
                 if (!open) {
                     open = true;
                     reconnectTimeout = 100;
-                    updateFeedback(false);
+                    updateConnectionFeedback();
                 }
                 onWebsocketMessage(event);
             };
@@ -53,7 +60,8 @@ $(() => {
             ws.onclose = function() {
                 console.error('Web socket closed');
                 ws = undefined;
-                updateFeedback(false);
+                open = false;
+                updateConnectionFeedback();
 
                 // reconnect immediately if the connection previously succeeded, otherwise
                 // try again in a little bit
@@ -261,6 +269,27 @@ $(() => {
     function onWebsocketMessage(event) {
         var parsed = JSON.parse(event.data);
         console.log('received ' + event.data);
+
+        if (parsed.type === 'id') {
+            conversationId = parsed.id;
+            return;
+        }
+
+        if (parsed.type === 'askSpecial') {
+            syncKeyboardType(parsed.ask);
+            syncCancelButton(parsed);
+            if (parsed.ask === 'yesno')
+                yesnoMessage();
+            return;
+        }
+
+        if (parsed.id <= lastMessageId)
+            return;
+        lastMessageId = parsed.id;
+
+        if (parsed.type !== 'command')
+            updateSpinner(false);
+
         switch (parsed.type) {
         case 'text':
         case 'result':
@@ -291,13 +320,6 @@ $(() => {
             linkMessage(parsed.title, parsed.url);
             break;
 
-        case 'askSpecial':
-            syncKeyboardType(parsed.ask);
-            syncCancelButton(parsed);
-            if (parsed.ask === 'yesno')
-                yesnoMessage();
-            break;
-
         case 'hypothesis':
             $('#input').val(parsed.hypothesis);
             break;
@@ -307,13 +329,7 @@ $(() => {
             collapseButtons();
             appendUserMessage(parsed.command);
             break;
-
-        case 'id':
-            conversationId = parsed.id;
-            return;
         }
-
-        updateFeedback(false);
     }
 
     function handleSlashR(line) {
@@ -334,15 +350,15 @@ $(() => {
             return;
         }
 
-        updateFeedback(true);
+        updateSpinner(true);
         ws.send(JSON.stringify({ type: 'command', text: text }));
     }
     function handleParsedCommand(json, title) {
-        updateFeedback(true);
+        updateSpinner(true);
         ws.send(JSON.stringify({ type: 'parsed', json: json, title: title }));
     }
     function handleThingTalk(tt) {
-        updateFeedback(true);
+        updateSpinner(true);
         ws.send(JSON.stringify({ type: 'tt', code: tt }));
     }
     function handleChoice(idx, title) {
