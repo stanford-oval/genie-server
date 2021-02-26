@@ -72,6 +72,7 @@ module.exports = function conversationHandler(ws, req, next) {
             debug: true,
         });
         await conversation.addOutput(delegate, true);
+        await conversation.startRecording();
         opened = true;
         ws.send(JSON.stringify({ type: 'id', id : conversation.id }));
 
