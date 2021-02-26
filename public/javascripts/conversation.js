@@ -38,7 +38,7 @@ $(() => {
         });
     }
 
-    function updateFeedback(thinking) {
+    function updateConnectionFeedback() {
         if (!ws || !open) {
             $('#input-form-group').addClass('has-warning');
             $('#input-form-group .spinner-container').addClass('hidden');
@@ -48,6 +48,12 @@ $(() => {
 
         $('#input-form-group').removeClass('has-warning');
         $('#input-form-group .glyphicon-warning-sign, #input-form-group .help-block').addClass('hidden');
+    }
+
+    function updateSpinner(thinking) {
+        if (!ws || !open)
+            return;
+
         if (thinking)
             $('#input-form-group .spinner-container').removeClass('hidden');
         else
@@ -64,7 +70,7 @@ $(() => {
                 if (!open) {
                     open = true;
                     reconnectTimeout = 100;
-                    updateFeedback(false);
+                    updateConnectionFeedback();
                 }
                 onWebsocketMessage(event);
                 refreshToolbar();
@@ -74,7 +80,7 @@ $(() => {
                 console.error('Web socket closed');
                 ws = undefined;
                 open = false;
-                updateFeedback(false);
+                updateConnectionFeedback();
 
                 // reconnect immediately if the connection previously succeeded, otherwise
                 // try again in a little bit
@@ -301,6 +307,9 @@ $(() => {
             return;
         lastMessageId = parsed.id;
 
+        if (parsed.type !== 'command')
+            updateSpinner(false);
+
         switch (parsed.type) {
         case 'text':
         case 'result':
@@ -341,8 +350,6 @@ $(() => {
             appendUserMessage(parsed.command);
             break;
         }
-
-        updateFeedback(false);
     }
 
     function handleSlashR(line) {
@@ -363,15 +370,15 @@ $(() => {
             return;
         }
 
-        updateFeedback(true);
+        updateSpinner(true);
         ws.send(JSON.stringify({ type: 'command', text: text }));
     }
     function handleParsedCommand(json, title) {
-        updateFeedback(true);
+        updateSpinner(true);
         ws.send(JSON.stringify({ type: 'parsed', json: json, title: title }));
     }
     function handleThingTalk(tt) {
-        updateFeedback(true);
+        updateSpinner(true);
         ws.send(JSON.stringify({ type: 'tt', code: tt }));
     }
     function handleChoice(idx, title) {
