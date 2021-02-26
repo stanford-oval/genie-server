@@ -24,8 +24,6 @@ const { login, startSession } = require('./login');
 
 async function testMyStuff(bob, nobody) {
     await assertRedirect(sessionRequest('', 'GET', null, nobody, { followRedirects: false }), '/user/login');
-
-    await assertRedirect(sessionRequest('/conversation', 'GET', null, nobody, { followRedirects: false }), '/user/login');
 }
 
 async function testMyDevices(bob, nobody) {

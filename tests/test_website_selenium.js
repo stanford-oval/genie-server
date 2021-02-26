@@ -105,19 +105,6 @@ async function login(driver) {
     await submit.click();
 }
 
-async function testHomepage(driver) {
-    await driver.get(BASE_URL + '/');
-
-    await login(driver);
-
-    const title = await driver.wait(
-        WD.until.elementLocated(WD.By.css('.jumbotron.text-center > h1')),
-        30000);
-    await checkAllImages(driver);
-
-    assert.strictEqual(await title.getText(), 'It works!');
-}
-
 // there is some randomness in what message we pick
 const WELCOME_MESSAGES = [
     `Hi, what can I do for you?`,
@@ -131,7 +118,7 @@ const WELCOME_MESSAGES = [
 ];
 
 async function testMyConversation(driver) {
-    await driver.get(BASE_URL + '/conversation');
+    await driver.get(BASE_URL + '/');
 
     await login(driver);
 
@@ -164,7 +151,6 @@ async function testMyConversation(driver) {
 }
 
 async function main() {
-    await withSelenium(testHomepage);
     await withSelenium(testMyConversation);
 }
 module.exports = main;
