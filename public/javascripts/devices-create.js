@@ -4,6 +4,22 @@ $(() => {
         return document.body.dataset.thingpediaUrl;
     }
 
+    function isIframe() {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    function isCrossOrigin() {
+        try {
+            return window.frameElement !== null;
+        } catch (e) {
+            return true;
+        }
+    }
+
     function handleOnlineAccountFactory(json, kind, name) {
         console.log('Handling online account ' + kind);
         const self = $('<div>');
@@ -64,6 +80,8 @@ $(() => {
                 btn.attr('href', json.href);
                 break;
             case 'oauth2':
+                if (isIframe())
+                    btn.attr('target', isCrossOrigin() ? '_blank' : '_parent');
                 btn.attr('href', 'oauth2/' + kind);
                 break;
             default: // discovery or builtin, ignore
