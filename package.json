@@ -29,7 +29,7 @@
     "passport": "^0.4.0",
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.0.0",
-    "pug": "^3.0.0",
+    "pug": "^3.0.2",
     "q": "^1.5.0",
     "serve-favicon": "^2.4.3",
     "thingpedia": "^2.9.0-alpha.2",
