@@ -27,7 +27,6 @@ const os = require('os');
 const Tp = require('thingpedia');
 const child_process = require('child_process');
 const Gettext = require('node-gettext');
-const DBus = require('dbus-native');
 let PulseAudio;
 try {
     PulseAudio = require('pulseaudio2');
@@ -35,7 +34,6 @@ try {
     PulseAudio = null;
 }
 
-const BluezBluetooth = require('./bluez');
 const MediaPlayer = require('./media_player');
 const _graphicsApi = require('./graphics');
 
@@ -71,10 +69,6 @@ const _notifyApi = JavaAPI.makeJavaAPI('Notify', [], ['showMessage'], []);
 const _audioManagerApi = JavaAPI.makeJavaAPI('AudioManager', [],
     ['setRingerMode', 'adjustMediaVolume', 'setMediaVolume'], []);
 const _smsApi = JavaAPI.makeJavaAPI('Sms', ['start', 'stop', 'sendMessage'], [], ['onsmsreceived']);
-const _btApi = JavaAPI.makeJavaAPI('Bluetooth',
-    ['start', 'startDiscovery', 'pairDevice', 'readUUIDs'],
-    ['stop', 'stopDiscovery'],
-    ['ondeviceadded', 'ondevicechanged', 'onstatechanged', 'ondiscoveryfinished']);
 const _audioRouterApi = JavaAPI.makeJavaAPI('AudioRouter',
     ['setAudioRouteBluetooth'], ['start', 'stop', 'isAudioRouteBluetooth'], []);
 const _systemAppsApi = JavaAPI.makeJavaAPI('SystemApps', [], ['startMusic'], []);
@@ -179,13 +173,6 @@ class ServerPlatform extends Tp.BasePlatform {
         this._cacheDir = getCacheDir();
         safeMkdirSync(this._cacheDir);
 
-        this._dbusSession = null;//DBus.sessionBus();
-        if (process.env.DBUS_SYSTEM_BUS_ADDRESS || fs.existsSync('/var/run/dbus/system_bus_socket'))
-            this._dbusSystem = DBus.systemBus();
-        else
-            this._dbusSystem = null;
-
-        this._btApi = null;
         this._wakeWordDetector = null;
 
         this._media = new MediaPlayer();
@@ -249,14 +236,6 @@ class ServerPlatform extends Tp.BasePlatform {
             // this platform
             return true;
 
-        case 'dbus-session':
-            return this._dbusSession !== null;
-        case 'dbus-system':
-            return this._dbusSystem !== null;
-
-        case 'bluetooth':
-            return this._dbusSystem !== null;
-
         case 'media-player':
             return true;
 
@@ -305,16 +284,6 @@ class ServerPlatform extends Tp.BasePlatform {
             // We have the support to download code
             return _unzipApi;
 
-        case 'dbus-session':
-            return this._dbusSession;
-        case 'dbus-system':
-            return this._dbusSystem;
-        case 'bluetooth':
-            if (this._dbusSystem === null)
-                return null;
-            if (!this._btApi)
-                this._btApi = new BluezBluetooth(this);
-            return this._btApi;
         case 'sound':
         case 'pulseaudio': // legacy name for "sound"
             this._ensurePulseAudio();
