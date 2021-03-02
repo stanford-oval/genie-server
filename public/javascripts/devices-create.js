@@ -13,11 +13,7 @@ $(() => {
     }
 
     function isCrossOrigin() {
-        try {
-            return window.frameElement !== null;
-        } catch (e) {
-            return true;
-        }
+        return window.frameElement !== null;
     }
 
     function handleOnlineAccountFactory(json, kind, name) {
