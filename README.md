@@ -52,8 +52,8 @@ npm install
 
 This will only install the minimal set of dependencies, and will not install any voice support. To enable voice, you must also run (Linux only):
 ```
-dnf -y install pulseaudio pulseaudio-libs-devel libcanberra-devel blas-devel atlas-devel # Fedora/RHEL
-dnf -y install pulseaudio libpulse-dev libcanberra-dev libatlas-base-dev unzip # Ubuntu/Debian
+dnf -y install pulseaudio pulseaudio-libs-devel libcanberra-devel blas-devel atlas-devel sound-theme-freedesktop # Fedora/RHEL
+apt -y install pulseaudio libpulse-dev libcanberra-dev libatlas-base-dev sound-theme-freedesktop # Ubuntu/Debian
 ```
 then run `npm install` again to pick up the new dependencies.
 
