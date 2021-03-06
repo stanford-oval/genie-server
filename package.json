@@ -21,7 +21,7 @@
     "express": "^4.15.3",
     "express-session": "^1.17.1",
     "express-ws": "^4.0.0",
-    "genie-toolkit": "github:stanford-oval/genie-toolkit#master",
+    "genie-toolkit": "github:stanford-oval/genie-toolkit",
     "gm": "^1.23.1",
     "morgan": "^1.8.2",
     "node-gettext": "^3.0.0",

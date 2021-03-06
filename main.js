@@ -93,6 +93,11 @@ async function init(platform) {
                     'media.role': 'voice-assistant',
                     [canberra.Property.EVENT_ID]: 'message-new-instant'
                 });
+
+                eventSoundCtx.cache({
+                    'media.role': 'voice-assistant',
+                    [canberra.Property.EVENT_ID]: 'dialog-warning'
+                });
             } catch (e) {
                 console.error(`Failed to cache event sound: ${e.message}`);
             }
@@ -103,6 +108,15 @@ async function init(platform) {
                     [canberra.Property.EVENT_ID]: 'message-new-instant'
                 }).catch((e) => {
                     console.error(`Failed to play hotword detection sound: ${e.message}`);
+                });
+            });
+
+            speech.on('no-match', () => {
+                eventSoundCtx.play(HOTWORD_DETECTED_ID, {
+                    'media.role': 'voice-assistant',
+                    [canberra.Property.EVENT_ID]: 'dialog-warning'
+                }).catch((e) => {
+                    console.error(`Failed to play hotword no-match sound: ${e.message}`);
                 });
             });
         }
