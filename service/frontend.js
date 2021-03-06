@@ -102,6 +102,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
 
         this._app.use((req, res, next) => {
             let port = ':' + this._app.get('port');
+            let protocol = req.protocol;
             if (Config.HAS_REVERSE_PROXY) {
                 if (req.headers['x-forwarded-port']) {
                     port = (':' + req.headers['x-forwarded-port']);
@@ -111,11 +112,13 @@ module.exports = class WebFrontend extends events.EventEmitter {
                 } else {
                     port = '';
                 }
+                if (req.headers['x-forwarded-proto'])
+                    protocol = req.headers['x-forwarded-proto'];
             }
-            if ((req.protocol === 'http' && port === ':80') ||
-                (req.protocol === 'https' && port === ':443'))
+            if ((protocol === 'http' && port === ':80') ||
+                (protocol === 'https' && port === ':443'))
                 port = '';
-            this._platform._setOrigin(req.protocol + '://' + req.hostname + port);
+            this._platform._setOrigin(protocol + '://' + req.hostname + port);
 
             if (req.user) {
                 res.locals.authenticated = true;
