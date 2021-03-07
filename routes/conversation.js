@@ -57,7 +57,7 @@ module.exports = function conversationHandler(ws, req, next) {
         const isMain = req.host === '127.0.0.1';
 
         let opened = false;
-        const conversationId = isMain ? 'main' : (req.query.conversationId || 'web-' + makeRandom(16));
+        const conversationId = req.query.id || 'main';
         ws.on('error', (err) => {
             console.error(err);
             ws.close();
