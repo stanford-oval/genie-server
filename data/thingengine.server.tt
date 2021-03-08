@@ -1,0 +1,14 @@
+class @org.thingpedia.builtin.thingengine.server extends @org.thingpedia.iot.speaker
+#_[thingpedia_name="Almond Smart Speaker"]
+#_[thingpedia_description="Commands that are specific to using Almond as a smart-speaker device."]
+#_[name="Almond Smart Speaker"]
+#_[description="Commands that are specific to using Almond as a smart-speaker device."]
+#_[canonical="almond smart speaker"]
+#[repository="https://github.com/stanford-oval/almond-server"]
+#[subcategory="service"]
+#[license="Apache-2.0"]
+#[license_gplcompatible=true]
+{
+  import loader from @org.thingpedia.builtin();
+  import config from @org.thingpedia.config.builtin();
+}

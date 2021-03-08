@@ -27,6 +27,7 @@ const os = require('os');
 const Tp = require('thingpedia');
 const child_process = require('child_process');
 const Gettext = require('node-gettext');
+const path = require('path');
 let PulseAudio;
 try {
     PulseAudio = require('pulseaudio2');
@@ -43,6 +44,9 @@ try {
 } catch(e) {
     WakeWordDetector = null;
 }
+
+// FIXME
+const Builtins = require('genie-toolkit/dist/lib/engine/devices/builtins');
 
 const Config = require('../../config');
 
@@ -179,6 +183,18 @@ class ServerPlatform extends Tp.BasePlatform {
 
         this._sqliteKey = null;
         this._origin = null;
+
+        this._serverDev = {
+            kind: 'org.thingpedia.builtin.thingengine.server',
+            class: fs.readFileSync(path.resolve(__dirname, '../../data/thingengine.server.tt')).toString(),
+            module: require('./thingengine.server')
+        };
+
+        // HACK: thingengine-core will try to load thingengine-own-desktop from the db
+        // before PairedEngineManager calls getPlatformDevice(), which can result in loading
+        // the device as unsupported (and that would be bad)
+        // to avoid that, we inject it eagerly here
+        Builtins.default[this._serverDev.kind] = this._serverDev;
     }
 
     _ensurePulseAudio() {
@@ -221,7 +237,7 @@ class ServerPlatform extends Tp.BasePlatform {
     }
 
     getPlatformDevice() {
-        return null;
+        return this._serverDev;
     }
 
     // Check if this platform has the required capability
