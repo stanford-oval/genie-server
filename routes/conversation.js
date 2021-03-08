@@ -19,12 +19,6 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 "use strict";
 
-const crypto = require('crypto');
-
-function makeRandom(bytes) {
-    return crypto.randomBytes(bytes).toString('hex');
-}
-
 class WebsocketAssistantDelegate {
     constructor(ws) {
         this._ws = ws;
@@ -54,10 +48,9 @@ module.exports = function conversationHandler(ws, req, next) {
         const engine = req.app.engine;
 
         const delegate = new WebsocketAssistantDelegate(ws);
-        const isMain = req.host === '127.0.0.1';
 
         let opened = false;
-        const conversationId = isMain ? 'main' : (req.query.conversationId || 'web-' + makeRandom(16));
+        const conversationId = req.query.id || 'main';
         ws.on('error', (err) => {
             console.error(err);
             ws.close();
