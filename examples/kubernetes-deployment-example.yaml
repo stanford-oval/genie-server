@@ -1,85 +1,166 @@
-# Kubernetes deployment
+# This file contains a basic configuration for kubernetes
 
-    This is a very basic configuration file for running almond-server on a Kubernetes cluster.
+# DEPLOYMENT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: almond-server
+  # namespace <your namespace>
+spec:
+  selector:
+    matchLabels:
+      app: almond-server
+      role: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: almond-server
+        role: backend
+    spec:
+      #hostNetwork: true
+      #dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: almond-server
+        image: stanfordoval/almond-server
+        env:
+        - name: TZ
+          value: Europe/London
+        - name: THINGENGINE_HOST_BASED_AUTHENTICATION
+          value: local-ip
+        imagePullPolicy: "IfNotPresent"
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities: {}
+          readOnlyRootFilesystem: false
+          runAsGroup: 1000
+          runAsUser: 1000
+          seLinuxOptions: {}
+        volumeMounts:
+        - name: run-user-1000
+          mountPath: /run/pulse
+        - name: home-user-config-almond-server
+          mountPath: /var/lib/almond-server
+        workingDir: /opt/almond
+      - name: nginx-sidecar
+        image: nginx:alpine
+        env:
+        - name: TZ
+          value: Europe/London
+        volumeMounts:
+        - name: nginx-sidecar-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - hostPath:
+          path: /run/user/1000/pulse
+          type: Directory
+        name: run-user-1000
+      - hostPath:
+          path: /home/pi/.config/almond-server
+          type: Directory
+        name: home-user-config-almond-server
+      - name: nginx-sidecar-config
+        configMap:
+          name: nginx-sidecar-conf
+status: {}
 
-    After applying this manifest, two containers are created by the pod and provides the following:
-        almond-server as the main deployment
-        nginx as a reverse proxy sidecar
-        sets securityContex for a specific user; in this example 'pi' with UID & GID of 1000.
-        configures a NodePort for Home-Assistant and local access
-
-    It is also assumed that PulesAudio runs in user mode
-    
-## Getting Started
-
-Find your UID and GID from the command line.
-Copy file 'kubernetes-deployment-example.yaml' to your prefered location, edit the following settings if necessary.
-
-Default values
 ---
-    deployment
-        image: stanfordoval/almond-server   ...    your image here if not amd64
+
+# SERVICE
+# Uses nodeport for local access
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: almond-service
+  # namespace <your namespace>
+  labels:
+    app: almond-service
+spec:
+  type: NodePort
+  ports:
+  - name: almond-web
+    port: 80
+    targetPort: 3001
+    protocol: TCP
+    nodePort: 32000
+  selector:
+    app: almond-server
+    role: backend
+status: {}
+
 ---
-    env:
-        TZ: Europe/London                   ...    your timezone 
----
-    SecurityContes:     this ensures that the container runs as a specific user
-        runAsGroup: 1000                    ...    enter your GID and UID here 
-        runAsUser: 1000                     ...    find it by typing 'id' from the command line 
----
-    volumes:
-        hostPath:
-            path: /run/user/1000/pulse       ...    this is just $XDG_RUNTIME_DIR/pulse 
-            path: /home/pi/.config/almond-server    path to your Almond-Server config directory 
----
-    service
-        spec:
-            nodePort: 32000                   ...   a valid port value of your choice 
----
-    configmap
-        server
-            allow   10.1.12.1;                ...   example only, check nginx logs for connection failures
----
 
-### Run almond-server
+# CONFIGMAP
+# nginx sidecar configmap
+# modify the allow section to allow only host you trust; deny all otherwise
+# monitor nginx logs for errors: e.g. kubectl logs -n namespace -c nginx-sidecar <pod id>
 
-    kubectl apply -f kubernetes-deployment-example.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-sidecar-conf
+  # namespace: <your namespace>
+data:
+  nginx.conf: |-
+    user nginx;
+    worker_processes  1;
+    pid /var/run/nginx.pid;
+    error_log /dev/stdout info;
 
-    Navigate to http://<almond host>:32000 for almond web interface
-    You should reach Almond's Initial Configuration page where you are invited to set a password.
+    events {
+        worker_connections 1024;
+    }
 
-Home-Assistant config for this example.
+    http {
+        include             mime.types;
+        default_type        application/octet-stream;
+        sendfile            on;
+        keepalive_timeout   65;
+        proxy_read_timeout  1d;
+        gzip                on;
+        gzip_disable        "msie6";
 
-```yaml
-# Example configuration.yaml entry
-almond:
-  type: local
-  host: http://<almond host>:32000
-```
-
-### Troubleshooting
-
-You may see an error, 'access forbidden by rule', output in nginx logs, as in example below;
-which IP 10.1.12.1 is my kubenetes instance and my host 192.168.0.2.
-
-```logs
-
-2021/03/06 10:06:18 [error] 31#31: *1 access forbidden by rule, client: 10.1.12.1, server: _, request: "GET / HTTP/1.1", host: "192.168.0.2:32000"
-10.1.12.1 - - [06/Mar/2021:10:06:18 +0000] "GET / HTTP/1.1" 403 125 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15"
-2021/03/06 10:06:18 [error] 31#31: *2 access forbidden by rule, client: 10.1.12.1, server: _, request: "GET /favicon.ico HTTP/1.1", host: "192.168.0.2:32000", referrer: "http://192.168.0.2:32000/"
-10.1.12.1 - - [06/Mar/2021:10:06:18 +0000] "GET /favicon.ico HTTP/1.1" 403 125 "http://192.168.0.2:32000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15"
-
-```
-
-Update the configmap to allow client 10.1.12.1, e.g.
-
-```yaml
-
-allow   127.0.0.1;  # localhost
-allow   10.1.12.1;  # kubernetes
-deny    all;
-
-```
-
-Restart Nginx container.
-You are good to go.
+        upstream backend {
+            ip_hash;
+            server 127.0.0.1:3000;
+            #server almond-service:3000;
+        }
+      
+        map $http_upgrade $connection_upgrade {
+            default upgrade;
+            ''      close;
+        }
+      
+        # API & Ingress
+        server {
+            listen 3001 default_server;
+            listen 8099 default_server;
+            listen [::]:3001 default_server;
+            listen [::]:8099 default_server;
+      
+            allow   127.0.0.1;  # localhost
+            deny    all;
+      
+            server_name _;
+            access_log /dev/stdout combined;
+      
+            client_max_body_size 4G;
+            keepalive_timeout 5;
+      
+            root /dev/null;
+      
+            location / {
+                proxy_redirect off;
+                proxy_pass http://backend;
+      
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection $connection_upgrade;
+                proxy_set_header Host "127.0.0.1:3000";
+                proxy_set_header Origin "http://127.0.0.1:3000";
+            }
+        }
+    }
