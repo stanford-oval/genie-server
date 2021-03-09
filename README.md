@@ -36,6 +36,10 @@ Voice support is only available on Linux. On Mac or Windows, you can use the fol
 docker run --name almond -p 3000:3000 stanfordoval/almond-server:latest-portable
 ```
 
+### I am Kubernetes!
+
+As an alternative, Almond-Server can run under Kubernetes; see sample configuration file in the [examples](https://github.com/stanford-oval/almond-server/tree/master/examples) directory for information on how to get started.
+
 ## Development setup
 
 To develop almond-server, you should clone this repository, then install the dependencies with:
