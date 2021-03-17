@@ -1,3 +1,29 @@
+2.0.0-alpha.1
+=============
+
+This is the first Alpha release of the Almond 2.0 release cycle. It brings
+the latest version of the Almond platform, with several improvements across
+the board. The high-level list of changes is available on the
+[release page](https://wiki.almond.stanford.edu/en/release-planning/two-point-oh).
+
+Among the almond-server specific changes are:
+
+* The home page was removed. Almond now opens directly with the conversation.
+* A new recording mode was added, that allows detailed recordings to be made
+  of dialogues as they occur, including the full content of all executed ThingTalk
+  programs and the replies from the agent. These recording can be used for
+  testing and debugging.
+* A new platform device was added that allows to control the volume of the main
+  speaker.
+* Voice input and output are now configurable from the Configuration page.
+* Wake-word recognition was made more reliable, and has now fewer spurious wake ups.
+* Conversation history is now shared across all browser sessions, regardless of
+  which host is used to access Almond.
+* API endpoints and browser endpoints have been separated, solving a number of
+  Origin-related issues when Almond is configured with a reverse proxy or inside
+  Home Assistant. API endpoints can now be optionally configured with an access
+  token instead of host authentication.
+
 1.99.0
 ======
 
