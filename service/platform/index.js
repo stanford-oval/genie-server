@@ -24,6 +24,7 @@
 const Q = require('q');
 const fs = require('fs');
 const os = require('os');
+const events = require('events');
 const Tp = require('thingpedia');
 const child_process = require('child_process');
 const Gettext = require('node-gettext');
@@ -35,7 +36,6 @@ try {
     PulseAudio = null;
 }
 
-const MediaPlayer = require('./media_player');
 const _graphicsApi = require('./graphics');
 
 let WakeWordDetector;
@@ -162,6 +162,34 @@ const _gpsApi = {
     }
 };
 
+// A simple Audio Player based on GStreamer
+class Player extends events.EventEmitter {
+    constructor(child) {
+        super();
+        this._child = child;
+
+        child.on('exit', () => {
+            this.emit('done');
+        });
+        child.on('error', (e) => {
+            this.emit('error', e);
+        });
+    }
+
+    async stop() {
+        if (this._child)
+            this._child.kill();
+    }
+}
+
+const _audioPlayerApi = {
+    play(urls) {
+        return new Player(child_process.spawn('gst-play-1.0', urls, {
+            stdio: ['ignore', process.stdout, process.stderr]
+        }));
+    }
+};
+
 class ServerPlatform extends Tp.BasePlatform {
     constructor() {
         super();
@@ -178,8 +206,6 @@ class ServerPlatform extends Tp.BasePlatform {
         safeMkdirSync(this._cacheDir);
 
         this._wakeWordDetector = null;
-
-        this._media = new MediaPlayer();
 
         this._sqliteKey = null;
         this._origin = null;
@@ -248,11 +274,11 @@ class ServerPlatform extends Tp.BasePlatform {
     hasCapability(cap) {
         switch(cap) {
         case 'code-download':
-            // If downloading code from the thingpedia server is allowed on
-            // this platform
-            return true;
-
-        case 'media-player':
+        case 'gps':
+        case 'graphics-api':
+        case 'content-api':
+        case 'audio-player':
+        case 'gettext':
             return true;
 
         case 'pulseaudio':
@@ -263,27 +289,6 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'wakeword-detector':
             this._ensurePulseAudio();
             return this._wakeWordDetector !== null;
-/*
-        // We can use the phone capabilities
-        case 'notify':
-        case 'audio-manager':
-        case 'sms':
-        case 'bluetooth':
-        case 'audio-router':
-        case 'system-apps':
-        case 'telephone':
-        // for compat
-        case 'notify-api':
-            return true;
-*/
-        case 'gps':
-        case 'graphics-api':
-        case 'content-api':
-        case 'assistant':
-            return true;
-
-        case 'gettext':
-            return true;
 
         default:
             return false;
@@ -307,41 +312,14 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'wakeword-detector':
             this._ensurePulseAudio();
             return this._wakeWordDetector;
-        case 'media-player':
-            return this._media;
+        case 'audio-player':
+            return _audioPlayerApi;
         case 'content-api':
             return _contentApi;
         case 'graphics-api':
             return _graphicsApi;
         case 'gps':
             return _gpsApi;
-
-/*
-        case 'notify-api':
-        case 'notify':
-            return _notifyApi;
-
-
-        case 'audio-manager':
-            return _audioManagerApi;
-
-        case 'sms':
-            return _smsApi;
-
-        case 'audio-router':
-            return _audioRouterApi;
-
-        case 'system-apps':
-            return _systemAppsApi;
-
-
-        case 'content-api':
-            return _contentApi;
-
-
-        case 'telephone':
-            return _telephoneApi;
-*/
 
         case 'gettext':
             return this._gettext;
