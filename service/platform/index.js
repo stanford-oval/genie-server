@@ -35,6 +35,12 @@ try {
 } catch(e) {
     PulseAudio = null;
 }
+let canberra;
+try {
+    canberra = require('canberra');
+} catch(e) {
+    canberra = null;
+}
 
 const _graphicsApi = require('./graphics');
 
@@ -190,6 +196,46 @@ const _audioPlayerApi = {
     }
 };
 
+const KNOWN_SOUND_EFFECTS = ['alarm-clock-elapsed', 'audio-channel-front-center', 'audio-channel-front-left', 'audio-channel-front-right', 'audio-channel-rear-center', 'audio-channel-rear-left', 'audio-channel-rear-right', 'audio-channel-side-left', 'audio-channel-side-right', 'audio-test-signal', 'audio-volume-change', 'bell', 'camera-shutter', 'complete', 'device-added', 'device-removed', 'dialog-error', 'dialog-information', 'dialog-warning', 'message-new-instant', 'message', 'network-connectivity-established', 'network-connectivity-lost', 'phone-incoming-call', 'phone-outgoing-busy', 'phone-outgoing-calling', 'power-plug', 'power-unplug', 'screen-capture', 'service-login', 'service-logout', 'suspend-error', 'trash-empty', 'window-attention', 'window-question'];
+
+const SOUND_EFFECT_ID = 0;
+class SoundEffectsApi {
+    constructor() {
+        this._ctx = new canberra.Context({
+            [canberra.Property.APPLICATION_ID]: 'edu.stanford.Almond',
+        });
+
+        try {
+            this._ctx.cache({
+                'media.role': 'voice-assistant',
+                [canberra.Property.EVENT_ID]: 'message-new-instant'
+            });
+
+            this._ctx.cache({
+                'media.role': 'voice-assistant',
+                [canberra.Property.EVENT_ID]: 'dialog-warning'
+            });
+        } catch (e) {
+            console.error(`Failed to cache event sound: ${e.message}`);
+        }
+    }
+
+    getURL(name) {
+        if (KNOWN_SOUND_EFFECTS.includes(name))
+            return 'file:///usr/share/sounds/freedesktop/stereo/' + name + '.oga';
+        else
+            return undefined;
+    }
+
+    play(name, id = SOUND_EFFECT_ID) {
+        return this._ctx.play(id, {
+            'media.role': 'voice-assistant',
+            [canberra.Property.EVENT_ID]: name
+        });
+    }
+}
+
+
 class ServerPlatform extends Tp.BasePlatform {
     constructor() {
         super();
@@ -206,6 +252,7 @@ class ServerPlatform extends Tp.BasePlatform {
         safeMkdirSync(this._cacheDir);
 
         this._wakeWordDetector = null;
+        this._soundEffects = null;
 
         this._sqliteKey = null;
         this._origin = null;
@@ -233,6 +280,9 @@ class ServerPlatform extends Tp.BasePlatform {
 
             if (WakeWordDetector)
                 this._wakeWordDetector = new WakeWordDetector();
+
+            if (canberra)
+                this._soundEffects = new SoundEffectsApi();
         } else {
             this._pulse = null;
         }
@@ -290,6 +340,10 @@ class ServerPlatform extends Tp.BasePlatform {
             this._ensurePulseAudio();
             return this._wakeWordDetector !== null;
 
+        case 'sound-effects':
+            this._ensurePulseAudio();
+            return this._soundEffects !== null;
+
         default:
             return false;
         }
@@ -312,6 +366,9 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'wakeword-detector':
             this._ensurePulseAudio();
             return this._wakeWordDetector;
+        case 'sound-effects':
+            this._ensurePulseAudio();
+            return this._soundEffects;
         case 'audio-player':
             return _audioPlayerApi;
         case 'content-api':

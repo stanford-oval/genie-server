@@ -24,13 +24,6 @@ Q.longStackSupport = true;
 process.on('unhandledRejection', (up) => { throw up; });
 
 const child_process = require('child_process');
-let canberra;
-try {
-    canberra = require('canberra');
-} catch(e) {
-    canberra = null;
-}
-
 const Genie = require('genie-toolkit');
 const WebFrontend = require('./service/frontend');
 
@@ -84,38 +77,16 @@ async function init(platform) {
             });
         });
 
-        if (canberra) {
-            const eventSoundCtx = new canberra.Context({
-                [canberra.Property.APPLICATION_ID]: 'edu.stanford.Almond',
-            });
-            try {
-                eventSoundCtx.cache({
-                    'media.role': 'voice-assistant',
-                    [canberra.Property.EVENT_ID]: 'message-new-instant'
-                });
-
-                eventSoundCtx.cache({
-                    'media.role': 'voice-assistant',
-                    [canberra.Property.EVENT_ID]: 'dialog-warning'
-                });
-            } catch (e) {
-                console.error(`Failed to cache event sound: ${e.message}`);
-            }
-
+        const soundEffects = platform.getCapability('sound-effects');
+        if (soundEffects) {
             speech.on('wakeword', (hotword) => {
-                eventSoundCtx.play(HOTWORD_DETECTED_ID, {
-                    'media.role': 'voice-assistant',
-                    [canberra.Property.EVENT_ID]: 'message-new-instant'
-                }).catch((e) => {
+                soundEffects.play('message-new-instant', HOTWORD_DETECTED_ID).catch((e) => {
                     console.error(`Failed to play hotword detection sound: ${e.message}`);
                 });
             });
 
             speech.on('no-match', () => {
-                eventSoundCtx.play(HOTWORD_DETECTED_ID, {
-                    'media.role': 'voice-assistant',
-                    [canberra.Property.EVENT_ID]: 'dialog-warning'
-                }).catch((e) => {
+                soundEffects.play('dialog-warning', HOTWORD_DETECTED_ID).catch((e) => {
                     console.error(`Failed to play hotword no-match sound: ${e.message}`);
                 });
             });
