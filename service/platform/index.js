@@ -197,6 +197,26 @@ class ServerPlatform extends Tp.BasePlatform {
         Builtins.default[this._serverDev.kind] = this._serverDev;
     }
 
+    async _ensurePulseConfig() {
+        try {
+            let hasFilterHeuristics = false, hasFilterApply = false;
+            const pulseModList = await this._pulse.modules();
+            for (let i = 0; i < pulseModList.length; i++) {
+                const mod = pulseModList[i];
+                if (mod.name === 'module-filter-heuristics')
+                    hasFilterHeuristics = true;
+                if (mod.name === 'module-filter-apply')
+                    hasFilterApply = true;
+            }
+            if (!hasFilterHeuristics)
+                await this._pulse.loadModule("module-filter-heuristics");
+            if (!hasFilterApply)
+                await this._pulse.loadModule("module-filter-apply");
+        } catch(e) {
+            console.error("failed to configure PulseAudio");
+        }
+    }
+
     _ensurePulseAudio() {
         if (this._pulse !== undefined)
             return;
@@ -204,6 +224,8 @@ class ServerPlatform extends Tp.BasePlatform {
         if (PulseAudio) {
             this._pulse = new PulseAudio();
             this._pulse.on('error', (err) => { console.error('error on PulseAudio', err); });
+
+            this._ensurePulseConfig();
 
             if (WakeWordDetector)
                 this._wakeWordDetector = new WakeWordDetector();
