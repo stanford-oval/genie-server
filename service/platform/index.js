@@ -24,6 +24,7 @@
 const Q = require('q');
 const fs = require('fs');
 const os = require('os');
+const events = require('events');
 const Tp = require('thingpedia');
 const child_process = require('child_process');
 const Gettext = require('node-gettext');
@@ -34,8 +35,13 @@ try {
 } catch(e) {
     PulseAudio = null;
 }
+let canberra;
+try {
+    canberra = require('canberra');
+} catch(e) {
+    canberra = null;
+}
 
-const MediaPlayer = require('./media_player');
 const _graphicsApi = require('./graphics');
 
 let WakeWordDetector;
@@ -162,6 +168,74 @@ const _gpsApi = {
     }
 };
 
+// A simple Audio Player based on GStreamer
+class Player extends events.EventEmitter {
+    constructor(child) {
+        super();
+        this._child = child;
+
+        child.on('exit', () => {
+            this.emit('done');
+        });
+        child.on('error', (e) => {
+            this.emit('error', e);
+        });
+    }
+
+    async stop() {
+        if (this._child)
+            this._child.kill();
+    }
+}
+
+const _audioPlayerApi = {
+    play(urls) {
+        return new Player(child_process.spawn('gst-play-1.0', urls, {
+            stdio: ['ignore', process.stdout, process.stderr]
+        }));
+    }
+};
+
+const KNOWN_SOUND_EFFECTS = ['alarm-clock-elapsed', 'audio-channel-front-center', 'audio-channel-front-left', 'audio-channel-front-right', 'audio-channel-rear-center', 'audio-channel-rear-left', 'audio-channel-rear-right', 'audio-channel-side-left', 'audio-channel-side-right', 'audio-test-signal', 'audio-volume-change', 'bell', 'camera-shutter', 'complete', 'device-added', 'device-removed', 'dialog-error', 'dialog-information', 'dialog-warning', 'message-new-instant', 'message', 'network-connectivity-established', 'network-connectivity-lost', 'phone-incoming-call', 'phone-outgoing-busy', 'phone-outgoing-calling', 'power-plug', 'power-unplug', 'screen-capture', 'service-login', 'service-logout', 'suspend-error', 'trash-empty', 'window-attention', 'window-question'];
+
+const SOUND_EFFECT_ID = 0;
+class SoundEffectsApi {
+    constructor() {
+        this._ctx = new canberra.Context({
+            [canberra.Property.APPLICATION_ID]: 'edu.stanford.Almond',
+        });
+
+        try {
+            this._ctx.cache({
+                'media.role': 'voice-assistant',
+                [canberra.Property.EVENT_ID]: 'message-new-instant'
+            });
+
+            this._ctx.cache({
+                'media.role': 'voice-assistant',
+                [canberra.Property.EVENT_ID]: 'dialog-warning'
+            });
+        } catch (e) {
+            console.error(`Failed to cache event sound: ${e.message}`);
+        }
+    }
+
+    getURL(name) {
+        if (KNOWN_SOUND_EFFECTS.includes(name))
+            return 'file:///usr/share/sounds/freedesktop/stereo/' + name + '.oga';
+        else
+            return undefined;
+    }
+
+    play(name, id = SOUND_EFFECT_ID) {
+        return this._ctx.play(id, {
+            'media.role': 'voice-assistant',
+            [canberra.Property.EVENT_ID]: name
+        });
+    }
+}
+
+
 class ServerPlatform extends Tp.BasePlatform {
     constructor() {
         super();
@@ -178,8 +252,7 @@ class ServerPlatform extends Tp.BasePlatform {
         safeMkdirSync(this._cacheDir);
 
         this._wakeWordDetector = null;
-
-        this._media = new MediaPlayer();
+        this._soundEffects = null;
 
         this._sqliteKey = null;
         this._origin = null;
@@ -229,6 +302,9 @@ class ServerPlatform extends Tp.BasePlatform {
 
             if (WakeWordDetector)
                 this._wakeWordDetector = new WakeWordDetector();
+
+            if (canberra)
+                this._soundEffects = new SoundEffectsApi();
         } else {
             this._pulse = null;
         }
@@ -270,11 +346,11 @@ class ServerPlatform extends Tp.BasePlatform {
     hasCapability(cap) {
         switch(cap) {
         case 'code-download':
-            // If downloading code from the thingpedia server is allowed on
-            // this platform
-            return true;
-
-        case 'media-player':
+        case 'gps':
+        case 'graphics-api':
+        case 'content-api':
+        case 'audio-player':
+        case 'gettext':
             return true;
 
         case 'pulseaudio':
@@ -285,27 +361,10 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'wakeword-detector':
             this._ensurePulseAudio();
             return this._wakeWordDetector !== null;
-/*
-        // We can use the phone capabilities
-        case 'notify':
-        case 'audio-manager':
-        case 'sms':
-        case 'bluetooth':
-        case 'audio-router':
-        case 'system-apps':
-        case 'telephone':
-        // for compat
-        case 'notify-api':
-            return true;
-*/
-        case 'gps':
-        case 'graphics-api':
-        case 'content-api':
-        case 'assistant':
-            return true;
 
-        case 'gettext':
-            return true;
+        case 'sound-effects':
+            this._ensurePulseAudio();
+            return this._soundEffects !== null;
 
         default:
             return false;
@@ -329,41 +388,17 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'wakeword-detector':
             this._ensurePulseAudio();
             return this._wakeWordDetector;
-        case 'media-player':
-            return this._media;
+        case 'sound-effects':
+            this._ensurePulseAudio();
+            return this._soundEffects;
+        case 'audio-player':
+            return _audioPlayerApi;
         case 'content-api':
             return _contentApi;
         case 'graphics-api':
             return _graphicsApi;
         case 'gps':
             return _gpsApi;
-
-/*
-        case 'notify-api':
-        case 'notify':
-            return _notifyApi;
-
-
-        case 'audio-manager':
-            return _audioManagerApi;
-
-        case 'sms':
-            return _smsApi;
-
-        case 'audio-router':
-            return _audioRouterApi;
-
-        case 'system-apps':
-            return _systemAppsApi;
-
-
-        case 'content-api':
-            return _contentApi;
-
-
-        case 'telephone':
-            return _telephoneApi;
-*/
 
         case 'gettext':
             return this._gettext;

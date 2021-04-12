@@ -40,7 +40,7 @@ async function testMyApiCreateGetApp(auth) {
     }), { auth, dataContentType: 'application/json' }));
 
     assert(result.uniqueId.startsWith('uuid-'));
-    assert.strictEqual(result.description, 'Get get data on test with count 2 and with size 10 byte.');
+    assert.strictEqual(result.description, 'Get get data on test with count 2 and size 10 byte.');
     assert.strictEqual(result.code, '@org.thingpedia.builtin.test.get_data(count=2, size=10byte);');
     assert.strictEqual(result.icon, 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test');
     assert.deepStrictEqual(result.errors, []);
@@ -51,7 +51,7 @@ async function testMyApiCreateGetApp(auth) {
             data: '!!!!!!!!!!',
             size: 10
         },
-        formatted: ['!!!!!!!!!!'],
+        formatted: ['The data is !!!!!!!!!!.', 'The count is 2.'],
         type: 'org.thingpedia.builtin.test:get_data'
     }, {
         raw: {
@@ -59,7 +59,7 @@ async function testMyApiCreateGetApp(auth) {
             data: '""""""""""',
             size: 10
         },
-        formatted: ['""""""""""'],
+        formatted: ['The data is """""""""".', 'The count is 2.'],
         type: 'org.thingpedia.builtin.test:get_data'
     }]);
 }
@@ -97,12 +97,13 @@ async function testMyApiCreateWhenApp(auth) {
                 return;
             delete parsed.result.raw.__timestamp;
             console.log(data);
+            parsed.result.formatted = parsed.result.formatted.filter((f) => f.indexOf('timestamp') < 0);
             if (count === 0) {
                 assert.deepStrictEqual(parsed, { result:
                     { appId: result.uniqueId,
                       raw: { data: '!!!!!!!!!!', size: 10 },
                       type: 'org.thingpedia.builtin.test:get_data',
-                      formatted: [ '!!!!!!!!!!' ],
+                      formatted: [ 'The data is !!!!!!!!!!.' ],
                       icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test' }
                 });
             } else {
@@ -110,7 +111,7 @@ async function testMyApiCreateWhenApp(auth) {
                     { appId: result.uniqueId,
                       raw: { data: '""""""""""', size: 10 },
                       type: 'org.thingpedia.builtin.test:get_data',
-                      formatted: [ '""""""""""' ],
+                      formatted: [ 'The data is """""""""".' ],
                       icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test' }
                 });
             }
@@ -279,6 +280,7 @@ async function testMyApiConverse(auth) {
             code: 'now => @org.thingpedia.builtin.test.dup_data(data_in="foo") => notify;',
         }
     }), { auth, dataContentType: 'application/json' }));
+    delete result1.messages[1].uniqueId;
     assert.deepStrictEqual(result1, {
         askSpecial: null,
         messages: [{
@@ -287,6 +289,17 @@ async function testMyApiConverse(auth) {
             command: '\\t now => @org.thingpedia.builtin.test.dup_data(data_in="foo") => notify;',
         }, {
             id: 3,
+            type: 'new-program',
+            code: '@org.thingpedia.builtin.test.dup_data(data_in="foo");',
+            errors: [],
+            icon: 'org.thingpedia.builtin.test',
+            name: 'Test',
+            results: [{
+                data_in: 'foo',
+                data_out: 'foofoo'
+            }],
+        }, {
+            id: 4,
             type: 'text',
             text: 'The answer is foofoo.',
             icon: 'org.thingpedia.builtin.test'
@@ -302,11 +315,11 @@ async function testMyApiConverse(auth) {
     assert.deepStrictEqual(result2, {
         askSpecial: null,
         messages: [{
-            id: 4,
+            id: 5,
             type: 'command',
             command: 'yes',
         }, {
-            id: 5,
+            id: 6,
             type: 'text',
             text: 'Sorry, I did not understand that. Can you rephrase it?',
             icon: 'org.thingpedia.builtin.test'
