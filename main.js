@@ -71,11 +71,38 @@ async function init(platform) {
             subscriptionKey: Config.MS_SPEECH_RECOGNITION_PRIMARY_KEY
         });
 
+        let play;
+        const ensureNullPlayback = () => {
+            if (play)
+                return;
+            play = platform.getCapability('sound').createPlaybackStream({
+                format: 'S16LE',
+                rate: 16000,
+                channels: 1,
+                stream: 'genie-voice-null',
+                properties: {
+                    'media.role': 'voice-assistant',
+                    'filter.want': 'echo-cancel',
+                }
+            });
+        };
+
+        const stopNullPlayback = () => {
+            if (play) {
+                play.end();
+                play = null;
+            }
+        };
+
         speech.on('wakeword', (hotword) => {
             child_process.spawn('xset', ['dpms', 'force', 'on']).on('error', (err) => {
                 console.error(`Failed to wake up the screen: ${err.message}`);
             });
-        });
+            ensureNullPlayback();
+         });
+
+        speech.on('no-match', stopNullPlayback);
+        speech.on('match', stopNullPlayback);
 
         const soundEffects = platform.getCapability('sound-effects');
         if (soundEffects) {

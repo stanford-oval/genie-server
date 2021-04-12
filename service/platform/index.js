@@ -280,11 +280,14 @@ class ServerPlatform extends Tp.BasePlatform {
                     hasFilterHeuristics = true;
                 if (mod.name === 'module-filter-apply')
                     hasFilterApply = true;
+                if (mod.name === 'module-role-ducking')
+                    await this._pulse.unloadModule(mod.index);
             }
             if (!hasFilterHeuristics)
                 await this._pulse.loadModule("module-filter-heuristics");
             if (!hasFilterApply)
                 await this._pulse.loadModule("module-filter-apply");
+            await this._pulse.loadModule("module-role-ducking", "trigger_roles=voice-assistant ducking_roles=music volume=40% global=true");
         } catch(e) {
             console.error("failed to configure PulseAudio");
         }
