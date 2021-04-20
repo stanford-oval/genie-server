@@ -33,7 +33,7 @@
     "serve-favicon": "^2.4.3",
     "thingpedia": "github:stanford-oval/thingpedia-api",
     "uuid": "^8.3.1",
-    "ws": "^7.4.4"
+    "ws": "^7.4.5"
   },
   "optionalDependencies": {
     "canberra": "^0.1.2",
@@ -42,12 +42,12 @@
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
-    "eslint": "^7.23.0",
+    "eslint": "^7.24.0",
     "form-data": "^4.0.0",
     "nodemon": "^2.0.7",
     "nyc": "^15.1.0",
     "parse5": "^6.0.1",
-    "selenium-webdriver": "^4.0.0-alpha.8",
+    "selenium-webdriver": "^4.0.0-beta.3",
     "tough-cookie": "^4.0.0"
   },
   "nyc": {
