@@ -51,7 +51,7 @@ async function testMyApiCreateGetApp(auth) {
             data: '!!!!!!!!!!',
             size: 10
         },
-        formatted: ['The data is !!!!!!!!!!.', 'The count is 2.'],
+        formatted: [{ type: 'text', text: 'The answer is !!!!!!!!!!' }],
         type: 'org.thingpedia.builtin.test:get_data'
     }, {
         raw: {
@@ -59,7 +59,7 @@ async function testMyApiCreateGetApp(auth) {
             data: '""""""""""',
             size: 10
         },
-        formatted: ['The data is """""""""".', 'The count is 2.'],
+        formatted: [{ type: 'text', text: 'The answer is """""""""".' }],
         type: 'org.thingpedia.builtin.test:get_data'
     }]);
 }
@@ -97,13 +97,12 @@ async function testMyApiCreateWhenApp(auth) {
                 return;
             delete parsed.result.raw.__timestamp;
             console.log(data);
-            parsed.result.formatted = parsed.result.formatted.filter((f) => f.indexOf('timestamp') < 0);
             if (count === 0) {
                 assert.deepStrictEqual(parsed, { result:
                     { appId: result.uniqueId,
                       raw: { data: '!!!!!!!!!!', size: 10 },
                       type: 'org.thingpedia.builtin.test:get_data',
-                      formatted: [ 'The data is !!!!!!!!!!.' ],
+                      formatted: [ { type: 'text', text: 'Notification from Test: the answer is !!!!!!!!!!' } ],
                       icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test' }
                 });
             } else {
@@ -111,7 +110,7 @@ async function testMyApiCreateWhenApp(auth) {
                     { appId: result.uniqueId,
                       raw: { data: '""""""""""', size: 10 },
                       type: 'org.thingpedia.builtin.test:get_data',
-                      formatted: [ 'The data is """""""""".' ],
+                      formatted: [ { type: 'text', text: 'Notification from Test: the answer is """""""""".' } ],
                       icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test' }
                 });
             }
