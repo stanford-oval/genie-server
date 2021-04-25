@@ -300,8 +300,9 @@ class ServerPlatform extends Tp.BasePlatform {
         if (PulseAudio) {
             this._pulse = new PulseAudio();
             this._pulse.on('error', (err) => { console.error('error on PulseAudio', err); });
-
-            this._ensurePulseConfig();
+            this._pulse.on('connection', () => {
+                this._ensurePulseConfig();
+            });
 
             if (WakeWordDetector)
                 this._wakeWordDetector = new WakeWordDetector();
