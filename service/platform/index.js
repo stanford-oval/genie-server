@@ -190,7 +190,7 @@ class Player extends events.EventEmitter {
 
 const _audioPlayerApi = {
     play(urls) {
-        return new Player(child_process.spawn('gst-play-1.0', urls, {
+        return new Player(child_process.spawn('gst-play-1.0', [ "-q" ].concat(urls), {
             stdio: ['ignore', process.stdout, process.stderr]
         }));
     }
