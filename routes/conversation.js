@@ -37,12 +37,6 @@ class WebsocketAssistantDelegate {
     }
 }
 
-const LOCAL_USER = {
-    id: process.getuid ? process.getuid() : 0,
-    account: '', //pwnam.name;
-    name: '', //pwnam.gecos;
-};
-
 module.exports = function conversationHandler(ws, req, next) {
     Promise.resolve().then(async () => {
         const engine = req.app.engine;
@@ -60,7 +54,7 @@ module.exports = function conversationHandler(ws, req, next) {
                 conversation.removeOutput(delegate);
             opened = false;
         });
-        const conversation = await engine.assistant.getOrOpenConversation(conversationId, LOCAL_USER, {
+        const conversation = await engine.assistant.getOrOpenConversation(conversationId, {
             showWelcome: true,
             debug: true,
         });

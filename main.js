@@ -41,11 +41,6 @@ function handleStop() {
 }
 
 const DEBUG = false;
-const LOCAL_USER = {
-    id: process.getuid ? process.getuid() : 0,
-    account: '', //pwnam.name;
-    name: '', //pwnam.gecos;
-};
 
 const HOTWORD_DETECTED_ID = 1;
 async function init(platform) {
@@ -58,7 +53,7 @@ async function init(platform) {
 
     await _engine.open();
 
-    const conversation = _engine.assistant.openConversation('main', LOCAL_USER, {
+    const conversation = _engine.assistant.openConversation('main', {
         showWelcome: true,
         debug: true,
         deleteWhenInactive: false,
