@@ -1,9 +1,10 @@
-html, body {
-  margin: 0;
+html,
+body {
+    margin: 0;
 }
 
 .force-inline {
-  display: inline;
+    display: inline;
 }
 
 #page-body {
@@ -11,7 +12,9 @@ html, body {
     min-height: calc(100vh - 195px);
     height: auto !important;
 }
-#page-body.container, #page-body.container-fluid {
+
+#page-body.container,
+#page-body.container-fluid {
     padding-bottom: 30px;
     min-height: calc(100vh - 165px);
 }
@@ -21,15 +24,17 @@ html, body {
 }
 
 footer.page-footer {
-  padding-top: 1.5em;
-  background-color: #8c1515;
-  color: white;
-  text-align: right;
-  min-height: 120px;
+    padding-top: 1.5em;
+    background-color: #8c1515;
+    color: white;
+    text-align: right;
+    min-height: 120px;
 }
 
-footer.page-footer a:link, footer.page-footer a:visited, footer.page-footer a:hover {
-  color: white;
+footer.page-footer a:link,
+footer.page-footer a:visited,
+footer.page-footer a:hover {
+    color: white;
 }
 
 .placeholder {
@@ -49,17 +54,17 @@ footer.page-footer a:link, footer.page-footer a:visited, footer.page-footer a:ho
     margin-right: 30px;
 }
 
-#qrcode-placeholder > img {
+#qrcode-placeholder>img {
     margin-left: auto;
     margin-right: auto;
 }
 
 #qrcode-target {
-    display:none;
+    display: none;
 }
 
 #config-phone-mobile-browser {
-    display:none;
+    display: none;
 }
 
 .app-content {
@@ -91,7 +96,8 @@ footer.page-footer a:link, footer.page-footer a:visited, footer.page-footer a:ho
     font-style: italic;
 }
 
-#app-install-well .btn, #show-hide-code .btn {
+#app-install-well .btn,
+#show-hide-code .btn {
     margin-bottom: 1em;
 }
 
@@ -99,15 +105,16 @@ footer.page-footer a:link, footer.page-footer a:visited, footer.page-footer a:ho
     margin-bottom: 1em;
 }
 
-pre, pre code {
+pre,
+pre code {
     color: black;
 }
 
 .app-template {
-  margin-bottom: 0.5em;
+    margin-bottom: 0.5em;
 }
 
-.device-icon-small > img {
+.device-icon-small>img {
     display: block;
     width: 80px;
     height: 80px;
@@ -123,11 +130,21 @@ pre, pre code {
 }
 
 #listen-button {
-  background: none;
-  border: none;
+    background: none;
+    border: none;
 }
+
 #listen-button img {
-  height: 80vh;
-  display: block;
-  object-fit: contain;
+    height: 80vh;
+    display: block;
+    object-fit: contain;
+}
+
+.consent_conf {
+    padding-top: 20px;
+}
+
+.consent_conf>h2 {
+    color: #8c1515;
+    font-weight: 500;
 }
