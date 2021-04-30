@@ -196,6 +196,7 @@ const _audioPlayerApi = {
     }
 };
 
+const LOCAL_SOUND_EFFECTS = ['news-intro'];
 const KNOWN_SOUND_EFFECTS = ['alarm-clock-elapsed', 'audio-channel-front-center', 'audio-channel-front-left', 'audio-channel-front-right', 'audio-channel-rear-center', 'audio-channel-rear-left', 'audio-channel-rear-right', 'audio-channel-side-left', 'audio-channel-side-right', 'audio-test-signal', 'audio-volume-change', 'bell', 'camera-shutter', 'complete', 'device-added', 'device-removed', 'dialog-error', 'dialog-information', 'dialog-warning', 'message-new-instant', 'message', 'network-connectivity-established', 'network-connectivity-lost', 'phone-incoming-call', 'phone-outgoing-busy', 'phone-outgoing-calling', 'power-plug', 'power-unplug', 'screen-capture', 'service-login', 'service-logout', 'suspend-error', 'trash-empty', 'window-attention', 'window-question'];
 
 const SOUND_EFFECT_ID = 0;
@@ -221,17 +222,24 @@ class SoundEffectsApi {
     }
 
     getURL(name) {
-        if (KNOWN_SOUND_EFFECTS.includes(name))
+        if (LOCAL_SOUND_EFFECTS.includes(name))
+            return 'file://' + path.resolve(path.dirname(module.filename), '../../data/sound-effects/' + name + '.oga');
+        else if (KNOWN_SOUND_EFFECTS.includes(name))
             return 'file:///usr/share/sounds/freedesktop/stereo/' + name + '.oga';
         else
             return undefined;
     }
 
     play(name, id = SOUND_EFFECT_ID) {
-        return this._ctx.play(id, {
+        const options = {
             'media.role': 'voice-assistant',
-            [canberra.Property.EVENT_ID]: name
-        });
+        };
+        if (LOCAL_SOUND_EFFECTS.includes(name))
+            options['media.filename'] = path.resolve(path.dirname(module.filename), '../../data/sound-effects/' + name + '.oga');
+        else
+            options['event.id'] = name;
+
+        return this._ctx.play(id, options);
     }
 }
 
