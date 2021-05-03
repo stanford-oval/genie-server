@@ -170,7 +170,10 @@ module.exports = {
     requireLogIn(req, res, next) {
         if (!model.isConfigured()) {
             if (req.method === 'GET' || req.method === 'HEAD') {
-                req.session.redirect_to = req.originalUrl;
+                if (!req.originalUrl.startsWith('/api') &&
+                    !req.originalUrl.startsWith('/recording') &&
+                    !req.originalUrl.startsWith('/ws'))
+                    req.session.redirect_to = req.originalUrl;
                 res.redirect(Config.BASE_URL + '/user/configure');
             } else {
                 res.status(401).render('error', {
@@ -180,7 +183,10 @@ module.exports = {
             }
         } else if (!req.user) {
             if (req.method === 'GET' || req.method === 'HEAD') {
-                req.session.redirect_to = req.originalUrl;
+                if (!req.originalUrl.startsWith('/api') &&
+                    !req.originalUrl.startsWith('/recording') &&
+                    !req.originalUrl.startsWith('/ws'))
+                    req.session.redirect_to = req.originalUrl;
                 res.redirect(Config.BASE_URL + '/user/login');
             } else {
                 res.status(401).render('login_required', { page_title: "Almond - Error" });
