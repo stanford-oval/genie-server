@@ -173,16 +173,17 @@ module.exports = {
                 req.session.redirect_to = req.originalUrl;
                 res.redirect(Config.BASE_URL + '/user/configure');
             } else {
-                res.status(401).render('configuration_required',
-                                       { page_title: "Almond - Error" });
+                res.status(401).render('error', {
+                    page_title: "Almond - Error",
+                    message: "You must complete the initial configuration of your Almond before you can perform this action."
+                });
             }
         } else if (!req.user) {
             if (req.method === 'GET' || req.method === 'HEAD') {
                 req.session.redirect_to = req.originalUrl;
                 res.redirect(Config.BASE_URL + '/user/login');
             } else {
-                res.status(401).render('login_required',
-                                   { page_title: "Almond - Error" });
+                res.status(401).render('login_required', { page_title: "Almond - Error" });
             }
         } else {
             next();
