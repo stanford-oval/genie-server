@@ -41,8 +41,8 @@ docker run --name almond -p 3000:3000 stanfordoval/almond-server:latest-portable
 To develop almond-server, you should clone this repository, then install the dependencies with:
 
 ```bash
-dnf -y install nodejs make gcc-c++ GraphicsMagick unzip # Fedora/RHEL
-apt -y install nodejs build-essential make g++ graphicsmagick unzip # Ubuntu/Debian
+dnf -y install nodejs gettext make gcc-c++ GraphicsMagick unzip # Fedora/RHEL
+apt -y install nodejs gettext build-essential make g++ graphicsmagick unzip # Ubuntu/Debian
 ```
 
 You can then build the repository with:
