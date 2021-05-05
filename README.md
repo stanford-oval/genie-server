@@ -41,8 +41,8 @@ docker run --name almond -p 3000:3000 stanfordoval/almond-server:latest-portable
 To develop almond-server, you should clone this repository, then install the dependencies with:
 
 ```bash
-dnf -y install nodejs gettext make gcc-c++ GraphicsMagick unzip # Fedora/RHEL
-apt -y install nodejs gettext build-essential make g++ graphicsmagick unzip # Ubuntu/Debian
+dnf -y install nodejs gettext make gcc-c++ GraphicsMagick zip unzip # Fedora/RHEL
+apt -y install nodejs gettext build-essential make g++ graphicsmagick zip unzip # Ubuntu/Debian
 ```
 
 You can then build the repository with:
@@ -57,4 +57,4 @@ apt -y install pulseaudio libpulse-dev libcanberra-dev libatlas-base-dev sound-t
 ```
 then run `npm install` again to pick up the new dependencies.
 
-After installing the dependencies locally, the server can be started using `npm start`. 
+After installing the dependencies locally, the server can be started using `npm start`.
