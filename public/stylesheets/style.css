@@ -16,7 +16,7 @@ body {
 #page-body.container,
 #page-body.container-fluid {
     padding-bottom: 30px;
-    min-height: calc(100vh - 165px);
+    min-height: calc(100vh - 145px);
 }
 
 #page-title {
@@ -25,10 +25,10 @@ body {
 
 footer.page-footer {
     padding-top: 1.5em;
-    background-color: #8c1515;
+    background-color: #585858;
     color: white;
     text-align: right;
-    min-height: 120px;
+    min-height: 100px;
 }
 
 footer.page-footer a:link,
@@ -147,4 +147,11 @@ pre code {
 .consent_conf>h2 {
     color: #8c1515;
     font-weight: 500;
+}
+
+.navbar-brand.hidden-sm {
+    font-weight: bold;
+    line-height: 21px;
+    height: 47px;
+    font-size: 26px;
 }

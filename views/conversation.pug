@@ -8,7 +8,7 @@ block styles
   link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/conversation.css')
 
 block page_name
-  = _("Chat")
+  = _("Chat with Almond")
 
 block content
   div.modal#comment-popup
@@ -25,9 +25,11 @@ block content
 
   div#toolbar
     div.form-inline
+      div.help-block.hidden= _("Lost connection to the server.")
       div.form-group#save-log
         i.far.fa-save#save-button
         span= _("Save Conversation Log")
+    
 
   div.modal#recording-save
     div.modal-dialog
@@ -51,7 +53,8 @@ block content
         div.form-group.has-feedback#input-form-group
           label(for='#chat-input').sr-only= _("Command:")
           input(type='text', placeholder=_("Write your command or answer here"), value=command ? command : '').form-control#input
+          button(type='button', title='Click to send a voice command').btn.btn-primary#record-button
           span.spinner-container.form-control-feedback.hidden
             span.spinner= _("Almond is thinking…")
           span.glyphicon.glyphicon-warning-sign.form-control-feedback.hidden
-          span.help-block.hidden= _("Lost connection to the server.")
+          

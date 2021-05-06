@@ -22,13 +22,13 @@ $(() => {
     function updateConnectionFeedback() {
         if (!ws || !open) {
             $('#input-form-group').addClass('has-warning');
-            $('#input-form-group .spinner-container').addClass('hidden');
--           $('#input-form-group .glyphicon-warning-sign, #input-form-group .help-block').removeClass('hidden');
+            $('#input-form-group .spinner-container').addClass('hidden'); -
+            $('#toolbar .form-inline .help-block').removeClass('hidden');
             return;
         }
 
         $('#input-form-group').removeClass('has-warning');
-        $('#input-form-group .glyphicon-warning-sign, #input-form-group .help-block').addClass('hidden');
+        $('#toolbar .form-inline .help-block').addClass('hidden');
     }
 
     function updateSpinner(thinking) {
@@ -142,13 +142,14 @@ $(() => {
     function maybeScroll(container) {
         if (!$('#input:focus').length)
             return;
+        //keep scroll bar to the bottom
 
         scrollChat();
         setTimeout(scrollChat, 1000);
     }
 
     function scrollChat() {
-        let chat = document.getElementById('conversation');
+        let chat = document.getElementById('chat');
         chat.scrollTop = chat.scrollHeight;
     }
 
@@ -289,44 +290,44 @@ $(() => {
         lastMessageId = parsed.id;
 
         switch (parsed.type) {
-        case 'text':
-        case 'result':
-            // FIXME: support more type of results
-            textMessage(parsed.text, parsed.icon);
-            currentGrid = null;
-            break;
+            case 'text':
+            case 'result':
+                // FIXME: support more type of results
+                textMessage(parsed.text, parsed.icon);
+                currentGrid = null;
+                break;
 
-        case 'picture':
-            picture(parsed.url, parsed.icon);
-            currentGrid = null;
-            break;
+            case 'picture':
+                picture(parsed.url, parsed.icon);
+                currentGrid = null;
+                break;
 
-        case 'rdl':
-            rdl(parsed.rdl, parsed.icon);
-            currentGrid = null;
-            break;
+            case 'rdl':
+                rdl(parsed.rdl, parsed.icon);
+                currentGrid = null;
+                break;
 
-        case 'choice':
-            choice(parsed.idx, parsed.title);
-            break;
+            case 'choice':
+                choice(parsed.idx, parsed.title);
+                break;
 
-        case 'button':
-            buttonMessage(parsed.title, parsed.json);
-            break;
+            case 'button':
+                buttonMessage(parsed.title, parsed.json);
+                break;
 
-        case 'link':
-            linkMessage(parsed.title, parsed.url);
-            break;
+            case 'link':
+                linkMessage(parsed.title, parsed.url);
+                break;
 
-        case 'hypothesis':
-            $('#input').val(parsed.hypothesis);
-            break;
+            case 'hypothesis':
+                $('#input').val(parsed.hypothesis);
+                break;
 
-        case 'command':
-            $('#input').val('');
-            collapseButtons();
-            appendUserMessage(parsed.command);
-            break;
+            case 'command':
+                $('#input').val('');
+                collapseButtons();
+                appendUserMessage(parsed.command);
+                break;
         }
     }
 
@@ -351,19 +352,23 @@ $(() => {
         updateSpinner(true);
         ws.send(JSON.stringify({ type: 'command', text: text }));
     }
+
     function handleParsedCommand(json, title) {
         updateSpinner(true);
         ws.send(JSON.stringify({ type: 'parsed', json: json, title: title }));
     }
+
     function handleThingTalk(tt) {
         updateSpinner(true);
         ws.send(JSON.stringify({ type: 'tt', code: tt }));
     }
+
     function handleChoice(idx, title) {
         handleParsedCommand({ code: ['bookkeeping', 'choice', String(idx)], entities: {} }, title);
     }
+
     function handleSpecial(special, title) {
-        handleParsedCommand({ code: ['bookkeeping', 'special', 'special:'+special ], entities: {} }, title);
+        handleParsedCommand({ code: ['bookkeeping', 'special', 'special:' + special], entities: {} }, title);
     }
 
     function appendUserMessage(text) {
@@ -374,10 +379,10 @@ $(() => {
     $('#input-form').submit((event) => {
         var text = $('#input').val();
         if (currCommand !== "")
-          pastCommandsUp.push(currCommand);
+            pastCommandsUp.push(currCommand);
         if (pastCommandsDown.length !== 0) {
-          pastCommandsUp = pastCommandsUp.concat(pastCommandsDown);
-          pastCommandsDown = [];
+            pastCommandsUp = pastCommandsUp.concat(pastCommandsDown);
+            pastCommandsDown = [];
         }
         pastCommandsUp.push(text);
 
@@ -391,21 +396,21 @@ $(() => {
     });
 
     $('#input-form').on('keydown', (event) => { // button is pressed
-      if (event.keyCode === 38) {  // Up
-        // removes last item from array pastCommandsUp, displays it as currCommand, adds current input text to pastCommandsDown
-        currCommand = pastCommandsUp.pop();
-        if ($('#input').val() !== "")
-          pastCommandsDown.push($('#input').val());
-        $('#input').val(currCommand);
-      }
+        if (event.keyCode === 38) { // Up
+            // removes last item from array pastCommandsUp, displays it as currCommand, adds current input text to pastCommandsDown
+            currCommand = pastCommandsUp.pop();
+            if ($('#input').val() !== "")
+                pastCommandsDown.push($('#input').val());
+            $('#input').val(currCommand);
+        }
 
-      if (event.keyCode === 40) {  // Down
-        // removes last item from array pastCommandsDown, displays it as currCommand, adds current input text to pastCommandsUp
-        currCommand = pastCommandsDown.pop();
-        if ($('#input').val() !== "")
-          pastCommandsUp.push($('#input').val());
-        $('#input').val(currCommand);
-      }
+        if (event.keyCode === 40) { // Down
+            // removes last item from array pastCommandsDown, displays it as currCommand, adds current input text to pastCommandsUp
+            currCommand = pastCommandsDown.pop();
+            if ($('#input').val() !== "")
+                pastCommandsUp.push($('#input').val());
+            $('#input').val(currCommand);
+        }
     });
 
     $('#save-log').click(() => {
