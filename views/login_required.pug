@@ -4,9 +4,14 @@ block page_name
   | Error
 
 block content
-  h1 Login required
-  p This Almond instance is configured to require login.
-  p
-    a(href='javascript:history.back()').btn.btn-default Go back
-    span= " "
+  div.sp_blk
+    div.blk_sx
+      img.err_img(src=Config.BASE_URL + '/images/almond_error.png')
+    div.blk_dx
+      div.sorry
+        h2.p=_("Login required")
+      div.sp_msg
+        h3.p=_("This Almond instance is configured to require login.")
+          a(href='javascript:history.back()').btn.btn-default Go back
+  div.sp_btn
     a(href=Config.BASE_URL + '/user/login').btn.btn-primary Log in

@@ -22,7 +22,7 @@ $(() => {
     function updateConnectionFeedback() {
         if (!ws || !open) {
             $('#input-form-group').addClass('has-warning');
-            $('#input-form-group .spinner-container').addClass('hidden'); -
+            $('#almond_thinking_container').remove();
             $('#toolbar .form-inline .help-block').removeClass('hidden');
             return;
         }
@@ -36,9 +36,9 @@ $(() => {
             return;
 
         if (thinking)
-            $('#input-form-group .spinner-container').removeClass('hidden');
+            $('#almond_thinking_container').removeClass('hidden');
         else
-            $('#input-form-group .spinner-container').addClass('hidden');
+            $('#almond_thinking_container').remove();
     }
 
 
@@ -101,6 +101,7 @@ $(() => {
 
     function addVoteButtons() {
         $('.comment-options').remove();
+        //$('#almond_thinking_container').remove();
         $('#comment-block').val('');
         const upvote = $('<i>').addClass('far fa-thumbs-up').attr('id', 'upvoteLast');
         const downvote = $('<i>').addClass('far fa-thumbs-down').attr('id', 'downvoteLast');
@@ -143,7 +144,6 @@ $(() => {
         if (!$('#input:focus').length)
             return;
         //keep scroll bar to the bottom
-
         scrollChat();
         setTimeout(scrollChat, 1000);
     }
@@ -180,6 +180,7 @@ $(() => {
         rdlMessage.append($('<span>').addClass('message-rdl-content')
             .text(rdl.displayText));
         container.append(rdlMessage);
+
         maybeScroll(container);
     }
 
@@ -374,6 +375,7 @@ $(() => {
     function appendUserMessage(text) {
         container.append($('<span>').addClass('message message-text from-user')
             .text(text));
+        container.append('<div id="almond_thinking_container" ><div id="almond_thinking_txt"><p>Almond is thinking</p></div><div id="almond_thinking"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>');
     }
 
     $('#input-form').submit((event) => {

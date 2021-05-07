@@ -10,6 +10,7 @@ block styles
   link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/my_stuff.css')
 
 block content
+  a#anch_top(href='#')
   if message
     div.row
       div.col-xs-12
@@ -32,8 +33,9 @@ block content
         div.clearfix.visible-md
       div.col-lg-4.col-md-6
         div.panel.panel-default.installed-dev
-          a(href='https://thingpedia.stanford.edu/thingpedia/devices/by-id/' + dev.kind).panel-heading
-            h2.panel-title= dev.name
+          div#cont_head
+            a(href='https://thingpedia.stanford.edu/thingpedia/devices/by-id/' + dev.kind).panel-heading
+              h2.panel-title= dev.name
           div.panel-body
             p.device-icon-small
               img(src=THINGPEDIA_URL + '/api/v3/devices/icon/' + dev.kind, alt="Icon for " + dev.name)
@@ -58,3 +60,6 @@ block content
                     input(type='hidden',name='id',value=dev.uniqueId)
                     input(type='hidden',name='_csrf',value=csrfToken)
                     button(type='submit').bottom_bar.fa.fa-cog
+  div.row                   
+    div#back_top.hidden
+      a(href= '#anch_top').btn.btn-primary#bttop-button.fas.fa-arrow-circle-up

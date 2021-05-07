@@ -155,3 +155,58 @@ pre code {
     height: 47px;
     font-size: 26px;
 }
+
+#login_btn {
+    border-radius: 15px;
+    font-weight: 600;
+}
+
+.sp_blk {
+    min-height: 15em;
+    padding-top: 4em;
+}
+
+.blk_sx {
+    width: 50%;
+    float: left;
+    text-align: right;
+    padding-right: 6em;
+}
+
+.err_img {
+    width: 100px;
+}
+
+.blk_dx {
+    width: 50%;
+    float: right;
+}
+
+.sorry>h2 {
+    font-weight: 600;
+    padding: 0.5em 0em;
+}
+
+.sp_msg {
+    color: #8c1515;
+}
+
+.sp_msg>h3 {
+    font-weight: 400;
+}
+
+.sp_btn {
+    width: 100%;
+    text-align: center;
+    padding: 50px 0px;
+}
+
+.sp_btn>a {
+    border-radius: 15px;
+}
+
+.logo_top {
+    width: 55px;
+    float: left;
+    margin-right: 10px;
+}
