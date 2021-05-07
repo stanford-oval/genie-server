@@ -19,6 +19,10 @@ block content
           p= message
 
   div.row
+      div.col-sm-6.col-md-3#new_skills
+        a(href=Config.BASE_URL + '/devices/create').btn.btn-primary.btn-block= _("Configure a new skill")
+
+  div.row
     each dev, i in devices
       if i % 6 === 0
         div.clearfix.visible-lg.visible-md
@@ -43,13 +47,14 @@ block content
               if !dev.isTransient
                 div.col-md-6
                   form.form-inline(action=Config.BASE_URL + '/devices/delete',method="post").form-delete
+                      input(type='hidden',name='id',value=dev.uniqueId)
+                      input(type='hidden',name='_csrf',value=csrfToken)
+                      if datasource
+                        button(type='submit').bottom_bar.fa.power-off
+                      else
+                        button(type='submit').bottom_bar.fa.fa-trash-alt
+
+                  form.form-inline(action=Config.BASE_URL + '/devices/config',method="post").form-config
                     input(type='hidden',name='id',value=dev.uniqueId)
                     input(type='hidden',name='_csrf',value=csrfToken)
-                    if datasource
-                      button(type='submit').btn.btn-danger.btn-sm.btn-block= _("Disable")
-                    else
-                      button(type='submit').btn.btn-danger.btn-sm.btn-block= _("Forget")
-
-  div.row
-    div.col-sm-6.col-md-3
-      a(href=Config.BASE_URL + '/devices/create').btn.btn-primary.btn-block= _("Configure a new skill")
+                    button(type='submit').bottom_bar.fa.fa-cog
