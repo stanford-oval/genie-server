@@ -18,14 +18,8 @@ block content
             span(aria-hidden='true') ×
           p= message
 
-  div.row
+  div.row.display-flex
     each dev, i in devices
-      if i % 6 === 0
-        div.clearfix.visible-lg.visible-md
-      else if i % 3 === 0
-        div.clearfix.visible-lg
-      else if i % 2 === 0
-        div.clearfix.visible-md
       div.col-lg-4.col-md-6
         div.panel.panel-default.installed-dev
           a(href='https://thingpedia.stanford.edu/thingpedia/devices/by-id/' + dev.kind).panel-heading
@@ -46,9 +40,9 @@ block content
                     input(type='hidden',name='id',value=dev.uniqueId)
                     input(type='hidden',name='_csrf',value=csrfToken)
                     if datasource
-                      button(type='submit').btn.btn-danger.btn-sm.btn-block= _("Disable")
+                      button(type='submit').btn.btn-warning.btn-block= _("Disable")
                     else
-                      button(type='submit').btn.btn-danger.btn-sm.btn-block= _("Forget")
+                      button(type='submit').btn.btn-warning.btn-block= _("Forget")
 
   div.row
     div.col-sm-6.col-md-3

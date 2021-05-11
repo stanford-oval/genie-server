@@ -7,6 +7,12 @@
     display: block;
 }
 
+.installed-dev {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
 .form-delete-app {
     float: right;
 }

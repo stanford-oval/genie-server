@@ -148,3 +148,18 @@ pre code {
     color: #8c1515;
     font-weight: 500;
 }
+
+.row.display-flex {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.row.display-flex > [class*='col-'] {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.panel {
+    height: 100%;
+}

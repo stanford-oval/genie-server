@@ -24,7 +24,7 @@ block content
         form.form-inline(action=Config.BASE_URL + "/apps/delete",method="post").form-delete.form-delete-app
           input(type='hidden',name='id',value=app.uniqueId)
           input(type='hidden',name='_csrf',value=csrfToken)
-          button(type='submit').btn.btn-sm.btn-danger= _("Stop")
+          button(type='submit').btn.btn.btn-warning= _("Stop")
         p= app.description
         if app.error
           p= _("This rule had an error: %s").format(app.error)
