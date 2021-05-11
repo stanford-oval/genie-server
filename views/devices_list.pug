@@ -33,16 +33,18 @@ block content
                 if dev.ownerTier !== 'cloud' && dev.ownerTier !== 'global'
                   p= _("This device is owned by your %s.").format(dev.ownerTier)
           div.panel-footer
-            div.row
-              if !dev.isTransient
+            div.row              
                 div.col-md-6
-                  form.form-inline(action=Config.BASE_URL + '/devices/delete',method="post").form-delete
-                    input(type='hidden',name='id',value=dev.uniqueId)
-                    input(type='hidden',name='_csrf',value=csrfToken)
-                    if datasource
-                      button(type='submit').btn.btn-warning.btn-block= _("Disable")
-                    else
-                      button(type='submit').btn.btn-warning.btn-block= _("Forget")
+                  if !dev.isTransient
+                    form.form-inline(action=Config.BASE_URL + '/devices/delete',method="post").form-delete
+                      input(type='hidden',name='id',value=dev.uniqueId)
+                      input(type='hidden',name='_csrf',value=csrfToken)
+                      if datasource
+                        button(type='submit').btn.btn-warning.btn-block= _("Disable")
+                      else
+                        button(type='submit').btn.btn-warning.btn-block= _("Forget")
+                  else      
+                    button(type='submit').btn.btn-warning.btn-block.disabled= _("Permanent")
 
   div.row
     div.col-sm-6.col-md-3
