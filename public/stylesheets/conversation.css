@@ -209,27 +209,28 @@
 }
 
 .help-block {
-    display: inline;
+    display: block;
     color: #b1040e;
     font-weight: bold;
     width: 50%;
     text-align: center;
+    font-size: 1.2em;
 }
 
-#almond_thinking_container {
+.almond-thinking-container {
     display: flex;
 }
 
-#almond_thinking_txt {
+.almond-thinking-txt {
     font-size: 1.4em;
     padding: 0.7em 0.2em 0em 1.2em;
 }
 
-#almond_thinking {
+.almond-thinking {
     padding: 1.1em;
 }
 
-#almong_thinking {
+#almond-thinking {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -239,7 +240,7 @@
     overflow: hidden;
 }
 
-#almond_thinking span {
+.almond-thinking span {
     display: inline-block;
     vertical-align: middle;
     width: .6em;
@@ -250,32 +251,32 @@
     animation: loading 1s infinite alternate;
 }
 
-#almond_thinking span:nth-of-type(2) {
+.almond-thinking span:nth-of-type(2) {
     background: #8d2727;
     animation-delay: 0.2s;
 }
 
-#almond_thinking span:nth-of-type(3) {
+.almond-thinking span:nth-of-type(3) {
     background: #a73c3c;
     animation-delay: 0.4s;
 }
 
-#almond_thinking span:nth-of-type(4) {
+.almond-thinking span:nth-of-type(4) {
     background: #c05959;
     animation-delay: 0.6s;
 }
 
-#almond_thinking span:nth-of-type(5) {
+.almond-thinking span:nth-of-type(5) {
     background: #c26e6e;
     animation-delay: 0.8s;
 }
 
-#almond_thinking span:nth-of-type(6) {
+.almond-thinking span:nth-of-type(6) {
     background: #df9595;
     animation-delay: 1.0s;
 }
 
-#almond_thinking span:nth-of-type(7) {
+.almond-thinking span:nth-of-type(7) {
     background: #e6acac;
     animation-delay: 1.2s;
 }

@@ -19,28 +19,69 @@ $(() => {
     var conversationId = null;
     var lastMessageId = -1;
 
+    var container = $('#chat');
+    var currentGrid = null;
+
     function updateConnectionFeedback() {
         if (!ws || !open) {
             $('#input-form-group').addClass('has-warning');
-            $('#almond_thinking_container').remove();
-            $('#toolbar .form-inline .help-block').removeClass('hidden');
+            manageSpinner('remove');
+            manageLostConnectionMsg('add');
+            manageLostConnectionMsg('show');
             return;
         }
 
         $('#input-form-group').removeClass('has-warning');
-        $('#toolbar .form-inline .help-block').addClass('hidden');
+        manageLostConnectionMsg('remove');
     }
 
     function updateSpinner(thinking) {
         if (!ws || !open)
             return;
 
+        let to_do;
+
         if (thinking)
-            $('#almond_thinking_container').removeClass('hidden');
+            to_do = 'show';
         else
-            $('#almond_thinking_container').remove();
+            to_do = 'remove';
+
+        manageSpinner(to_do)
     }
 
+    function manageLostConnectionMsg(todo) {
+        // let last_elem = $("#chat > span").last();
+        //$("#chat span:last-child")
+
+        switch (todo) {
+            case 'remove':
+                $('#chat > .help-block').remove();
+                break;
+            case 'show':
+                $('#chat > .help-block').removeClass('hidden');
+                break;
+            case 'add':
+                $('#chat > .help-block').remove();
+                $(".help-block").clone().appendTo("#chat").last();
+                break;
+        }
+        return;
+    }
+
+    function manageSpinner(todo) {
+        let last_elem = $(".from-user").last();
+        switch (todo) {
+            case 'remove':
+                $('#chat > .almond-thinking').remove();
+                break;
+            case 'show':
+                $('#chat > .almond-thinking').remove();
+                $(".almond-thinking").clone().insertAfter(last_elem);
+                $('#chat > .almond-thinking').removeClass('hidden');
+                break;
+        }
+        return;
+    }
 
     (function() {
         var reconnectTimeout = 100;
@@ -85,9 +126,6 @@ $(() => {
             $('#cancel').addClass('hidden');
     }
 
-    var container = $('#chat');
-    var currentGrid = null;
-
     function almondMessage(icon) {
         var msg = $('<span>').addClass('message-container from-almond');
         icon = icon || 'org.thingpedia.builtin.thingengine.builtin';
@@ -96,12 +134,13 @@ $(() => {
         container.append(msg);
 
         addVoteButtons();
+        manageLostConnectionMsg('add');
+        manageSpinner('remove');
         return msg;
     }
 
     function addVoteButtons() {
         $('.comment-options').remove();
-        //$('#almond_thinking_container').remove();
         $('#comment-block').val('');
         const upvote = $('<i>').addClass('far fa-thumbs-up').attr('id', 'upvoteLast');
         const downvote = $('<i>').addClass('far fa-thumbs-down').attr('id', 'downvoteLast');
@@ -375,7 +414,9 @@ $(() => {
     function appendUserMessage(text) {
         container.append($('<span>').addClass('message message-text from-user')
             .text(text));
-        container.append('<div id="almond_thinking_container" ><div id="almond_thinking_txt"><p>Almond is thinking</p></div><div id="almond_thinking"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>');
+
+        manageLostConnectionMsg('add');
+        manageSpinner('show');
     }
 
     $('#input-form').submit((event) => {
@@ -393,6 +434,7 @@ $(() => {
         handleCommand(text);
         event.preventDefault();
     });
+
     $('#cancel').click(() => {
         handleSpecial('nevermind', "Cancel.");
     });

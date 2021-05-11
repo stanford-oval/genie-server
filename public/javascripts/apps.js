@@ -4,11 +4,11 @@ $(function() {
     });
     $(window).scroll(function() {
         if ($(window).scrollTop() > 100) {
-            $('#back_top').removeClass('hidden');
+            $('#back-top').removeClass('hidden');
             console.log("hidden")
         } else {
             console.log("not hidden")
-            $('#back_top').addClass('hidden')
+            $('#back-top').addClass('hidden')
         }
     });
 });

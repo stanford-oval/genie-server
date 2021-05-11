@@ -1,17 +1,17 @@
 extends layout
 
 block page_name
-  | Error
+  = _("Error")
 
 block content
-  div.sp_blk
-    div.blk_sx
-      img.err_img(src=Config.BASE_URL + '/images/almond_error.png')
-    div.blk_dx
-      div.sorry
+  div.msg-container
+    div.msg-left-block
+      img.msg-image(src=Config.BASE_URL + '/images/almond_error.png')
+    div.msg-right-block
+      div.msg-title
         h2.p=_("Login required")
-      div.sp_msg
+      div.msg-body
         h3.p=_("This Almond instance is configured to require login.")
-          a(href='javascript:history.back()').btn.btn-default Go back
-  div.sp_btn
-    a(href=Config.BASE_URL + '/user/login').btn.btn-primary Log in
+          a(href='javascript:history.back()').btn.btn-default=_("Go back")
+  div.msg-button
+    a(href=Config.BASE_URL + '/user/login').btn.btn-primary=_("Log in")

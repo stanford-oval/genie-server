@@ -20,7 +20,7 @@ block content
           p= message
 
   div.row
-      div.col-sm-6.col-md-3#new_skills
+      div.col-sm-6.col-md-3#new-skills
         a(href=Config.BASE_URL + '/devices/create').btn.btn-primary.btn-block= _("Configure a new skill")
 
   div.row
@@ -33,7 +33,7 @@ block content
         div.clearfix.visible-md
       div.col-lg-4.col-md-6
         div.panel.panel-default.installed-dev
-          div#cont_head
+          div.content-head
             a(href='https://thingpedia.stanford.edu/thingpedia/devices/by-id/' + dev.kind).panel-heading
               h2.panel-title= dev.name
           div.panel-body
@@ -52,14 +52,14 @@ block content
                       input(type='hidden',name='id',value=dev.uniqueId)
                       input(type='hidden',name='_csrf',value=csrfToken)
                       if datasource
-                        button(type='submit').bottom_bar.fa.power-off
+                        button(type='submit').bottom-bar.fa.power-off
                       else
-                        button(type='submit').bottom_bar.fa.fa-trash-alt
+                        button(type='submit').bottom-bar.fa.fa-trash-alt
 
                   form.form-inline(action=Config.BASE_URL + '/devices/config',method="post").form-config
                     input(type='hidden',name='id',value=dev.uniqueId)
                     input(type='hidden',name='_csrf',value=csrfToken)
-                    button(type='submit').bottom_bar.fa.fa-cog
+                    button(type='submit').bottom-bar.fa.fa-cog
   div.row                   
-    div#back_top.hidden
+    div#back-top.hidden
       a(href= '#anch_top').btn.btn-primary#bttop-button.fas.fa-arrow-circle-up

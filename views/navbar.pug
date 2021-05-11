@@ -1,17 +1,17 @@
 ul.nav.navbar-nav
   if authenticated
     li
-      a(class="scroller", href=Config.BASE_URL + "/") Conversation
+      a(class="scroller", href=Config.BASE_URL + "/")=_("Conversation")
     li
-      a(class="scroller", href=Config.BASE_URL + "/apps") My Rules
+      a(class="scroller", href=Config.BASE_URL + "/apps")=_("My Rules")
     li
-      a(class="scroller", href=Config.BASE_URL + "/devices") My Skills
+      a(class="scroller", href=Config.BASE_URL + "/devices")=_("My Skills")
     li
-      a(class="scroller", href=Config.THINGPEDIA_URL + "/cheatsheet", target='_blank', rel='noopener') Cheatsheet
+      a(class="scroller", href=Config.THINGPEDIA_URL + "/cheatsheet", target='_blank', rel='noopener')=_("Cheatsheet")
 
 ul.nav.navbar-nav.navbar-right
   if authenticated
     li
-      a(class="scroller", href=Config.BASE_URL + "/config") Configuration
+      a(class="scroller", href=Config.BASE_URL + "/config")=_("Configuration")
     li
-      a.navbar-login#navbar-login-button(class="scroller", href=Config.BASE_URL + "/user/logout") Log out
+      a.navbar-login#navbar-login-button(class="scroller", href=Config.BASE_URL + "/user/logout")=_("Log out")

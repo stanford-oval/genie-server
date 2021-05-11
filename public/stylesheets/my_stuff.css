@@ -11,76 +11,23 @@
     float: right;
 }
 
-#new_skills {
-    padding: 30px 0px;
-}
-
-#new_skills>a {
-    font-weight: 600;
-    font-size: 1.3em;
-    border-radius: 15px;
-}
-
-.panel {
-    min-height: 13.9em;
-    border-bottom-left-radius: 19px;
-    border-bottom-right-radius: 19px;
-    border-top-left-radius: 19px;
-    border-top-right-radius: 19px;
-}
-
-.panel-default {
-    border-color: #585858;
-}
-
-.panel-body {
-    min-height: 8em;
-    background-color: #ece5dd6b;
-}
-
-.panel-footer {
-    min-height: 3em;
-    padding: 2px 5px !important;
-    background-color: #b1040e;
-    border-bottom-left-radius: 19px;
-    border-bottom-right-radius: 19px;
-}
-
-.panel-title {
-    font-size: 19px;
-    font-weight: 600;
-    line-height: 1.2em;
-}
-
-.panel-heading {
-    min-height: 3em;
-    border-top-left-radius: 19px;
-    border-top-right-radius: 19px;
-    background-color: #d8d8d8 !important;
-    color: #000;
-}
-
-#cont_head {
-    text-align: center;
-}
-
-.bottom_bar.fa,
-.bottom_bar.far {
+.bottom-bar.fa,
+.bottom-bar.far {
     cursor: grab;
     border-radius: 60px;
     background-color: transparent;
     color: white;
     margin: 5px;
-    width: 1.4em;
-    height: 1.4em;
+    width: 1.6em;
+    height: 1.7em;
     font-size: 1.3em;
     line-height: 1.5em;
     text-align: center;
     border: none;
 }
 
-.bottom_bar.fa:hover,
-.bottom_bar.far:hover {
+.bottom-bar.fa:hover,
+.bottom-bar.far:hover {
     background-color: #8c1515;
 }
 
@@ -103,7 +50,7 @@ p.device-icon-small {
     padding-right: 1em;
 }
 
-#back_top {
+#back-top {
     text-align: right;
     padding-top: 3em;
     width: 100%;

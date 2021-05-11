@@ -98,20 +98,24 @@ async function testMyApiCreateWhenApp(auth) {
             delete parsed.result.raw.__timestamp;
             console.log(data);
             if (count === 0) {
-                assert.deepStrictEqual(parsed, { result:
-                    { appId: result.uniqueId,
-                      raw: { data: '!!!!!!!!!!', size: 10 },
-                      type: 'org.thingpedia.builtin.test:get_data',
-                      formatted: [ { type: 'text', text: 'Notification from Test: the answer is !!!!!!!!!!' } ],
-                      icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test' }
+                assert.deepStrictEqual(parsed, {
+                    result: {
+                        appId: result.uniqueId,
+                        raw: { data: '!!!!!!!!!!', size: 10 },
+                        type: 'org.thingpedia.builtin.test:get_data',
+                        formatted: [{ type: 'text', text: 'Notification from Test: the answer is !!!!!!!!!!' }],
+                        icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test'
+                    }
                 });
             } else {
-                assert.deepStrictEqual(parsed, { result:
-                    { appId: result.uniqueId,
-                      raw: { data: '""""""""""', size: 10 },
-                      type: 'org.thingpedia.builtin.test:get_data',
-                      formatted: [ { type: 'text', text: 'Notification from Test: the answer is """""""""".' } ],
-                      icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test' }
+                assert.deepStrictEqual(parsed, {
+                    result: {
+                        appId: result.uniqueId,
+                        raw: { data: '""""""""""', size: 10 },
+                        type: 'org.thingpedia.builtin.test:get_data',
+                        formatted: [{ type: 'text', text: 'Notification from Test: the answer is """""""""".' }],
+                        icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test'
+                    }
                 });
             }
             if (++count === 2) {
@@ -131,8 +135,7 @@ async function testMyApiListApps(auth, uniqueId) {
         name: 'Test',
         description: 'Notify me when there are new get data on test with size 10 byte.',
         error: null,
-        code:
-         'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));',
+        code: 'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));',
         icon: 'org.thingpedia.builtin.test',
         isEnabled: true,
         isRunning: true,
@@ -144,8 +147,7 @@ async function testMyApiListApps(auth, uniqueId) {
         name: 'Test',
         description: 'Notify me when there are new get data on test with size 10 byte.',
         error: null,
-        code:
-         'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));',
+        code: 'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));',
         icon: 'org.thingpedia.builtin.test',
         isEnabled: true,
         isRunning: true,
@@ -167,43 +169,50 @@ async function testMyApiDeleteApp(auth, uniqueId) {
 async function testMyApiDevices(auth) {
     const listResult = JSON.parse(await request('/api/devices/list', 'GET', null, { auth }));
 
-    assert.deepStrictEqual(listResult, [
-      { uniqueId: 'thingengine-own-server:81e0e8abba27202a',
-        name: 'Almond server (:81e0e8abba27202a)',
-        description: 'This is one of your own Almond apps.',
-        kind: 'org.thingpedia.builtin.thingengine',
-        version: 0,
-        ownerTier: 'server',
-        class: 'system',
-        isTransient: false,
-        authType: 'builtin' },
-      { uniqueId: 'org.thingpedia.builtin.thingengine.server',
-        name: 'Almond Smart Speaker',
-        description: 'Commands that are specific to using Almond as a smart-speaker device.',
-        kind: 'org.thingpedia.builtin.thingengine.server',
-        version: 0,
-        class: 'data',
-        ownerTier: 'global',
-        isTransient: false,
-        authType: 'builtin' },
-      { uniqueId: 'org.thingpedia.builtin.thingengine.builtin',
-        name: 'Miscellaneous Interfaces',
-        description: 'Time, randomness and other non-device specific things.',
-        kind: 'org.thingpedia.builtin.thingengine.builtin',
-        version: 0,
-        ownerTier: 'global',
-        class: 'data',
-        isTransient: true,
-        authType: 'builtin' },
-      { uniqueId: 'org.thingpedia.builtin.test',
-        name: 'Test Device',
-        description: 'Test Almond in various ways',
-        kind: 'org.thingpedia.builtin.test',
-        version: 0,
-        ownerTier: 'global',
-        class: 'system',
-        isTransient: true,
-        authType: 'builtin' },
+    assert.deepStrictEqual(listResult, [{
+            uniqueId: 'thingengine-own-server:81e0e8abba27202a',
+            name: 'Almond server (:81e0e8abba27202a)',
+            description: 'This is one of your own Almond apps.',
+            kind: 'org.thingpedia.builtin.thingengine',
+            version: 0,
+            ownerTier: 'server',
+            class: 'system',
+            isTransient: false,
+            authType: 'builtin'
+        },
+        {
+            uniqueId: 'org.thingpedia.builtin.thingengine.server',
+            name: 'Almond Smart Speaker',
+            description: 'Commands that are specific to using Almond as a smart-speaker device.',
+            kind: 'org.thingpedia.builtin.thingengine.server',
+            version: 0,
+            class: 'data',
+            ownerTier: 'global',
+            isTransient: false,
+            authType: 'builtin'
+        },
+        {
+            uniqueId: 'org.thingpedia.builtin.thingengine.builtin',
+            name: 'Miscellaneous Interfaces',
+            description: 'Time, randomness and other non-device specific things.',
+            kind: 'org.thingpedia.builtin.thingengine.builtin',
+            version: 0,
+            ownerTier: 'global',
+            class: 'data',
+            isTransient: true,
+            authType: 'builtin'
+        },
+        {
+            uniqueId: 'org.thingpedia.builtin.test',
+            name: 'Test Device',
+            description: 'Test Almond in various ways',
+            kind: 'org.thingpedia.builtin.test',
+            version: 0,
+            ownerTier: 'global',
+            class: 'system',
+            isTransient: true,
+            authType: 'builtin'
+        },
     ]);
 
     const createResult = JSON.parse(await request('/api/devices/create', 'POST', JSON.stringify({
@@ -223,53 +232,62 @@ async function testMyApiDevices(auth) {
     });
 
     const listResult2 = JSON.parse(await request('/api/devices/list', 'GET', null, { auth }));
-    listResult2[listResult2.length-1].version = 0;
-    assert.deepStrictEqual(listResult2, [
-      { uniqueId: 'thingengine-own-server:81e0e8abba27202a',
-        name: 'Almond server (:81e0e8abba27202a)',
-        description: 'This is one of your own Almond apps.',
-        kind: 'org.thingpedia.builtin.thingengine',
-        version: 0,
-        ownerTier: 'server',
-        class: 'system',
-        isTransient: false,
-        authType: 'builtin' },
-      { uniqueId: 'org.thingpedia.builtin.thingengine.server',
-        name: 'Almond Smart Speaker',
-        description: 'Commands that are specific to using Almond as a smart-speaker device.',
-        kind: 'org.thingpedia.builtin.thingengine.server',
-        version: 0,
-        class: 'data',
-        ownerTier: 'global',
-        isTransient: false,
-        authType: 'builtin' },
-      { uniqueId: 'org.thingpedia.builtin.thingengine.builtin',
-        name: 'Miscellaneous Interfaces',
-        description: 'Time, randomness and other non-device specific things.',
-        kind: 'org.thingpedia.builtin.thingengine.builtin',
-        version: 0,
-        ownerTier: 'global',
-        class: 'data',
-        isTransient: true,
-        authType: 'builtin' },
-      { uniqueId: 'org.thingpedia.builtin.test',
-        name: 'Test Device',
-        description: 'Test Almond in various ways',
-        kind: 'org.thingpedia.builtin.test',
-        version: 0,
-        ownerTier: 'global',
-        class: 'system',
-        isTransient: true,
-        authType: 'builtin' },
-      { uniqueId: 'com.xkcd',
-        name: 'XKCD',
-        description: 'A webcomic of romance, sarcasm, math, and language.',
-        kind: 'com.xkcd',
-        version: 0,
-        ownerTier: 'global',
-        class: 'data',
-        isTransient: false,
-        authType: 'none' }
+    listResult2[listResult2.length - 1].version = 0;
+    assert.deepStrictEqual(listResult2, [{
+            uniqueId: 'thingengine-own-server:81e0e8abba27202a',
+            name: 'Almond server (:81e0e8abba27202a)',
+            description: 'This is one of your own Almond apps.',
+            kind: 'org.thingpedia.builtin.thingengine',
+            version: 0,
+            ownerTier: 'server',
+            class: 'system',
+            isTransient: false,
+            authType: 'builtin'
+        },
+        {
+            uniqueId: 'org.thingpedia.builtin.thingengine.server',
+            name: 'Almond Smart Speaker',
+            description: 'Commands that are specific to using Almond as a smart-speaker device.',
+            kind: 'org.thingpedia.builtin.thingengine.server',
+            version: 0,
+            class: 'data',
+            ownerTier: 'global',
+            isTransient: false,
+            authType: 'builtin'
+        },
+        {
+            uniqueId: 'org.thingpedia.builtin.thingengine.builtin',
+            name: 'Miscellaneous Interfaces',
+            description: 'Time, randomness and other non-device specific things.',
+            kind: 'org.thingpedia.builtin.thingengine.builtin',
+            version: 0,
+            ownerTier: 'global',
+            class: 'data',
+            isTransient: true,
+            authType: 'builtin'
+        },
+        {
+            uniqueId: 'org.thingpedia.builtin.test',
+            name: 'Test Device',
+            description: 'Test Almond in various ways',
+            kind: 'org.thingpedia.builtin.test',
+            version: 0,
+            ownerTier: 'global',
+            class: 'system',
+            isTransient: true,
+            authType: 'builtin'
+        },
+        {
+            uniqueId: 'com.xkcd',
+            name: 'XKCD',
+            description: 'A webcomic of romance, sarcasm, math, and language.',
+            kind: 'com.xkcd',
+            version: 0,
+            ownerTier: 'global',
+            class: 'data',
+            isTransient: false,
+            authType: 'none'
+        }
     ]);
 }
 
