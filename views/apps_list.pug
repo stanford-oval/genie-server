@@ -19,8 +19,8 @@ block content
           p= message
 
   if apps.length === 0
-    p= "No rules created yet."
-    p= "They can be created by WHEN type commands."
+    p= _("No rules created yet.")
+    p= _("They can be created by WHEN type commands.")
 
   for app in apps
     div.row
