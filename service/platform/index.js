@@ -183,8 +183,10 @@ class Player extends events.EventEmitter {
     }
 
     async stop() {
-        if (this._child)
+        if (this._child) {
+            this.emit('stopChain'); // emitted when stop is called, lets agent know to stop playing current audio and all subsequent audios
             this._child.kill();
+          }
     }
 }
 
