@@ -56,7 +56,7 @@ block content
                       else
                         button(type='submit').bottom-bar.fa.fa-trash-alt
 
-                  form.form-inline(action=Config.BASE_URL + '/devices/config',method="post").form-config
+                  form.hidden.form-inline(action=Config.BASE_URL + '/devices/config',method="post").form-config
                     input(type='hidden',name='id',value=dev.uniqueId)
                     input(type='hidden',name='_csrf',value=csrfToken)
                     button(type='submit').bottom-bar.fa.fa-cog
