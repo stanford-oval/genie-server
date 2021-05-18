@@ -45,20 +45,19 @@
     width: 90%;
     text-align: right;
     margin-left: auto;
-    border-image-source: url(../images/bubble_green.png);
-    border-image-slice: 88 130 93 97 fill;
-    border-image-width: 25px 42px 24px 20px;
+    background-color: #DCF8C6;
+    border-radius: 10px;
     padding: 13px 24px 12px 24px;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 }
 
 #conversation .from-almond>.message {
     display: block;
     overflow: auto;
-    border-image-source: url(../images/bubble_almond.png);
-    border-image-slice: 90 97 94 120 fill;
-    border-image-width: 13px 24px 12px 24px;
+    background-color: #fff;
+    border-radius: 10px;
     padding: 13px 24px 12px 24px;
+    margin-bottom: 10px;
 }
 
 #conversation .message {
