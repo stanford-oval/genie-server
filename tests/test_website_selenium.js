@@ -40,12 +40,12 @@ async function withSelenium(test) {
     // just annoying and not very useful
     if (process.env.TRAVIS) {
         builder
-        .setFirefoxOptions(
-            new firefox.Options().headless()
-        )
-        .setChromeOptions(
-            new chrome.Options().headless()
-        );
+            .setFirefoxOptions(
+                new firefox.Options().headless()
+            )
+            .setChromeOptions(
+                new chrome.Options().headless()
+            );
     }
 
     const driver = builder.build();
@@ -66,7 +66,7 @@ async function checkAllImages(driver) {
     const currentUrl = await driver.getCurrentUrl();
     const images = await driver.findElements(WD.By.css('img'));
 
-    await Promise.all(images.map(async (img) => {
+    await Promise.all(images.map(async(img) => {
         const src = await img.getAttribute('src');
 
         // small optimization: we only check an image once
@@ -79,11 +79,13 @@ async function checkAllImages(driver) {
         _checkedImages.add(src);
 
         // this is not exactly what the browser does
-        const res = await Tp.Helpers.Http.getStream(src, { extraHeaders: {
-            Referrer: currentUrl
-        }});
+        const res = await Tp.Helpers.Http.getStream(src, {
+            extraHeaders: {
+                Referrer: currentUrl
+            }
+        });
         assert(res.headers['content-type'].startsWith('image/'),
-               `expected image/* content type for image, found ${res['content-type']}`);
+            `expected image/* content type for image, found ${res['content-type']}`);
         res.resume();
     }));
 }

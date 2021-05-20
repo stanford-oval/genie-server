@@ -4,17 +4,17 @@ block scripts
   script(src=Config.BASE_URL + '/javascripts/query.js')
 
 block page_name
-  | Run Query
+  = _("Run Query")
 
 block content
   div.form-group
-    label(for="code").control-label Query
+    label(for="code").control-label=_("Query")
     textarea#code(name="code", placeholder="Write query here").form-control
 
   p.from-group
-    button(type="button")#run.btn.btn-success Run
+    button(type="button")#run.btn.btn-success=_("Run")
 
   div.form-group
-    label(for="results").control-label Results
+    label(for="results").control-label=_("Results")
     textarea#results(name="results").form-control
 

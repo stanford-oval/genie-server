@@ -16,7 +16,7 @@ body {
 #page-body.container,
 #page-body.container-fluid {
     padding-bottom: 30px;
-    min-height: calc(100vh - 165px);
+    min-height: calc(100vh - 145px);
 }
 
 #page-title {
@@ -25,10 +25,10 @@ body {
 
 footer.page-footer {
     padding-top: 1.5em;
-    background-color: #8c1515;
+    background-color: #585858;
     color: white;
     text-align: right;
-    min-height: 120px;
+    min-height: 100px;
 }
 
 footer.page-footer a:link,
@@ -140,26 +140,188 @@ pre code {
     object-fit: contain;
 }
 
-.consent_conf {
+.consent-container {
     padding-top: 20px;
 }
 
-.consent_conf>h2 {
+.consent-container>h2 {
     color: #8c1515;
     font-weight: 500;
 }
 
-.row.display-flex {
-    display: flex;
-    flex-wrap: wrap;
+.navbar-brand.hidden-sm {
+    font-weight: bold;
+    line-height: 21px;
+    height: 47px;
+    font-size: 26px;
 }
 
-.row.display-flex > [class*='col-'] {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
+.custom-btn {
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1.3em;
+}
+
+.msg-container {
+    min-height: 15em;
+    padding-top: 4em;
+}
+
+.msg-left-block {
+    width: 50%;
+    float: left;
+    text-align: right;
+    padding-right: 6em;
+}
+
+.msg-image {
+    width: 100px;
+}
+
+.msg-right-block {
+    width: 50%;
+    float: right;
+}
+
+.msg-title>h2 {
+    font-weight: 600;
+    padding: 0.5em 0em;
+}
+
+.msg-body {
+    color: #8c1515;
+}
+
+.msg-body>h3 {
+    font-weight: 400;
+}
+
+.msg-button {
+    width: 100%;
+    text-align: center;
+    padding: 50px 0px;
+}
+
+.msg-button>a {
+    border-radius: 10px;
+}
+
+.logo_top {
+    width: 55px;
+    float: left;
+    margin-right: 10px;
+}
+
+.subtitle-msg {
+    padding: 2em 0em;
+    font-size: 1.3em;
+}
+
+.subtitle-conf-msg {
+    font-size: 1.3em;
+    padding: 1.1em 0em;
+}
+
+.control-label {
+    font-size: 1.2em;
 }
 
 .panel {
-    height: 100%;
+    min-height: 13.9em;
+    border-bottom-left-radius: 19px;
+    border-bottom-right-radius: 19px;
+    border-top-left-radius: 19px;
+    border-top-right-radius: 19px;
+}
+
+.panel-default {
+    border-color: #585858;
+    margin: 30px 0px;
+}
+
+.panel-body {
+    min-height: 8em;
+    background-color: #ece5dd6b;
+}
+
+.panel-body.btn.btn-primary {
+    font-weight: 600;
+    font-size: 1.3em;
+    border-radius: 10px;
+}
+
+.panel-body-conf {
+    font-size: 1.3em;
+}
+
+.panel-footer {
+    min-height: 3em;
+    padding: 2px 5px !important;
+    background-color: #b1040e;
+    border-bottom-left-radius: 19px;
+    border-bottom-right-radius: 19px;
+}
+
+.panel-title {
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.2em;
+}
+
+.panel-heading {
+    min-height: 3em;
+    border-top-left-radius: 19px;
+    border-top-right-radius: 19px;
+    background-color: #d8d8d8 !important;
+    color: #000;
+}
+
+.content-head {
+    text-align: center;
+}
+
+#new-skills {
+    padding: 30px 0px;
+    margin-left: 15px;
+}
+
+#new-skills>a {
+    font-weight: 600;
+    font-size: 1.3em;
+    border-radius: 10px;
+}
+
+.new-button>a,
+.new-button>button {
+    font-weight: 600;
+    font-size: 0.9em;
+    border-radius: 10px;
+}
+
+.new-button {
+    padding: 15px 0px 5px 0px;
+}
+
+@media (min-width: 768px) {
+    .navbar-fixed-top .navbar-collapse,
+    .navbar-static-top .navbar-collapse,
+    .navbar-fixed-bottom .navbar-collapse {
+        font-size: 1.1em;
+    }
+}
+
+.radio label,
+.checkbox label {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.online-account-choice>form>.btn,
+.online-account-choice>a {
+    font-size: 1.1em;
+    border-radius: 10px;
+}
+
+#chat_upper_container {
+    padding-top: 1.2em;
 }

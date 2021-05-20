@@ -98,20 +98,24 @@ async function testMyApiCreateWhenApp(auth) {
             delete parsed.result.raw.__timestamp;
             console.log(data);
             if (count === 0) {
-                assert.deepStrictEqual(parsed, { result:
-                    { appId: result.uniqueId,
-                      raw: { data: '!!!!!!!!!!', size: 10 },
-                      type: 'org.thingpedia.builtin.test:get_data',
-                      formatted: [ { type: 'text', text: 'Notification from Test: the answer is !!!!!!!!!!' } ],
-                      icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test' }
+                assert.deepStrictEqual(parsed, {
+                    result: {
+                        appId: result.uniqueId,
+                        raw: { data: '!!!!!!!!!!', size: 10 },
+                        type: 'org.thingpedia.builtin.test:get_data',
+                        formatted: [{ type: 'text', text: 'Notification from Test: the answer is !!!!!!!!!!' }],
+                        icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test'
+                    }
                 });
             } else {
-                assert.deepStrictEqual(parsed, { result:
-                    { appId: result.uniqueId,
-                      raw: { data: '""""""""""', size: 10 },
-                      type: 'org.thingpedia.builtin.test:get_data',
-                      formatted: [ { type: 'text', text: 'Notification from Test: the answer is """""""""".' } ],
-                      icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test' }
+                assert.deepStrictEqual(parsed, {
+                    result: {
+                        appId: result.uniqueId,
+                        raw: { data: '""""""""""', size: 10 },
+                        type: 'org.thingpedia.builtin.test:get_data',
+                        formatted: [{ type: 'text', text: 'Notification from Test: the answer is """""""""".' }],
+                        icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test'
+                    }
                 });
             }
             if (++count === 2) {
@@ -131,8 +135,7 @@ async function testMyApiListApps(auth, uniqueId) {
         name: 'Test',
         description: 'Notify me when there are new get data on test with size 10 byte.',
         error: null,
-        code:
-         'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));',
+        code: 'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));',
         icon: 'org.thingpedia.builtin.test',
         isEnabled: true,
         isRunning: true,
@@ -144,8 +147,7 @@ async function testMyApiListApps(auth, uniqueId) {
         name: 'Test',
         description: 'Notify me when there are new get data on test with size 10 byte.',
         error: null,
-        code:
-         'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));',
+        code: 'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));',
         icon: 'org.thingpedia.builtin.test',
         isEnabled: true,
         isRunning: true,

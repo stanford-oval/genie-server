@@ -28,7 +28,7 @@ const Config = require('../config');
 router.use(user.requireLogIn);
 
 router.get('/', (req, res, next) => {
-    res.render('devices_list', { page_title: 'Almond - My Goods',
+    res.render('devices_list', { page_title: 'Almond - My Skills',
                                  devices: req.app.engine.getDeviceInfos() });
 });
 

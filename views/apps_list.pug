@@ -18,6 +18,10 @@ block content
             span(aria-hidden='true') ×
           p= message
 
+  if apps.length === 0
+    p= _("No rules created yet.")
+    p= _("They can be created by WHEN type commands.")
+
   for app in apps
     div.row
       div.col-lg-6.col-xs-12.app-template
