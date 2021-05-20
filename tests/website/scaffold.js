@@ -78,7 +78,7 @@ function assertHttpError(request, httpStatus, expectedMessage) {
         if (expectedMessage) {
             let message;
             if (err.detail.startsWith('<!DOCTYPE html>')) {
-                const match = /sorry that did not work<\/p><p>([^<]+)<\/p>/.exec(err.detail);
+                const match = /Sorry that did not work<\/h2><\/div><div class="msg-body"><h3 class="p">([^<]+)<\/h3>/.exec(err.detail);
                 if (!match)
                     assert.fail(`cannot find error message`);
                 message = match[1];
