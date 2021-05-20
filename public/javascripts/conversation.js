@@ -19,28 +19,69 @@ $(() => {
     var conversationId = null;
     var lastMessageId = -1;
 
+    var container = $('#chat');
+    var currentGrid = null;
+
     function updateConnectionFeedback() {
         if (!ws || !open) {
             $('#input-form-group').addClass('has-warning');
-            $('#input-form-group .spinner-container').addClass('hidden');
--           $('#input-form-group .glyphicon-warning-sign, #input-form-group .help-block').removeClass('hidden');
+            manageSpinner('remove');
+            manageLostConnectionMsg('add');
+            manageLostConnectionMsg('show');
             return;
         }
 
         $('#input-form-group').removeClass('has-warning');
-        $('#input-form-group .glyphicon-warning-sign, #input-form-group .help-block').addClass('hidden');
+        manageLostConnectionMsg('remove');
     }
 
     function updateSpinner(thinking) {
         if (!ws || !open)
             return;
 
+        let to_do;
+
         if (thinking)
-            $('#input-form-group .spinner-container').removeClass('hidden');
+            to_do = 'show';
         else
-            $('#input-form-group .spinner-container').addClass('hidden');
+            to_do = 'remove';
+
+        manageSpinner(to_do)
     }
 
+    function manageLostConnectionMsg(todo) {
+        // let last_elem = $("#chat > span").last();
+        //$("#chat span:last-child")
+
+        switch (todo) {
+            case 'remove':
+                $('#chat > .help-block').remove();
+                break;
+            case 'show':
+                $('#chat > .help-block').removeClass('hidden');
+                break;
+            case 'add':
+                $('#chat > .help-block').remove();
+                $(".help-block").clone().appendTo("#chat").last();
+                break;
+        }
+        return;
+    }
+
+    function manageSpinner(todo) {
+        let last_elem = $(".from-user").last();
+        switch (todo) {
+            case 'remove':
+                $('#chat > .almond-thinking').remove();
+                break;
+            case 'show':
+                $('#chat > .almond-thinking').remove();
+                $(".almond-thinking").clone().insertAfter(last_elem);
+                $('#chat > .almond-thinking').removeClass('hidden');
+                break;
+        }
+        return;
+    }
 
     (function() {
         var reconnectTimeout = 100;
@@ -85,9 +126,6 @@ $(() => {
             $('#cancel').addClass('hidden');
     }
 
-    var container = $('#chat');
-    var currentGrid = null;
-
     function almondMessage(icon) {
         var msg = $('<span>').addClass('message-container from-almond');
         icon = icon || 'org.thingpedia.builtin.thingengine.builtin';
@@ -96,6 +134,8 @@ $(() => {
         container.append(msg);
 
         addVoteButtons();
+        manageLostConnectionMsg('add');
+        manageSpinner('remove');
         return msg;
     }
 
@@ -142,13 +182,13 @@ $(() => {
     function maybeScroll(container) {
         if (!$('#input:focus').length)
             return;
-
+        //keep scroll bar to the bottom
         scrollChat();
         setTimeout(scrollChat, 1000);
     }
 
     function scrollChat() {
-        let chat = document.getElementById('conversation');
+        let chat = document.getElementById('chat');
         chat.scrollTop = chat.scrollHeight;
     }
 
@@ -179,6 +219,7 @@ $(() => {
         rdlMessage.append($('<span>').addClass('message-rdl-content')
             .text(rdl.displayText));
         container.append(rdlMessage);
+
         maybeScroll(container);
     }
 
@@ -289,44 +330,44 @@ $(() => {
         lastMessageId = parsed.id;
 
         switch (parsed.type) {
-        case 'text':
-        case 'result':
-            // FIXME: support more type of results
-            textMessage(parsed.text, parsed.icon);
-            currentGrid = null;
-            break;
+            case 'text':
+            case 'result':
+                // FIXME: support more type of results
+                textMessage(parsed.text, parsed.icon);
+                currentGrid = null;
+                break;
 
-        case 'picture':
-            picture(parsed.url, parsed.icon);
-            currentGrid = null;
-            break;
+            case 'picture':
+                picture(parsed.url, parsed.icon);
+                currentGrid = null;
+                break;
 
-        case 'rdl':
-            rdl(parsed.rdl, parsed.icon);
-            currentGrid = null;
-            break;
+            case 'rdl':
+                rdl(parsed.rdl, parsed.icon);
+                currentGrid = null;
+                break;
 
-        case 'choice':
-            choice(parsed.idx, parsed.title);
-            break;
+            case 'choice':
+                choice(parsed.idx, parsed.title);
+                break;
 
-        case 'button':
-            buttonMessage(parsed.title, parsed.json);
-            break;
+            case 'button':
+                buttonMessage(parsed.title, parsed.json);
+                break;
 
-        case 'link':
-            linkMessage(parsed.title, parsed.url);
-            break;
+            case 'link':
+                linkMessage(parsed.title, parsed.url);
+                break;
 
-        case 'hypothesis':
-            $('#input').val(parsed.hypothesis);
-            break;
+            case 'hypothesis':
+                $('#input').val(parsed.hypothesis);
+                break;
 
-        case 'command':
-            $('#input').val('');
-            collapseButtons();
-            appendUserMessage(parsed.command);
-            break;
+            case 'command':
+                $('#input').val('');
+                collapseButtons();
+                appendUserMessage(parsed.command);
+                break;
         }
     }
 
@@ -351,33 +392,40 @@ $(() => {
         updateSpinner(true);
         ws.send(JSON.stringify({ type: 'command', text: text }));
     }
+
     function handleParsedCommand(json, title) {
         updateSpinner(true);
         ws.send(JSON.stringify({ type: 'parsed', json: json, title: title }));
     }
+
     function handleThingTalk(tt) {
         updateSpinner(true);
         ws.send(JSON.stringify({ type: 'tt', code: tt }));
     }
+
     function handleChoice(idx, title) {
         handleParsedCommand({ code: ['bookkeeping', 'choice', String(idx)], entities: {} }, title);
     }
+
     function handleSpecial(special, title) {
-        handleParsedCommand({ code: ['bookkeeping', 'special', 'special:'+special ], entities: {} }, title);
+        handleParsedCommand({ code: ['bookkeeping', 'special', 'special:' + special], entities: {} }, title);
     }
 
     function appendUserMessage(text) {
         container.append($('<span>').addClass('message message-text from-user')
             .text(text));
+
+        manageLostConnectionMsg('add');
+        manageSpinner('show');
     }
 
     $('#input-form').submit((event) => {
         var text = $('#input').val();
         if (currCommand !== "")
-          pastCommandsUp.push(currCommand);
+            pastCommandsUp.push(currCommand);
         if (pastCommandsDown.length !== 0) {
-          pastCommandsUp = pastCommandsUp.concat(pastCommandsDown);
-          pastCommandsDown = [];
+            pastCommandsUp = pastCommandsUp.concat(pastCommandsDown);
+            pastCommandsDown = [];
         }
         pastCommandsUp.push(text);
 
@@ -386,26 +434,27 @@ $(() => {
         handleCommand(text);
         event.preventDefault();
     });
+
     $('#cancel').click(() => {
         handleSpecial('nevermind', "Cancel.");
     });
 
     $('#input-form').on('keydown', (event) => { // button is pressed
-      if (event.keyCode === 38) {  // Up
-        // removes last item from array pastCommandsUp, displays it as currCommand, adds current input text to pastCommandsDown
-        currCommand = pastCommandsUp.pop();
-        if ($('#input').val() !== "")
-          pastCommandsDown.push($('#input').val());
-        $('#input').val(currCommand);
-      }
+        if (event.keyCode === 38) { // Up
+            // removes last item from array pastCommandsUp, displays it as currCommand, adds current input text to pastCommandsDown
+            currCommand = pastCommandsUp.pop();
+            if ($('#input').val() !== "")
+                pastCommandsDown.push($('#input').val());
+            $('#input').val(currCommand);
+        }
 
-      if (event.keyCode === 40) {  // Down
-        // removes last item from array pastCommandsDown, displays it as currCommand, adds current input text to pastCommandsUp
-        currCommand = pastCommandsDown.pop();
-        if ($('#input').val() !== "")
-          pastCommandsUp.push($('#input').val());
-        $('#input').val(currCommand);
-      }
+        if (event.keyCode === 40) { // Down
+            // removes last item from array pastCommandsDown, displays it as currCommand, adds current input text to pastCommandsUp
+            currCommand = pastCommandsDown.pop();
+            if ($('#input').val() !== "")
+                pastCommandsUp.push($('#input').val());
+            $('#input').val(currCommand);
+        }
     });
 
     $('#save-log').click(() => {

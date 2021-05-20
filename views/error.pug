@@ -1,9 +1,16 @@
 extends layout
 
 block page_name
-  | Error
+  = _("Error")
 
 block content
-  p Sorry that did not work
-  p= message
-  a(href='javascript:history.back()').btn.btn-primary Go back
+  div.msg-container
+    div.msg-left-block
+      img.msg-image(src=Config.BASE_URL + '/images/almond_error.png')
+    div.msg-right-block
+      div.msg-title
+        h2.p= _("Sorry that did not work")
+      div.msg-body
+        h3.p= message
+  div.msg-button
+    a(href='javascript:history.back()').btn.btn-primary.custom-btn= _("Go back")
