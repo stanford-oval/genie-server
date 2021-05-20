@@ -19,7 +19,7 @@
 
 .bottom-bar.fa,
 .bottom-bar.far {
-    cursor: grab;
+    cursor: pointer;
     border-radius: 60px;
     background-color: transparent;
     color: white;

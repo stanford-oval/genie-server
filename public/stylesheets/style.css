@@ -228,6 +228,7 @@ pre code {
 
 .panel {
     min-height: 13.9em;
+    height: 100%;
     border-bottom-left-radius: 19px;
     border-bottom-right-radius: 19px;
     border-top-left-radius: 19px;
@@ -241,6 +242,7 @@ pre code {
 
 .panel-body {
     min-height: 8em;
+    height: 100%;
     background-color: #ece5dd6b;
 }
 
@@ -274,6 +276,16 @@ pre code {
     border-top-right-radius: 19px;
     background-color: #d8d8d8 !important;
     color: #000;
+}
+
+.row.display-flex {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.row.display-flex > [class*='col-'] {
+    display: flex;
+    flex-direction: column;
 }
 
 .content-head {
