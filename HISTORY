@@ -1,3 +1,20 @@
+2.0.0-beta.1
+============
+
+* Improved support for sound effects in skills that use them (like SmartNews)
+  [#173, #184]
+* Added support for automatically configuring ducking and echo cancellation
+  at startup [#170, #171, #176].
+* Almond now shows the consent form upon initial configuration [#181].
+* Added a link to the Thingpedia cheatsheet in the navbar [#184].
+* Misc bug fixes [#174, #177, #184].
+* Updated dependencies [#175, #178, #179, #180, #188].
+* Build system fixes [#172].
+
+Contributors to this release:
+- Francesco Gialuppi
+- Antonio Muratore
+
 2.0.0-alpha.1
 =============
 
@@ -62,7 +79,7 @@ You can learn more about this release at
 =====
 
 * Several attempts were made to make the docker build more reliable
-  (especially around snowboy) [#50, #51, #52, #55, #56, #58] 
+  (especially around snowboy) [#50, #51, #52, #55, #56, #58]
 
 1.8.0-beta.1
 ============
