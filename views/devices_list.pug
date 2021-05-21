@@ -41,7 +41,7 @@ block content
           div.panel-footer
             div.row
               if !dev.isTransient
-                div.col-md-6                  
+                div.col-md-6
                   form.form-inline(action=Config.BASE_URL + '/devices/delete' method="post").form-delete
                     input(type='hidden' name='id',value=dev.uniqueId)
                     input(type='hidden' name='_csrf',value=csrfToken)
