@@ -13,9 +13,12 @@
     justify-content: space-between;
 }
 
-.form-delete-app {
-    float: right;
+.installed-app {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
+
 
 .bottom-bar.fa,
 .bottom-bar.far {
