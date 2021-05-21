@@ -41,13 +41,14 @@ block content
           div.panel-footer
             div.row              
                 div.col-md-6
-                  form.form-inline(action=Config.BASE_URL + '/devices/delete',method="post").form-delete
-                      input(type='hidden',name='id',value=dev.uniqueId)
-                      input(type='hidden',name='_csrf',value=csrfToken)
-                      if datasource
-                        button(type='submit').bottom-bar.fa.power-off
-                      else
-                        button(type='submit').bottom-bar.fa.fa-trash-alt
+                  if !dev.isTransient
+                    form.form-inline(action=Config.BASE_URL + '/devices/delete',method="post").form-delete
+                        input(type='hidden',name='id',value=dev.uniqueId)
+                        input(type='hidden',name='_csrf',value=csrfToken)
+                        if datasource
+                          button(type='submit').bottom-bar.fa.power-off
+                        else
+                          button(type='submit').bottom-bar.fa.fa-trash-alt
 
                   form.hidden.form-inline(action=Config.BASE_URL + '/devices/config',method="post").form-config
                     input(type='hidden',name='id',value=dev.uniqueId)
