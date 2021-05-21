@@ -28,7 +28,7 @@ block content
       div.col-lg-4.col-sm-6.col-xs-12
         div.panel.panel-default.installed-dev
           div.content-head
-            a(href='https://thingpedia.stanford.edu/thingpedia/devices/by-id/' + dev.kind).panel-heading
+            a(href=Config.THINGPEDIA_URL + '/devices/by-id/' + dev.kind).panel-heading
               h2.panel-title= dev.name
           div.panel-body
             p.device-icon-small
