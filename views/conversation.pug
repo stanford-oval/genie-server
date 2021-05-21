@@ -39,7 +39,7 @@ block content
             p= _("The conversation log has been updated.")
             pre#recording-log
             p.small= _("Privacy warning: The log may include your account and device names, as well as the results from performing actions on your accounts.")
-          div.modal-footer
+          div.new-button.modal-footer
             button.btn.btn-primary#recording-download= _("Download")
             a(target='_blank',rel='noopener').btn.btn-primary#recording-share= _("Share with Almond Team")
             button.btn.btn-default#recording-save-done= _("Done")
@@ -56,7 +56,7 @@ block content
             label(for='#chat-input').sr-only= _("Command:")
             input(type='text', placeholder=_("Write your command or answer here"), value=command ? command : '').form-control#input
             button(type='button', title='Click to send a voice command').btn.btn-primary.hidden#record-button
-            span.glyphicon.glyphicon-warning-sign.form-control-feedback.hidden
+            //-span.glyphicon.glyphicon-warning-sign.form-control-feedback.hidden
     
     div#hidden-container 
       div.help-block.hidden= _("Lost connection to the server.")

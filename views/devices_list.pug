@@ -5,12 +5,12 @@ block scripts
 
 block page_name
   = _("My Skills")
+  
 
 block styles
   link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/my_stuff.css')
 
 block content
-  a#anch_top(href='#')
   if message
     div.row
       div.col-xs-12
@@ -62,4 +62,4 @@ block content
                     button(type='submit').bottom-bar.fa.fa-cog
   div.row                   
     div#back-top.hidden
-      a(href= '#anch_top').btn.btn-primary#bttop-button.fas.fa-arrow-circle-up
+      a(href= '#anch-top').btn.btn-primary#bttop-button.fas.fa-arrow-circle-up
