@@ -15,13 +15,13 @@ block content
     div.row
       div.col-xs-12
         div.alert.alert-success.alert-dismissible.fade.in(role='alert')
-          button(type='button', data-dismiss='alert', aria-label="Close").close
+          button(type='button' data-dismiss='alert' aria-label="Close").close
             span(aria-hidden='true') ×
           p= message
 
   div.row
-      div.col-sm-6.col-md-3#new-skills
-        a(href=Config.BASE_URL + '/devices/create').btn.btn-primary.btn-block= _("Configure a new skill")
+    div.col-sm-6.col-md-3#new-skills
+      a(href=Config.BASE_URL + '/devices/create').btn.btn-primary.btn-block= _("Configure a new skill")
 
   div.row.display-flex
     each dev, i in devices
@@ -36,24 +36,24 @@ block content
             p= dev.description
 
             if dev.class === 'physical'
-                if dev.ownerTier !== 'cloud' && dev.ownerTier !== 'global'
-                  p= _("This device is owned by your %s.").format(dev.ownerTier)
+              if dev.ownerTier !== 'cloud' && dev.ownerTier !== 'global'
+                p= _("This device is owned by your %s.").format(dev.ownerTier)
           div.panel-footer
-            div.row              
-                if !dev.isTransient
-                  div.col-md-6                  
-                    form.form-inline(action=Config.BASE_URL + '/devices/delete',method="post").form-delete
-                        input(type='hidden',name='id',value=dev.uniqueId)
-                        input(type='hidden',name='_csrf',value=csrfToken)
-                        if datasource
-                          button(type='submit').bottom-bar.fa.power-off
-                        else
-                          button(type='submit').bottom-bar.fa.fa-trash-alt
+            div.row
+              if !dev.isTransient
+                div.col-md-6                  
+                  form.form-inline(action=Config.BASE_URL + '/devices/delete' method="post").form-delete
+                    input(type='hidden' name='id',value=dev.uniqueId)
+                    input(type='hidden' name='_csrf',value=csrfToken)
+                    if datasource
+                      button(type='submit').bottom-bar.fa.power-off
+                    else
+                      button(type='submit').bottom-bar.fa.fa-trash-alt
 
-                  form.hidden.form-inline(action=Config.BASE_URL + '/devices/config',method="post").form-config
-                    input(type='hidden',name='id',value=dev.uniqueId)
-                    input(type='hidden',name='_csrf',value=csrfToken)
-                    button(type='submit').bottom-bar.fa.fa-cog
+                form.hidden.form-inline(action=Config.BASE_URL + '/devices/config' method="post").form-config
+                  input(type='hidden' name='id',value=dev.uniqueId)
+                  input(type='hidden' name='_csrf',value=csrfToken)
+                  button(type='submit').bottom-bar.fa.fa-cog
   div.row                   
     div#back-top.hidden
       a(href= '#anch_top').btn.btn-primary#bttop-button.fas.fa-arrow-circle-up
