@@ -38,7 +38,8 @@
   "optionalDependencies": {
     "canberra": "^0.1.2",
     "pulseaudio2": "^0.5.0",
-    "snowboy": "^1.3.1"
+    "snowboy": "^1.3.1",
+    "webrtcvad": "^1.0.1"
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
