@@ -12,11 +12,12 @@
 }
 
 #conversation #chat {
-    margin: 1em 0em;
+    margin: 1px 0em;
     overflow-y: scroll;
     height: -webkit-fill-available;
-    padding: 5px 35px;
-    height: 595px;
+    padding: 20px 35px;
+    min-height: 566px;
+    height: calc(100vh - 385px);
     overflow-anchor: none;
 }
 
@@ -86,7 +87,8 @@
     margin: auto;
     max-width: 800px;
     background-color: #ece5dd6b;
-    font-weight: 600;
+    font-weight: 400;
+    font-size: 1.2em;
 }
 
 #conversation.single {
@@ -101,6 +103,11 @@
 
 #conversation .message-rdl-content {
     display: block;
+}
+
+.new-msg-button {
+    border-radius: 10px;
+    margin: 10px;
 }
 
 #input-form-group {
@@ -125,7 +132,6 @@
 #save-log {
     padding-left: 10px;
     cursor: pointer;
-    width: 50%;
 }
 
 .comment-options>.fa,
@@ -137,8 +143,35 @@
     margin: 5px;
 }
 
+#recording-save {
+    padding-left: unset !important;
+}
+
+.modal {
+    height: 980px;
+}
+
 #recording-log {
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 250px);
+}
+
+.new-button.modal-footer {
+    margin-right: 1em;
+    margin-bottom: 0.6em;
+}
+
+.modal-content {
+    border-radius: 10px;
+}
+
+.modal-dialog {
+    height: 900px;
+}
+
+@media (min-width: 768px) {
+    .modal-dialog {
+        width: 767px;
+    }
 }
 
 #record-button {
