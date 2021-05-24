@@ -243,38 +243,6 @@ class SoundEffectsApi {
     }
 }
 
-let webrtcvad;
-try {
-    webrtcvad = require('webrtcvad').default;
-} catch(e) {
-    console.log("VAD not available");
-    webrtcvad = null;
-}
-
-class VAD {
-    constructor() {
-        this._instance = null;
-    }
-
-    setup(bitrate, level) {
-        if (this._instance)
-            this._instance = null;
-
-        if (webrtcvad) {
-            this._instance = new webrtcvad(bitrate, level);
-            // console.log("setup VAD bitrate", bitrate, "level", level);
-            return true;
-        }
-
-        return false;
-    }
-
-    process(chunk) {
-        if (!this._instance)
-            return false;
-        return this._instance.process(chunk);
-    }
-}
 
 class ServerPlatform extends Tp.BasePlatform {
     constructor() {
@@ -292,7 +260,6 @@ class ServerPlatform extends Tp.BasePlatform {
         safeMkdirSync(this._cacheDir);
 
         this._wakeWordDetector = null;
-        this._voiceDetector = null;
         this._soundEffects = null;
 
         this._sqliteKey = null;
@@ -350,9 +317,6 @@ class ServerPlatform extends Tp.BasePlatform {
 
             if (canberra)
                 this._soundEffects = new SoundEffectsApi();
-
-            if (webrtcvad && VAD)
-                this._voiceDetector = new VAD();
         } else {
             this._pulse = null;
         }
@@ -409,8 +373,6 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'wakeword-detector':
             this._ensurePulseAudio();
             return this._wakeWordDetector !== null;
-        case 'voice-detector':
-            return this._voiceDetector !== null;
 
         case 'sound-effects':
             this._ensurePulseAudio();
@@ -438,8 +400,6 @@ class ServerPlatform extends Tp.BasePlatform {
         case 'wakeword-detector':
             this._ensurePulseAudio();
             return this._wakeWordDetector;
-        case 'voice-detector':
-            return this._voiceDetector;
         case 'sound-effects':
             this._ensurePulseAudio();
             return this._soundEffects;

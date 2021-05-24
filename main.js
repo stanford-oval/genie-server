@@ -63,7 +63,7 @@ async function init(platform) {
 
     if (platform.hasCapability('sound')) {
         const speech = new Genie.SpeechHandler(conversation, platform, {
-            nlUrl: Config.NL_URL
+            subscriptionKey: Config.MS_SPEECH_RECOGNITION_PRIMARY_KEY
         });
 
         let play;
