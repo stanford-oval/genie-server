@@ -12,11 +12,12 @@
 }
 
 #conversation #chat {
-    margin: 1em 0em;
+    margin: 1px 0em;
     overflow-y: scroll;
     height: -webkit-fill-available;
-    padding: 5px 35px;
-    height: 566px;
+    padding: 20px 35px;
+    min-height: 566px;
+    height: calc(100vh - 385px);
     overflow-anchor: none;
 }
 
