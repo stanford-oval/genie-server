@@ -1,3 +1,19 @@
+2.0.0
+=====
+
+* The UI has been refreshed, with a better looking conversation widget
+  and nicer view in My Skills [#189, #198, #199, #200, #204, #206].
+* Misc bug fixes [#191, #203].
+* Updated dependencies [#207, #210].
+
+Contributors to this release:
+- Philip Allgaier
+- Francesco Galuppi
+- Antonio Muratore
+
+Please see the previous release for the full list of changes in this
+development cycle.
+
 2.0.0-beta.1
 ============
 
