@@ -7,8 +7,16 @@
     display: block;
 }
 
-.form-delete-app {
-    float: right;
+.installed-dev {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.installed-app {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .bottom-bar.fa,

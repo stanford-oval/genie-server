@@ -51,9 +51,6 @@ $(() => {
     }
 
     function manageLostConnectionMsg(todo) {
-        // let last_elem = $("#chat > span").last();
-        //$("#chat span:last-child")
-
         switch (todo) {
             case 'remove':
                 $('#chat > .help-block').remove();

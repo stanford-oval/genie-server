@@ -95,6 +95,8 @@
     max-height: 100%;
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
+    border: 1px solid #585858;
+    border-top: 0;
 }
 
 #conversation .message-rdl-title {
@@ -230,6 +232,8 @@
     border-top-right-radius: 15px;
     text-align: right;
     padding-right: 15px;
+    border: 1px solid #585858;
+    border-bottom: 0;
 }
 
 .comment-options {
