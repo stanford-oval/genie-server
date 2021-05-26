@@ -75,9 +75,9 @@ module.exports.HOST_BASED_AUTHENTICATION = process.env.THINGENGINE_HOST_BASED_AU
 module.exports.ENABLE_DB_ENCRYPTION = false;
 
 
-module.exports.SEMPRE_URL = process.env.THINGENGINE_NLP_URL || 'https://nlp-staging.almond.stanford.edu';
-module.exports.THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://dev.almond.stanford.edu/thingpedia';
-module.exports.CLOUD_SYNC_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://dev.almond.stanford.edu';
+module.exports.NLP_URL = process.env.THINGENGINE_NLP_URL || 'https://nlp.almond.stanford.edu';
+module.exports.THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://thingpedia.stanford.edu/thingpedia';
+module.exports.CLOUD_SYNC_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://almond.stanford.edu';
 module.exports.MS_SPEECH_RECOGNITION_PRIMARY_KEY = 'de1f02817356494483ba502b2ce95f6f';
 module.exports.MS_SPEECH_RECOGNITION_SECONDARY_KEY = '3dc6ce0b832940f0b0c984a1517c457e';
 
