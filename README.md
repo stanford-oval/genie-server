@@ -15,7 +15,7 @@ information at <https://thingpedia.stanford.edu/about>.
 ## Running almond-server
 
 The recommended way to run almond-server is through [podman](https://podman.io/), a replacement for [docker](https://docs.docker.com/install/) that allows
-the container to run as your regular user (and thus access PulseAudio from your normal session).
+the container to run as your regular user (and thus access PulseAudio from your normal session). You can find the installation instructions [here](https://podman.io/getting-started/installation).
 
 To run, use the command:
 ```bash
@@ -23,10 +23,17 @@ podman run --name almond -p 3000:3000 \
     -v /dev/shm:/dev/shm \
     -v $XDG_RUNTIME_DIR/pulse:/run/pulse \
     --security-opt label=disable \
-    stanfordoval/almond-server
+    docker.io/stanfordoval/almond-server
 ```
 
 You can now navigate to [127.0.0.1:3000](http://127.0.0.1:3000) to access Almond, or use your voice with the hotword "computer".
+
+To manage the container later, you can use:
+```bash
+podman start almond # start the container again
+podman stop almond # stop the container
+podman logs almond # look at the most recent logs of a running container
+```
 
 ### I am a Mac!
 
