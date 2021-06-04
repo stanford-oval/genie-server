@@ -23,7 +23,7 @@ podman run --name almond -p 3000:3000 \
     -v /dev/shm:/dev/shm \
     -v $XDG_RUNTIME_DIR/pulse:/run/pulse \
     --security-opt label=disable \
-    stanfordoval/almond-server
+    docker.io/stanfordoval/almond-server
 ```
 
 You can now navigate to [127.0.0.1:3000](http://127.0.0.1:3000) to access Almond, or use your voice with the hotword "computer".
