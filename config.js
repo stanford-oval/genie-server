@@ -74,6 +74,12 @@ module.exports.HOST_BASED_AUTHENTICATION = process.env.THINGENGINE_HOST_BASED_AU
 */
 module.exports.ENABLE_DB_ENCRYPTION = false;
 
+/**
+  Adjust operation to run inside an Home Assistant add-on.
+
+  This affects the behavior of the OAuth proxy.
+*/
+module.exports.IN_HOME_ASSISTANT_ADDON = !!process.env.THINGENGINE_IN_HOME_ASSISTANT_ADDON;
 
 module.exports.NLP_URL = process.env.THINGENGINE_NLP_URL || 'https://nlp.almond.stanford.edu';
 module.exports.THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://thingpedia.stanford.edu/thingpedia';
