@@ -1,8 +1,8 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
-// Copyright 2019 The Board of Trustees of the Leland Stanford Junior University
+// Copyright 2017-2018 The Board of Trustees of the Leland Stanford Junior University
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,36 +20,39 @@
 
 // Graphics API abstraction, based on nodejs-gm
 
-import Q from 'q';
 import gm from 'gm';
+import * as stream from 'stream';
+import * as util from 'util';
+import * as Tp from 'thingpedia';
 
-class Image {
-    constructor(how) {
+class Image implements Tp.Capabilities.Image {
+    private _gm : gm.State;
+
+    constructor(how : string|Buffer) {
         this._gm = gm(how);
     }
 
     getSize() {
-        return Q.ninvoke(this._gm, 'size');
+        return util.promisify<gm.Dimensions>(this._gm.size).call(this._gm);
     }
 
-    resizeFit(width, height) {
+    resizeFit(width : number, height : number) {
         this._gm = this._gm.resize(width, height);
     }
 
-    stream(format) {
-        return Q.ninvoke(this._gm, 'stream', format);
+    stream(format : string) {
+        return util.promisify<string, stream.Readable>(this._gm.stream).call(this._gm, format);
     }
 
     toBuffer() {
-        return Q.ninvoke(this._gm, 'toBuffer');
+        return util.promisify<Buffer>(this._gm.toBuffer).call(this._gm);
     }
 }
 
-export function createImageFromPath(path) {
+export function createImageFromPath(path : string) {
     return new Image(path);
 }
 
-export function createImageFromBuffer(buffer) {
+export function createImageFromBuffer(buffer : Buffer) {
     return new Image(buffer);
 }
-

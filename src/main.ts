@@ -20,12 +20,12 @@
 
 process.on('unhandledRejection', (up) => { throw up; });
 
-import * as Tp from 'thingpedia';
 import * as child_process from 'child_process';
 import * as Genie from 'genie-toolkit';
 import * as stream from 'stream';
 
 import WebFrontend from './frontend';
+import type { ServerPlatform, SoundEffectsApi } from './service/platform';
 import platform from './service/platform';
 
 import * as Config from './config';
@@ -44,7 +44,7 @@ function handleStop() {
 const DEBUG = false;
 
 const HOTWORD_DETECTED_ID = 1;
-async function init(platform : Tp.BasePlatform) {
+async function init(platform : ServerPlatform) {
     _engine = new Genie.AssistantEngine(platform, {
         cloudSyncUrl: Config.CLOUD_SYNC_URL,
         thingpediaUrl: Config.THINGPEDIA_URL,
@@ -100,16 +100,16 @@ async function init(platform : Tp.BasePlatform) {
         speech.on('no-match', stopNullPlayback);
         speech.on('match', stopNullPlayback);
 
-        const soundEffects = platform.getCapability('sound-effects');
+        const soundEffects = platform.getCapability('sound-effects') as SoundEffectsApi;
         if (soundEffects) {
             speech.on('wakeword', (hotword) => {
-                (soundEffects.play as any)('message-new-instant', HOTWORD_DETECTED_ID).catch((e : Error) => {
+                soundEffects.play('message-new-instant', HOTWORD_DETECTED_ID).catch((e : Error) => {
                     console.error(`Failed to play hotword detection sound: ${e.message}`);
                 });
             });
 
             speech.on('no-match', () => {
-                (soundEffects.play as any)('dialog-warning', HOTWORD_DETECTED_ID).catch((e : Error) => {
+                soundEffects.play('dialog-warning', HOTWORD_DETECTED_ID).catch((e : Error) => {
                     console.error(`Failed to play hotword no-match sound: ${e.message}`);
                 });
             });
@@ -138,11 +138,11 @@ async function main() {
                     if (DEBUG)
                         console.log('Unlock key: ' + key.toString('hex'));
                     platform._setSqliteKey(key);
-                    resolve(init(platform as unknown as Tp.BasePlatform /* FIXME */));
+                    resolve(init(platform));
                 });
             });
         } else {
-            await init(platform as unknown as Tp.BasePlatform /* FIXME */);
+            await init(platform);
             await _frontend.open();
         }
 

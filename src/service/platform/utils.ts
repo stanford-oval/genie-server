@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -18,15 +18,22 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-export function ninvoke(obj, method, ...args) {
+type NInvokeReturn<ObjType, Method extends keyof ObjType, ArgTypes extends unknown[]> =
+    ObjType[Method] extends (this : ObjType, ...args : [...ArgTypes, (err ?: Error|null) => void]) => void ? void :
+    ObjType[Method] extends (this : ObjType, ...args : [...ArgTypes, (err : Error|null, res : infer ResType) => void]) => void ? ResType :
+    ObjType[Method] extends (this : ObjType, ...args : [...ArgTypes, (err : Error|null, ...res : infer ResType) => void]) => void ? ResType :
+    never;
+
+export function ninvoke<ObjType, Method extends keyof ObjType, ArgTypes extends unknown[]>(obj : ObjType, method : Method, ...args : ArgTypes)
+    : Promise<NInvokeReturn<ObjType, Method, ArgTypes>> {
     return new Promise((resolve, reject) => {
-        obj[method](...args, (err, ...res) => {
+        (obj[method] as any)(...args, (err : Error|null, ...res : any) => {
             if (err)
                 reject(err);
             else if (res.length === 1)
                 resolve(res[0]);
             else if (res.length === 0)
-                resolve();
+                resolve(undefined as any);
             else
                 resolve(res);
         });
