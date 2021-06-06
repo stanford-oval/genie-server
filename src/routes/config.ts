@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -31,21 +31,23 @@ const router = express.Router();
 
 router.use(user.requireLogIn);
 
-function config(req, res, next, userData, cloudData) {
+function config(req : express.Request, res : express.Response, next : express.NextFunction,
+                userData : { username ?: string, password ?: string, error ?: unknown },
+                cloudData : { username ?: string, error ?: unknown }) {
     return Genie.IpAddressUtils.getServerName().then((host) => {
-        let port = res.app.get('port');
-        let serverAddress = 'http://' +
+        const port = res.app.get('port');
+        const serverAddress = 'http://' +
             (host.indexOf(':') >= 0 ? '[' + host + ']' : host)
             + ':' + port + Config.BASE_URL + '/config';
 
-        let prefs = platform.getSharedPreferences();
-        let cloudId = prefs.get('cloud-id');
-        let authToken = prefs.get('auth-token');
+        const prefs = platform.getSharedPreferences();
+        const cloudId = prefs.get('cloud-id');
+        const authToken = prefs.get('auth-token');
 
-        let qrcodeTarget = 'https://thingengine.stanford.edu/qrcode/' + host + '/'
+        const qrcodeTarget = 'https://thingengine.stanford.edu/qrcode/' + host + '/'
             + port + '/' + authToken;
 
-        let ipAddresses = Genie.IpAddressUtils.getServerAddresses(host);
+        const ipAddresses = Genie.IpAddressUtils.getServerAddresses(host);
         res.render('config', {
             page_title: "Configure Almond",
             csrfToken: req.csrfToken(),
@@ -90,7 +92,7 @@ router.post('/set-options', (req, res, next) => {
 });
 
 router.post('/set-server-password', (req, res, next) => {
-    let password;
+    let password : string;
     try {
         if (typeof req.body['password'] !== 'string' ||
             req.body['password'].length < 8 ||

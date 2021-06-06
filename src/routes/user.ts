@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -21,17 +21,13 @@
 import Q from 'q';
 import express from 'express';
 import passport from 'passport';
-import * as crypto from 'crypto';
 
 import * as user from '../util/user';
 import platform from '../service/platform';
 import * as Config from '../config';
+import { makeRandom } from '../util/random';
 
-function makeRandom(bytes) {
-    return crypto.randomBytes(bytes).toString('hex');
-}
-
-let router = express.Router();
+const router = express.Router();
 
 router.get('/configure', (req, res, next) => {
     if (user.isConfigured()) {
@@ -57,7 +53,7 @@ router.post('/configure', (req, res, next) => {
         return;
     }
 
-    let password;
+    let password : string;
     try {
         if (typeof req.body['password'] !== 'string' ||
             req.body['password'].length < 8 ||
@@ -67,7 +63,6 @@ router.post('/configure', (req, res, next) => {
         if (req.body['confirm-password'] !== req.body['password'])
             throw new Error("The password and the confirmation do not match");
         password = req.body['password'];
-
     } catch(e) {
         res.render('configure', {
             csrfToken: req.csrfToken(),
@@ -82,7 +77,7 @@ router.post('/configure', (req, res, next) => {
         return Q.ninvoke(req, 'login', userObj);
     }).then(() => {
         // Redirection back to the original page
-        let redirect_to = req.session.redirect_to || '/';
+        const redirect_to = req.session.redirect_to || '/';
         delete req.session.redirect_to;
         res.redirect(redirect_to);
     }).catch((error) => {
@@ -106,7 +101,7 @@ router.post('/login', passport.authenticate('local', { failureRedirect: Config.B
                                                        failureFlash: true }), (req, res, next) => {
     user.unlock(req, req.body.password);
     // Redirection back to the original page
-    let redirect_to = req.session.redirect_to || (Config.BASE_URL + '/');
+    const redirect_to = req.session.redirect_to || (Config.BASE_URL + '/');
     delete req.session.redirect_to;
     res.redirect(303, redirect_to);
 });

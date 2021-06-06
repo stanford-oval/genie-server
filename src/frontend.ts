@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -19,6 +19,7 @@
 import Q from 'q';
 import * as events from 'events';
 import * as http from 'http';
+import * as Genie from 'genie-toolkit';
 
 import express from 'express';
 import * as path from 'path';
@@ -36,31 +37,69 @@ import connect_flash from 'connect-flash';
 import * as user from './util/user';
 import * as errorHandling from './util/error_handling';
 import * as secretKey from './util/secret_key';
+import type { ServerPlatform } from './service/platform';
+import * as I18n from './util/i18n';
 
 import * as Config from './config';
 
+declare global {
+    namespace Express {
+        interface Application {
+            frontend : WebFrontend;
+            //engine : Genie.AssistantEngine;
+            genie : Genie.AssistantEngine;
+        }
+
+        interface Request {
+            isLocked : boolean;
+            locale : string;
+
+            _ : (x : string) => string;
+            gettext : (x : string) => string;
+            ngettext : (x : string, x1 : string, n : number) => string;
+            pgettext : (c : string, x : string) => string;
+        }
+
+
+    }
+}
+
+declare module 'express-session' {
+    interface SessionData {
+        'device-redirect-to' : string;
+        redirect_to : string;
+    }
+}
+
 export default class WebFrontend extends events.EventEmitter {
-    constructor(platform) {
+    private _platform : ServerPlatform;
+    private _app : express.Application;
+    private _server : http.Server;
+    private _isLocked = true;
+
+    constructor(platform : ServerPlatform) {
         super();
 
         this._platform = platform;
+        this._app = express();
+        this._app.frontend = this;
+        this._server = http.createServer(this._app);
     }
 
     async init() {
         // all environments
-        this._app = express();
-        this._app.frontend = this;
-        this._server = http.createServer(this._app);
         expressWs(this._app, this._server);
 
         // work around a crash in expressWs if a WebSocket route fails with an error
         // code and express-session tries to save the session
         this._app.use((req, res, next) => {
-            if (req.ws) {
-                const originalWriteHead = res.writeHead;
-                res.writeHead = function(statusCode) {
+            if ((req as any).ws) {
+                const originalWriteHead = res.writeHead as any;
+                res.writeHead = function(statusCode : number) : any {
+                    // eslint-disable-next-line prefer-rest-params
                     originalWriteHead.apply(this, arguments);
-                    http.ServerResponse.prototype.writeHead.apply(this, arguments);
+                    // eslint-disable-next-line prefer-rest-params
+                    return (http.ServerResponse.prototype.writeHead as any).apply(this, arguments);
                 };
             }
 
@@ -107,7 +146,7 @@ export default class WebFrontend extends events.EventEmitter {
                 if (req.headers['x-forwarded-port']) {
                     port = (':' + req.headers['x-forwarded-port']);
                 } else if (req.headers['x-forwarded-host']) {
-                    let tmp = req.headers['x-forwarded-host'].split(':');
+                    const tmp = String(req.headers['x-forwarded-host']).split(':');
                     port = tmp[1] ? (':' + tmp[1]) : '';
                 } else {
                     port = '';
@@ -128,16 +167,17 @@ export default class WebFrontend extends events.EventEmitter {
 
             res.locals.Config = Config;
             res.locals.THINGPEDIA_URL = Config.THINGPEDIA_URL;
-            res.locals.developerKey = (this._app.engine ? this._app.engine.platform.getSharedPreferences().get('developer-key') : '') || '';
+            res.locals.developerKey = (this._app.engine ?
+                (this._app.engine as unknown as Genie.AssistantEngine).platform.getSharedPreferences().get('developer-key') : '') || '';
 
             next();
         });
 
         // i18n support
-        let gt = this._platform.getCapability('gettext');
-        let modir = path.resolve(path.dirname(module.filename), '../po');
+        const gt = this._platform.getCapability('gettext');
+        const modir = path.resolve(path.dirname(module.filename), '../po');
         try {
-            gt.loadTextdomainDirectory('almond-server', modir);
+            I18n.loadTextdomainDirectory(gt, this._platform.locale, 'almond-server', modir);
         } catch(e) {
             console.log('Failed to load translations: ' + e.message);
         }
@@ -205,11 +245,14 @@ export default class WebFrontend extends events.EventEmitter {
         return this._app;
     }
 
-    setEngine(engine) {
-        this._app.engine = engine;
+    setEngine(engine : Genie.AssistantEngine) {
+        this._app.genie = engine;
+
+        // FIXME this code is broken because we're overwriting a method in express!
+        (this._app as any).engine = engine;
     }
 
-    unlock(key) {
+    unlock(key : string) {
         if (!this._isLocked)
             return;
         this._isLocked = false;

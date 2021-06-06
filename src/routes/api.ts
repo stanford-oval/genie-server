@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -18,16 +18,18 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-
 import express from 'express';
 import passport from 'passport';
+import * as Genie from 'genie-toolkit';
+import WebSocket from 'ws';
 
 import * as user from '../util/user';
 import * as errorHandling from '../util/error_handling';
+import { makeRandom } from '../util/random';
 
 import conversationHandler from './conversation';
 
-let router = express.Router();
+const router = express.Router();
 
 router.use('/', passport.authenticate(['host-based', 'bearer']), user.requireLogIn);
 
@@ -38,17 +40,17 @@ router.post('/converse', (req, res, next) => {
         return;
     }
 
-    const engine = req.app.engine;
+    const engine = req.app.genie;
     const assistant = engine.assistant;
     Promise.resolve().then(() => {
-        return assistant.converse(command);
+        return assistant.converse(command, req.body.conversationId ? String(req.body.conversationId) : 'stateless-' + makeRandom(4));
     }).then((result) => {
         res.json(result);
     }).catch(next);
 });
 
 router.get('/devices/list', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
     Promise.resolve().then(() => {
         const result = engine.getDeviceInfos();
         // sort by name to provide a deterministic result
@@ -58,20 +60,20 @@ router.get('/devices/list', (req, res, next) => {
 });
 
 router.post('/devices/create', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
     Promise.resolve().then(async () => {
         const device = await engine.devices.addSerialized(req.body);
-        res.json(engine.getDeviceInfo(device.uniqueId));
+        res.json(engine.getDeviceInfo(device.uniqueId!));
     }).catch(next);
 });
 
 
 router.post('/apps/create', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
     Promise.resolve().then(() => {
         return engine.createAppAndReturnResults(req.body.code);
     }).then((result) => {
-        if (result.error)
+        if (result.errors && result.errors.length)
             res.status(400);
         if (result.icon)
             result.icon = 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/' + result.icon;
@@ -80,7 +82,7 @@ router.post('/apps/create', (req, res, next) => {
 });
 
 router.get('/apps/list', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     Promise.resolve().then(() => {
         res.json(engine.getAppInfos());
@@ -88,7 +90,7 @@ router.get('/apps/list', (req, res, next) => {
 });
 
 router.get('/apps/get/:appId', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     Promise.resolve().then(() => {
         return engine.getAppInfo(req.params.appId, false);
@@ -103,7 +105,7 @@ router.get('/apps/get/:appId', (req, res, next) => {
 });
 
 router.post('/apps/delete/:appId', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     Promise.resolve().then(() => {
         return engine.deleteApp(req.params.appId);
@@ -119,7 +121,10 @@ router.post('/apps/delete/:appId', (req, res, next) => {
 
 
 class NotificationWrapper {
-    constructor(engine, ws) {
+    private _dispatcher : Genie.DialogueAgent.AssistantDispatcher;
+    private _ws : WebSocket;
+
+    constructor(engine : Genie.AssistantEngine, ws : WebSocket) {
         this._dispatcher = engine.assistant;
         this._ws = ws;
         this._dispatcher.addNotificationOutput(this);
@@ -129,13 +134,13 @@ class NotificationWrapper {
         this._dispatcher.removeNotificationOutput(this);
     }
 
-    async notify(data) {
+    async notify(data : Parameters<Genie.DialogueAgent.NotificationDelegate['notify']>[0]) {
         if (data.icon)
             data.icon = 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/' + data.icon;
         await this._ws.send(JSON.stringify({ result: data }));
     }
 
-    async notifyError(data) {
+    async notifyError(data : Parameters<Genie.DialogueAgent.NotificationDelegate['notifyError']>[0]) {
         if (data.icon)
             data.icon = 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/' + data.icon;
         await this._ws.send(JSON.stringify({ error: data }));
@@ -143,12 +148,12 @@ class NotificationWrapper {
 }
 
 router.ws('/results', (ws, req, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     Promise.resolve().then(() => {
         const wrapper = new NotificationWrapper(engine, ws);
         ws.on('close', () => {
-            wrapper.destroy(ws);
+            wrapper.destroy();
         });
         ws.on('ping', (data) => ws.pong(data));
     }).catch((error) => {

@@ -66,6 +66,7 @@ async function init(platform : ServerPlatform) {
         const speech = new Genie.SpeechHandler(conversation, platform, {
             subscriptionKey: Config.MS_SPEECH_RECOGNITION_PRIMARY_KEY
         });
+        platform.speech = speech;
 
         let play : stream.Writable|null;
         const ensureNullPlayback = () => {

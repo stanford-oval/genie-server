@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -18,7 +18,6 @@
 //
 // Author: Silei Xu <silei@cs.stanford.edu>
 
-
 import * as fs from 'fs';
 import express from 'express';
 
@@ -29,7 +28,7 @@ const router = express.Router();
 router.use(user.requireLogIn);
 
 router.post('/start', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     Promise.resolve().then(() => {
         return engine.assistant.getConversation(req.body.id);
@@ -45,7 +44,7 @@ router.post('/start', (req, res, next) => {
 });
 
 router.post('/stop', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     Promise.resolve().then(() => {
         return engine.assistant.getConversation(req.body.id);
@@ -61,7 +60,7 @@ router.post('/stop', (req, res, next) => {
 });
 
 router.get('/status/:id', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     Promise.resolve().then(() => {
         return engine.assistant.getConversation(req.params.id);
@@ -76,12 +75,12 @@ router.get('/status/:id', (req, res, next) => {
 });
 
 router.post('/vote/:vote', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     Promise.resolve().then(() => {
         return engine.assistant.getConversation(req.body.id);
     }).then((conversation) => {
-        if (!['up', 'down'].includes(req.params.vote)) {
+        if (req.params.vote !== 'up' && req.params.vote !== 'down') {
             res.status(400);
             return res.json({ error: 'Invalid voting option' });
         } else if (!conversation) {
@@ -95,7 +94,7 @@ router.post('/vote/:vote', (req, res, next) => {
 });
 
 router.post('/comment', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
     const command = req.body.comment;
     if (!command) {
         res.status(400).json({ error: 'Missing comment' });
@@ -116,7 +115,7 @@ router.post('/comment', (req, res, next) => {
 });
 
 router.post('/save', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     Promise.resolve().then(() => {
         return engine.assistant.getConversation(req.body.id);
@@ -131,10 +130,10 @@ router.post('/save', (req, res, next) => {
 });
 
 router.get('/log/:id.txt', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     Promise.resolve().then(() => {
-        return engine.assistant.getConversation(req.params.id);
+        return engine.assistant.getConversation((req.params as any).id);
     }).then((conversation) => {
         if (!conversation || !conversation.log) {
             res.status(404);
@@ -148,7 +147,7 @@ router.get('/log/:id.txt', (req, res, next) => {
 });
 
 router.get('/log/:id', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     Promise.resolve().then(() => {
         return engine.assistant.getConversation(req.params.id);

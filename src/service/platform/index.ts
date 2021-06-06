@@ -31,6 +31,7 @@ import * as child_process from 'child_process';
 import Gettext from 'node-gettext';
 import * as path from 'path';
 import * as util from 'util';
+import * as Genie from 'genie-toolkit';
 
 import * as _graphicsApi from './graphics';
 
@@ -251,6 +252,7 @@ export class ServerPlatform extends Tp.BasePlatform {
     private _sqliteKey : string|null;
     private _origin : string|null;
     private _pulse : PulseAudio_|null|undefined;
+    speech : Genie.SpeechHandler|null;
 
     private _serverDev : {
         kind : string;
@@ -281,6 +283,7 @@ export class ServerPlatform extends Tp.BasePlatform {
 
         this._wakeWordDetector = null;
         this._soundEffects = null;
+        this.speech = null;
 
         this._sqliteKey = null;
         this._origin = null;
