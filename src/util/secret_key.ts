@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -22,14 +22,10 @@ import * as crypto from 'crypto';
 
 import platform from '../service/platform';
 
-/**
- *
- * @returns {string}
- */
 export function getSecretKey() {
-    let prefs = platform.getSharedPreferences();
+    const prefs = platform.getSharedPreferences();
 
-    let sessionKey = prefs.get('session-key');
+    let sessionKey = prefs.get('session-key') as string|undefined;
     if (sessionKey === undefined) {
         sessionKey = crypto.randomBytes(32).toString('hex');
         prefs.set('session-key', sessionKey);

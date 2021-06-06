@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -18,9 +18,10 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
+import express from 'express';
 import * as Tp from 'thingpedia';
 
-function html(err, req, res, next) {
+export function html(err : any, req : express.Request, res : express.Response, next : express.NextFunction) {
     if (err instanceof Tp.OAuthError || err instanceof Tp.ImplementationError) {
         res.status(500).render('error', {
             page_title: req._("Almond - Error"),
@@ -80,7 +81,7 @@ function html(err, req, res, next) {
     }
 }
 
-function json(err, req, res, next) {
+export function json(err : any, req : express.Request, res : express.Response, next : express.NextFunction) {
     let message = err.message;
 
     if (typeof err.status === 'number') {
@@ -102,8 +103,3 @@ function json(err, req, res, next) {
 
     res.json({ error: message, code: err.code });
 }
-
-export {
-    json,
-    html
-};

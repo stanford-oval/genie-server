@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -18,15 +18,29 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
+import express from 'express';
 import * as crypto from 'crypto';
 import * as util from 'util';
+
 import passport from 'passport';
-import BaseStrategy from 'passport-strategy';
+import { Strategy as BaseStrategy } from 'passport-strategy';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as BearerStrategy } from 'passport-http-bearer';
 
 import platform from '../service/platform';
+import { makeRandom } from './random';
+
 import * as Config from '../config';
+
+declare global {
+    namespace Express {
+        interface User {
+            password : string;
+            salt : string;
+            sqliteKeySalt : string;
+        }
+    }
+}
 
 // a model of user based on sharedpreferences
 const model = {
@@ -38,23 +52,28 @@ const model = {
 
     get() {
         const prefs = platform.getSharedPreferences();
-        const user = prefs.get('server-login');
+        const user = prefs.get('server-login') as Express.User|undefined;
         if (user === undefined)
             throw new Error("Login not configured yet");
         return user;
     },
 
-    set(salt, sqliteKeySalt, passwordHash) {
+    set(salt : string, sqliteKeySalt : string, passwordHash : string) {
         const prefs = platform.getSharedPreferences();
-        const user = { password: passwordHash,
-                       salt: salt,
-                       sqliteKeySalt: sqliteKeySalt };
+        const user : Express.User = {
+            password: passwordHash,
+            salt: salt,
+            sqliteKeySalt: sqliteKeySalt
+        };
         prefs.set('server-login', user);
         return user;
     }
 };
 
 class HostBasedStrategy extends BaseStrategy {
+    name : string;
+    private _mode : string;
+
     constructor() {
         super();
         this.name = 'host-based';
@@ -64,7 +83,7 @@ class HostBasedStrategy extends BaseStrategy {
             throw new Error(`Configuration error: invalid value ${this._mode} for HOST_BASED_AUTHENTICATION setting`);
     }
 
-    authenticate(req, options) {
+    authenticate(req : express.Request) {
         // if the server is not configured, disable HBA and let the user set the password
         if (!model.isConfigured())
             return this.pass();
@@ -81,31 +100,29 @@ class HostBasedStrategy extends BaseStrategy {
     }
 }
 
-function makeRandom() {
-    return crypto.randomBytes(32).toString('hex');
-}
-
-function hashPassword(salt, password) {
+function hashPassword(salt : string, password : string) {
     return util.promisify(crypto.pbkdf2)(password, salt, 10000, 32, 'sha1')
         .then((buffer) => buffer.toString('hex'));
 }
 
 export function initializePassport() {
     passport.serializeUser((user, done) => {
-        done(null, user);
+        done(null, 'local');
     });
 
-    passport.deserializeUser((user, done) => {
-        done(null, user);
+    passport.deserializeUser<'local'>((user, done) => {
+        done(null, user === 'local' ? model.get() : undefined);
     });
 
     passport.use(new HostBasedStrategy());
 
     passport.use(new BearerStrategy((accessToken, done) => {
-        Promise.resolve().then(() => {
+        Promise.resolve().then(async () : Promise<[Express.User|false, string|null]> => {
             try {
                 const prefs = platform.getSharedPreferences();
-                const expectedAccessToken = prefs.get('access-token');
+                const expectedAccessToken = prefs.get('access-token') as string;
+                if (!expectedAccessToken)
+                    return [false, "Access token not configured"];
                 if (crypto.timingSafeEqual(new Buffer(accessToken, 'hex'), new Buffer(expectedAccessToken, 'hex')))
                     return [model.get(), null];
                 return [false, "Invalid access token"];
@@ -113,28 +130,28 @@ export function initializePassport() {
                 return [false, e.message];
             }
         }).then((result) => {
-            done(null, result[0], { message: result[1] });
+            done(null, result[0], { message: result[1]!, scope: [] });
         }, (err) => {
             done(err);
         });
     }));
 
     passport.use(new LocalStrategy((username, password, done) => {
-        Promise.resolve().then(() => {
+        Promise.resolve().then(async () : Promise<[Express.User|false, string|null]> => {
             try {
-                let user = model.get();
+                const user = model.get();
 
                 return hashPassword(user.salt, password).then((hash) => {
                     if (!crypto.timingSafeEqual(new Buffer(hash, 'hex'), new Buffer(user.password, 'hex')))
                         return [false, "Invalid username or password"];
 
-                    return ['local', null];
+                    return [user, null];
                 });
             } catch(e) {
                 return [false, e.message];
             }
         }).then((result) => {
-            done(null, result[0], { message: result[1] });
+            done(null, result[0], { message: result[1]! });
         }, (err) => {
             done(err);
         });
@@ -145,16 +162,16 @@ export function isConfigured() {
     return model.isConfigured();
 }
 
-export function register(password) {
-    let salt = makeRandom();
-    let sqliteKeySalt = makeRandom();
+export function register(password : string) {
+    const salt = makeRandom();
+    const sqliteKeySalt = makeRandom();
     return hashPassword(salt, password).then((hash) => {
         return model.set(salt, sqliteKeySalt, hash);
     });
 }
 
-export function unlock(req, password) {
-    let user = model.get();
+export function unlock(req : express.Request, password : string) {
+    const user = model.get();
     hashPassword(user.sqliteKeySalt, password).then((key) => {
         req.app.frontend.unlock(key);
     });
@@ -163,7 +180,7 @@ export function unlock(req, password) {
 /* Middleware to check if the user is logged in before performing an
     * action. If not, the user will be redirected to login.
     */
-export function requireLogIn(req, res, next) {
+export function requireLogIn(req : express.Request, res : express.Response, next : express.NextFunction) {
     if (!model.isConfigured()) {
         if (req.method === 'GET' || req.method === 'HEAD') {
             if (!req.originalUrl.startsWith('/api') &&
