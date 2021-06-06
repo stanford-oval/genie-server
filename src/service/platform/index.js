@@ -223,7 +223,7 @@ class SoundEffectsApi {
 
     getURL(name) {
         if (LOCAL_SOUND_EFFECTS.includes(name))
-            return 'file://' + path.resolve(path.dirname(module.filename), '../../data/sound-effects/' + name + '.oga');
+            return 'file://' + path.resolve(path.dirname(module.filename), '../../../data/sound-effects/' + name + '.oga');
         else if (KNOWN_SOUND_EFFECTS.includes(name))
             return 'file:///usr/share/sounds/freedesktop/stereo/' + name + '.oga';
         else
@@ -235,7 +235,7 @@ class SoundEffectsApi {
             'media.role': 'voice-assistant',
         };
         if (LOCAL_SOUND_EFFECTS.includes(name))
-            options['media.filename'] = path.resolve(path.dirname(module.filename), '../../data/sound-effects/' + name + '.oga');
+            options['media.filename'] = path.resolve(path.dirname(module.filename), '../../../data/sound-effects/' + name + '.oga');
         else
             options['event.id'] = name;
 
@@ -267,7 +267,7 @@ class ServerPlatform extends Tp.BasePlatform {
 
         this._serverDev = {
             kind: 'org.thingpedia.builtin.thingengine.server',
-            class: fs.readFileSync(path.resolve(__dirname, '../../data/thingengine.server.tt')).toString(),
+            class: fs.readFileSync(path.resolve(__dirname, '../../../data/thingengine.server.tt')).toString(),
             module: require('./thingengine.server')
         };
 

@@ -25,7 +25,7 @@ process.on('unhandledRejection', (up) => { throw up; });
 
 const child_process = require('child_process');
 const Genie = require('genie-toolkit');
-const WebFrontend = require('./service/frontend');
+const WebFrontend = require('./frontend');
 
 const Config = require('./config');
 

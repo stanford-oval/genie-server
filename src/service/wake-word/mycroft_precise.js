@@ -81,7 +81,7 @@ module.exports = class DetectorStream extends stream.Writable {
         // keep chunks small, to reduce latency
         super({ highWaterMark: 128 });
 
-        this._modelPath = path.resolve(path.dirname(module.filename), '../../data/wake-word/almond.net');
+        this._modelPath = path.resolve(path.dirname(module.filename), '../../../data/wake-word/almond.net');
         this._hotword = path.basename(this._modelPath).split('.')[0];
 
         this._detector = new TriggerDetector(2048);

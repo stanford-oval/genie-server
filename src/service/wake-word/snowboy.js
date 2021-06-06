@@ -33,13 +33,13 @@ module.exports = class SnowboyDetectorStream extends stream.Writable {
 
         let models = new snowboy.Models();
         models.add({
-             file: path.resolve(path.dirname(module.filename), '../../data/wake-word/snowboy/computer.umdl'),
+             file: path.resolve(path.dirname(module.filename), '../../../data/wake-word/snowboy/computer.umdl'),
              sensitivity: 0.4,
              hotwords : 'computer'
         });
 
         this._detector = new snowboy.Detector({
-            resource: path.resolve(path.dirname(module.filename), '../../data/wake-word/snowboy/common.res'),
+            resource: path.resolve(path.dirname(module.filename), '../../../data/wake-word/snowboy/common.res'),
             models: models,
             audioGain: 1.0,
             applyFrontend: true,

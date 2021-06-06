@@ -46,7 +46,7 @@ EOF
 # set the server to require authentication so we can run the tests for login
 export THINGENGINE_HOST_BASED_AUTHENTICATION=disabled
 
-node $srcdir/main.js &
+node $srcdir/src/main.js &
 serverpid=$!
 
 # in interactive mode, sleep forever

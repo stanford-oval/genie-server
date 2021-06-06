@@ -34,11 +34,11 @@ const expressWs = require('express-ws');
 const passport = require('passport');
 const connect_flash = require('connect-flash');
 
-const user = require('../util/user');
-const errorHandling = require('../util/error_handling');
-const secretKey = require('../util/secret_key');
+const user = require('./util/user');
+const errorHandling = require('./util/error_handling');
+const secretKey = require('./util/secret_key');
 
-const Config = require('../config');
+const Config = require('./config');
 
 module.exports = class WebFrontend extends events.EventEmitter {
     constructor(platform) {
@@ -136,13 +136,13 @@ module.exports = class WebFrontend extends events.EventEmitter {
         var gt = platform.getCapability('gettext');
         var modir = path.resolve(path.dirname(module.filename), '../po');
         try {
-            gt.loadTextdomainDirectory('thingengine-platform-server', modir);
+            gt.loadTextdomainDirectory('almond-server', modir);
         } catch(e) {
             console.log('Failed to load translations: ' + e.message);
         }
-        const gettext = gt.dgettext.bind(gt, 'thingengine-platform-server');
-        const pgettext = gt.dpgettext.bind(gt, 'thingengine-platform-server');
-        const ngettext = gt.dngettext.bind(gt, 'thingengine-platform-server');
+        const gettext = gt.dgettext.bind(gt, 'almond-server');
+        const pgettext = gt.dpgettext.bind(gt, 'almond-server');
+        const ngettext = gt.dngettext.bind(gt, 'almond-server');
         this._app.use((req, res, next) => {
             req.locale = platform.locale;
             req.gettext = gettext;
@@ -158,19 +158,19 @@ module.exports = class WebFrontend extends events.EventEmitter {
         });
 
         // mount /api before csurf so we can perform requests without the CSRF token
-        this._app.use('/api', require('../routes/api'));
+        this._app.use('/api', require('./routes/api'));
 
         this._app.use(csurf({ cookie: false }));
         this._app.use((req, res, next) => {
             res.locals.csrfToken = req.csrfToken();
             next();
         });
-        this._app.use('/', require('../routes/index'));
-        this._app.use('/apps', require('../routes/apps'));
-        this._app.use('/user', require('../routes/user'));
-        this._app.use('/config', require('../routes/config'));
-        this._app.use('/devices', require('../routes/devices'));
-        this._app.use('/recording', require('../routes/recording'));
+        this._app.use('/', require('./routes/index'));
+        this._app.use('/apps', require('./routes/apps'));
+        this._app.use('/user', require('./routes/user'));
+        this._app.use('/config', require('./routes/config'));
+        this._app.use('/devices', require('./routes/devices'));
+        this._app.use('/recording', require('./routes/recording'));
 
         this._app.use((req, res) => {
             // if we get here, we have a 404 response
