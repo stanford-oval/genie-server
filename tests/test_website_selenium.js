@@ -18,17 +18,16 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-
 // load thingpedia to initialize the polyfill
-require('thingpedia');
+import 'thingpedia';
 process.on('unhandledRejection', (up) => { throw up; });
 
-const assert = require('assert');
-const Tp = require('thingpedia');
+import assert from 'assert';
+import * as Tp from 'thingpedia';
 
-const WD = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
-const firefox = require('selenium-webdriver/firefox');
+import * as WD from 'selenium-webdriver';
+import * as chrome from 'selenium-webdriver/chrome';
+import * as firefox from 'selenium-webdriver/firefox';
 
 const BASE_URL = `http://127.0.0.1:${process.env.PORT}`;
 
@@ -155,6 +154,4 @@ async function testMyConversation(driver) {
 async function main() {
     await withSelenium(testMyConversation);
 }
-module.exports = main;
-if (!module.parent)
-    main();
+main();

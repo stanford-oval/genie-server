@@ -19,7 +19,7 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
 
-const Tp = require('thingpedia');
+import * as Tp from 'thingpedia';
 
 class UnavailableError extends Error {
     constructor() {
@@ -37,7 +37,7 @@ function avg(array) {
     return sum / array.length;
 }
 
-module.exports = class ThingEngineServerDevice extends Tp.BaseDevice {
+export default class ThingEngineServerDevice extends Tp.BaseDevice {
     constructor(engine, state) {
         super(engine, state);
 
@@ -108,4 +108,4 @@ module.exports = class ThingEngineServerDevice extends Tp.BaseDevice {
 
         await this._pulseaudio.setSinkMute(sink.name, 0);
     }
-};
+}

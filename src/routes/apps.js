@@ -19,11 +19,11 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
 
-const express = require('express');
+import express from 'express';
 let router = express.Router();
 
-const user = require('../util/user');
-const Config = require('../config');
+import * as user from '../util/user';
+import * as Config from '../config';
 
 router.use(user.requireLogIn);
 
@@ -53,4 +53,4 @@ router.post('/delete', (req, res, next) => {
     }).catch(next);
 });
 
-module.exports = router;
+export default router;

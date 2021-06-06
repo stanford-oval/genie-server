@@ -18,15 +18,14 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
+import Q from 'q';
+import express from 'express';
+import passport from 'passport';
+import * as crypto from 'crypto';
 
-const Q = require('q');
-const express = require('express');
-const passport = require('passport');
-const crypto = require('crypto');
-
-const user = require('../util/user');
-const platform = require('../service/platform');
-const Config = require('../config');
+import * as user from '../util/user';
+import platform from '../service/platform';
+import * as Config from '../config';
 
 function makeRandom(bytes) {
     return crypto.randomBytes(bytes).toString('hex');
@@ -128,4 +127,4 @@ router.post('/token', user.requireLogIn, (req, res, next) => {
     res.json({ result: 'ok', token: accessToken });
 });
 
-module.exports = router;
+export default router;

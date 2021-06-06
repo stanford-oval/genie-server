@@ -18,19 +18,17 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
+import * as crypto from 'crypto';
 
-const crypto = require('crypto');
-const platform = require('../service/platform');
+import platform from '../service/platform';
 
-module.exports = {
-    getSecretKey() {
-        let prefs = platform.getSharedPreferences();
+export function getSecretKey() {
+    let prefs = platform.getSharedPreferences();
 
-        let sessionKey = prefs.get('session-key');
-        if (sessionKey === undefined) {
-            sessionKey = crypto.randomBytes(32).toString('hex');
-            prefs.set('session-key', sessionKey);
-        }
-        return sessionKey;
-    },
-};
+    let sessionKey = prefs.get('session-key');
+    if (sessionKey === undefined) {
+        sessionKey = crypto.randomBytes(32).toString('hex');
+        prefs.set('session-key', sessionKey);
+    }
+    return sessionKey;
+}

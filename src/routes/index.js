@@ -19,11 +19,11 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
 
-const express = require('express');
+import express from 'express';
 
-const user = require('../util/user');
+import * as user from '../util/user';
 
-const conversationHandler = require('./conversation');
+import conversationHandler from './conversation';
 
 const router = express.Router();
 
@@ -60,4 +60,4 @@ router.post('/listen', user.requireLogIn, (req, res, next) => {
     });
 });
 
-module.exports = router;
+export default router;

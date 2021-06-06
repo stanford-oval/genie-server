@@ -18,8 +18,7 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-
-const Tp = require('thingpedia');
+import * as Tp from 'thingpedia';
 
 function html(err, req, res, next) {
     if (err instanceof Tp.OAuthError || err instanceof Tp.ImplementationError) {
@@ -104,7 +103,7 @@ function json(err, req, res, next) {
     res.json({ error: message, code: err.code });
 }
 
-module.exports = {
+export {
     json,
     html
 };

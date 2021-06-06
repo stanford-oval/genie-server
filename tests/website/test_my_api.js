@@ -18,11 +18,10 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-
-const assert = require('assert');
-const WebSocket = require('ws');
-const { assertHttpError, request, sessionRequest } = require('./scaffold');
-const { login, } = require('./login');
+import assert from 'assert';
+import WebSocket from 'ws';
+import { assertHttpError, request, sessionRequest } from './scaffold';
+import { login, } from './login';
 
 async function getAccessToken(session) {
     return JSON.parse(await sessionRequest('/user/token', 'POST', '', session, {
@@ -358,6 +357,6 @@ async function main() {
     const token = await getAccessToken(bob);
     await testMyApiOAuth(token);
 }
-module.exports = main;
+export default main;
 if (!module.parent)
     main();

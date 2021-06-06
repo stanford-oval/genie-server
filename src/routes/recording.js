@@ -19,10 +19,10 @@
 // Author: Silei Xu <silei@cs.stanford.edu>
 
 
-const fs = require('fs');
-const express = require('express');
+import * as fs from 'fs';
+import express from 'express';
 
-const user = require('../util/user');
+import * as user from '../util/user';
 
 const router = express.Router();
 
@@ -166,4 +166,4 @@ router.get('/log/:id', (req, res, next) => {
 });
 
 
-module.exports = router;
+export default router;

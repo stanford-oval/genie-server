@@ -18,11 +18,10 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-
 // Graphics API abstraction, based on nodejs-gm
 
-const Q = require('q');
-const gm = require('gm');
+import Q from 'q';
+import gm from 'gm';
 
 class Image {
     constructor(how) {
@@ -46,13 +45,11 @@ class Image {
     }
 }
 
-module.exports = {
-    createImageFromPath(path) {
-        return new Image(path);
-    },
+export function createImageFromPath(path) {
+    return new Image(path);
+}
 
-    createImageFromBuffer(buffer) {
-        return new Image(buffer);
-    },
-};
+export function createImageFromBuffer(buffer) {
+    return new Image(buffer);
+}
 

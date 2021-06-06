@@ -26,7 +26,7 @@ import * as Genie from 'genie-toolkit';
 import * as stream from 'stream';
 
 import WebFrontend from './frontend';
-import ServerPlatform from './service/platform';
+import platform from './service/platform';
 
 import * as Config from './config';
 
@@ -121,13 +121,14 @@ async function init(platform : Tp.BasePlatform) {
 }
 
 async function main() {
+    await platform.init();
+
     process.on('SIGINT', handleStop);
     process.on('SIGTERM', handleStop);
 
-    const platform = new ServerPlatform();
     try {
-
         _frontend = new WebFrontend(platform);
+        await _frontend.init();
 
         if (Config.ENABLE_DB_ENCRYPTION) {
             await _frontend.open();

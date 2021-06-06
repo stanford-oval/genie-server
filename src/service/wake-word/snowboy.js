@@ -18,16 +18,15 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-
-const stream = require('stream');
-const path = require('path');
-const snowboy = require('snowboy');
+import * as stream from 'stream';
+import * as path from 'path';
+import * as snowboy from 'snowboy';
 
 // keep 1.5 seconds of audio
 // (at 16kHz mono, 2 bytes per sample)
 const AUDIO_BUFFER = 1.5 * 16000 * 2;
 
-module.exports = class SnowboyDetectorStream extends stream.Writable {
+export default class SnowboyDetectorStream extends stream.Writable {
     constructor() {
         super();
 
@@ -80,4 +79,4 @@ module.exports = class SnowboyDetectorStream extends stream.Writable {
 
         this._detector.write(chunk, encoding, callback);
     }
-};
+}

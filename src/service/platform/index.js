@@ -18,43 +18,28 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-
 // Server platform
 
-const Q = require('q');
-const fs = require('fs');
-const os = require('os');
-const events = require('events');
-const Tp = require('thingpedia');
-const child_process = require('child_process');
-const Gettext = require('node-gettext');
-const path = require('path');
-let PulseAudio;
-try {
-    PulseAudio = require('pulseaudio2');
-} catch(e) {
-    PulseAudio = null;
-}
-let canberra;
-try {
-    canberra = require('canberra');
-} catch(e) {
-    canberra = null;
-}
+import Q from 'q';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as events from 'events';
+import * as Tp from 'thingpedia';
+import * as child_process from 'child_process';
+import Gettext from 'node-gettext';
+import * as path from 'path';
 
-const _graphicsApi = require('./graphics');
+import * as _graphicsApi from './graphics';
 
-let WakeWordDetector;
-try {
-    WakeWordDetector = require('../wake-word/snowboy');
-} catch(e) {
-    WakeWordDetector = null;
-}
+let PulseAudio = null;
+let canberra = null;
+let WakeWordDetector = null;
 
 // FIXME
-const Builtins = require('genie-toolkit/dist/lib/engine/devices/builtins');
+import Builtins from 'genie-toolkit/dist/lib/engine/devices/builtins';
+import ThingEngineServerDevice from './thingengine.server';
 
-const Config = require('../../config');
+import * as Config from '../../config';
 
 let _unzipApi = {
     unzip(zipPath, dir) {
@@ -243,7 +228,7 @@ class SoundEffectsApi {
     }
 }
 
-module.exports = class ServerPlatform extends Tp.BasePlatform {
+class ServerPlatform extends Tp.BasePlatform {
     constructor() {
         super();
 
@@ -267,14 +252,32 @@ module.exports = class ServerPlatform extends Tp.BasePlatform {
         this._serverDev = {
             kind: 'org.thingpedia.builtin.thingengine.server',
             class: fs.readFileSync(path.resolve(__dirname, '../../../data/thingengine.server.tt')).toString(),
-            module: require('./thingengine.server')
+            module: ThingEngineServerDevice
         };
 
         // HACK: thingengine-core will try to load thingengine-own-desktop from the db
         // before PairedEngineManager calls getPlatformDevice(), which can result in loading
         // the device as unsupported (and that would be bad)
         // to avoid that, we inject it eagerly here
-        Builtins.default[this._serverDev.kind] = this._serverDev;
+        Builtins[this._serverDev.kind] = this._serverDev;
+    }
+
+    async init() {
+        try {
+            PulseAudio = await import('pulseaudio2').default;
+        } catch(e) {
+            PulseAudio = null;
+        }
+        try {
+            canberra = await import('canberra').default;
+        } catch(e) {
+            canberra = null;
+        }
+        try {
+            WakeWordDetector = await import('../wake-word/snowboy').default;
+        } catch(e) {
+            WakeWordDetector = null;
+        }
     }
 
     async _ensurePulseConfig() {
@@ -522,4 +525,6 @@ module.exports = class ServerPlatform extends Tp.BasePlatform {
         this._prefs.set('auth-token', authToken);
         return true;
     }
-};
+}
+
+export default new ServerPlatform();

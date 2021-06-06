@@ -18,7 +18,6 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-
 /**
   The URL prefix at which all almond-server APIs and pages are exposed.
 
@@ -28,7 +27,7 @@
   Good: /foo /foo/bar
   Bad: foo foo/ /foo/ /foo//bar
 */
-module.exports.BASE_URL = process.env.THINGENGINE_BASE_URL || '';
+export const BASE_URL = process.env.THINGENGINE_BASE_URL || '';
 
 /**
   Set this to true if Almond is served behind a reverse proxy.
@@ -36,7 +35,7 @@ module.exports.BASE_URL = process.env.THINGENGINE_BASE_URL || '';
   If true, Almond will trust the X-Forwarded-* headers, the default host-based authentication
   will be "proxied-ip", and the default origin will not use a port.
 */
-module.exports.HAS_REVERSE_PROXY = !!process.env.THINGENGINE_HAS_REVERSE_PROXY;
+export const HAS_REVERSE_PROXY = !!process.env.THINGENGINE_HAS_REVERSE_PROXY;
 
 /**
   Enable host-based authentication.
@@ -60,8 +59,8 @@ module.exports.HAS_REVERSE_PROXY = !!process.env.THINGENGINE_HAS_REVERSE_PROXY;
 
   NOTE: host-based authentication is not compatible with DB encryption.
 */
-module.exports.HOST_BASED_AUTHENTICATION = process.env.THINGENGINE_HOST_BASED_AUTHENTICATION ||
-    (module.exports.HAS_REVERSE_PROXY ? 'proxied-ip' : 'local-ip');
+export const HOST_BASED_AUTHENTICATION = process.env.THINGENGINE_HOST_BASED_AUTHENTICATION ||
+    (HAS_REVERSE_PROXY ? 'proxied-ip' : 'local-ip');
 
 /**
   Enable password-based DB encryption.
@@ -72,12 +71,10 @@ module.exports.HOST_BASED_AUTHENTICATION = process.env.THINGENGINE_HOST_BASED_AU
   enable by default. If enabled, you must build the server with sqlcipher as the sqlite backend
   (the default docker images do not do this).
 */
-module.exports.ENABLE_DB_ENCRYPTION = false;
+export const ENABLE_DB_ENCRYPTION = false;
 
-
-module.exports.NLP_URL = process.env.THINGENGINE_NLP_URL || 'https://nlp.almond.stanford.edu';
-module.exports.THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://thingpedia.stanford.edu/thingpedia';
-module.exports.CLOUD_SYNC_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://almond.stanford.edu';
-module.exports.MS_SPEECH_RECOGNITION_PRIMARY_KEY = 'de1f02817356494483ba502b2ce95f6f';
-module.exports.MS_SPEECH_RECOGNITION_SECONDARY_KEY = '3dc6ce0b832940f0b0c984a1517c457e';
-
+export const NLP_URL = process.env.THINGENGINE_NLP_URL || 'https://nlp.almond.stanford.edu';
+export const THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://thingpedia.stanford.edu/thingpedia';
+export const CLOUD_SYNC_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://almond.stanford.edu';
+export const MS_SPEECH_RECOGNITION_PRIMARY_KEY = 'de1f02817356494483ba502b2ce95f6f';
+export const MS_SPEECH_RECOGNITION_SECONDARY_KEY = '3dc6ce0b832940f0b0c984a1517c457e';

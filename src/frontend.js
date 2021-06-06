@@ -16,36 +16,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Q from 'q';
+import * as events from 'events';
+import * as http from 'http';
 
-const Q = require('q');
-const events = require('events');
-const http = require('http');
-
-const express = require('express');
-const path = require('path');
-const logger = require('morgan');
+import express from 'express';
+import * as path from 'path';
+import logger from 'morgan';
 //const favicon = require('serve-favicon');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const session = require('express-session');
-const csurf = require('csurf');
-const errorHandler = require('errorhandler');
-const expressWs = require('express-ws');
-const passport = require('passport');
-const connect_flash = require('connect-flash');
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import session from 'express-session';
+import csurf from 'csurf';
+import errorHandler from 'errorhandler';
+import expressWs from 'express-ws';
+import passport from 'passport';
+import connect_flash from 'connect-flash';
 
-const user = require('./util/user');
-const errorHandling = require('./util/error_handling');
-const secretKey = require('./util/secret_key');
+import * as user from './util/user';
+import * as errorHandling from './util/error_handling';
+import * as secretKey from './util/secret_key';
 
-const Config = require('./config');
+import * as Config from './config';
 
-module.exports = class WebFrontend extends events.EventEmitter {
+export default class WebFrontend extends events.EventEmitter {
     constructor(platform) {
         super();
 
         this._platform = platform;
+    }
 
+    async init() {
         // all environments
         this._app = express();
         this._app.frontend = this;
@@ -133,7 +134,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
         });
 
         // i18n support
-        let gt = platform.getCapability('gettext');
+        let gt = this._platform.getCapability('gettext');
         let modir = path.resolve(path.dirname(module.filename), '../po');
         try {
             gt.loadTextdomainDirectory('almond-server', modir);
@@ -144,7 +145,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
         const pgettext = gt.dpgettext.bind(gt, 'almond-server');
         const ngettext = gt.dngettext.bind(gt, 'almond-server');
         this._app.use((req, res, next) => {
-            req.locale = platform.locale;
+            req.locale = this._platform.locale;
             req.gettext = gettext;
             req._ = req.gettext;
             req.pgettext = pgettext;
@@ -158,19 +159,19 @@ module.exports = class WebFrontend extends events.EventEmitter {
         });
 
         // mount /api before csurf so we can perform requests without the CSRF token
-        this._app.use('/api', require('./routes/api'));
+        this._app.use('/api', (await import('./routes/api')).default);
 
         this._app.use(csurf({ cookie: false }));
         this._app.use((req, res, next) => {
             res.locals.csrfToken = req.csrfToken();
             next();
         });
-        this._app.use('/', require('./routes/index'));
-        this._app.use('/apps', require('./routes/apps'));
-        this._app.use('/user', require('./routes/user'));
-        this._app.use('/config', require('./routes/config'));
-        this._app.use('/devices', require('./routes/devices'));
-        this._app.use('/recording', require('./routes/recording'));
+        this._app.use('/', (await import('./routes/index')).default);
+        this._app.use('/apps', (await import('./routes/apps')).default);
+        this._app.use('/user', (await import('./routes/user')).default);
+        this._app.use('/config', (await import('./routes/config')).default);
+        this._app.use('/devices', (await import('./routes/devices')).default);
+        this._app.use('/recording', (await import('./routes/recording')).default);
 
         this._app.use((req, res) => {
             // if we get here, we have a 404 response
@@ -214,4 +215,4 @@ module.exports = class WebFrontend extends events.EventEmitter {
         this._isLocked = false;
         this.emit('unlock', key);
     }
-};
+}

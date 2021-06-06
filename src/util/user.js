@@ -18,16 +18,15 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
+import * as crypto from 'crypto';
+import * as util from 'util';
+import passport from 'passport';
+import BaseStrategy from 'passport-strategy';
+import { Strategy as LocalStrategy } from 'passport-local';
+import { Strategy as BearerStrategy } from 'passport-http-bearer';
 
-const crypto = require('crypto');
-const util = require('util');
-const passport = require('passport');
-const BaseStrategy = require('passport-strategy');
-const LocalStrategy = require('passport-local').Strategy;
-const BearerStrategy = require('passport-http-bearer').Strategy;
-
-const platform = require('../service/platform');
-const Config = require('../config');
+import platform from '../service/platform';
+import * as Config from '../config';
 
 // a model of user based on sharedpreferences
 const model = {
@@ -91,7 +90,7 @@ function hashPassword(salt, password) {
         .then((buffer) => buffer.toString('hex'));
 }
 
-function initializePassport() {
+export function initializePassport() {
     passport.serializeUser((user, done) => {
         done(null, user);
     });
@@ -142,57 +141,53 @@ function initializePassport() {
     }));
 }
 
-module.exports = {
-    initializePassport: initializePassport,
+export function isConfigured() {
+    return model.isConfigured();
+}
 
-    isConfigured() {
-        return model.isConfigured();
-    },
+export function register(password) {
+    let salt = makeRandom();
+    let sqliteKeySalt = makeRandom();
+    return hashPassword(salt, password).then((hash) => {
+        return model.set(salt, sqliteKeySalt, hash);
+    });
+}
 
-    register(password) {
-        let salt = makeRandom();
-        let sqliteKeySalt = makeRandom();
-        return hashPassword(salt, password).then((hash) => {
-            return model.set(salt, sqliteKeySalt, hash);
-        });
-    },
+export function unlock(req, password) {
+    let user = model.get();
+    hashPassword(user.sqliteKeySalt, password).then((key) => {
+        req.app.frontend.unlock(key);
+    });
+}
 
-    unlock(req, password) {
-        let user = model.get();
-        hashPassword(user.sqliteKeySalt, password).then((key) => {
-            req.app.frontend.unlock(key);
-        });
-    },
-
-    /* Middleware to check if the user is logged in before performing an
-     * action. If not, the user will be redirected to login.
-     */
-    requireLogIn(req, res, next) {
-        if (!model.isConfigured()) {
-            if (req.method === 'GET' || req.method === 'HEAD') {
-                if (!req.originalUrl.startsWith('/api') &&
-                    !req.originalUrl.startsWith('/recording') &&
-                    !req.originalUrl.startsWith('/ws'))
-                    req.session.redirect_to = req.originalUrl;
-                res.redirect(Config.BASE_URL + '/user/configure');
-            } else {
-                res.status(401).render('error', {
-                    page_title: "Almond - Error",
-                    message: "You must complete the initial configuration of your Almond before you can perform this action."
-                });
-            }
-        } else if (!req.user) {
-            if (req.method === 'GET' || req.method === 'HEAD') {
-                if (!req.originalUrl.startsWith('/api') &&
-                    !req.originalUrl.startsWith('/recording') &&
-                    !req.originalUrl.startsWith('/ws'))
-                    req.session.redirect_to = req.originalUrl;
-                res.redirect(Config.BASE_URL + '/user/login');
-            } else {
-                res.status(401).render('login_required', { page_title: "Almond - Error" });
-            }
+/* Middleware to check if the user is logged in before performing an
+    * action. If not, the user will be redirected to login.
+    */
+export function requireLogIn(req, res, next) {
+    if (!model.isConfigured()) {
+        if (req.method === 'GET' || req.method === 'HEAD') {
+            if (!req.originalUrl.startsWith('/api') &&
+                !req.originalUrl.startsWith('/recording') &&
+                !req.originalUrl.startsWith('/ws'))
+                req.session.redirect_to = req.originalUrl;
+            res.redirect(Config.BASE_URL + '/user/configure');
         } else {
-            next();
+            res.status(401).render('error', {
+                page_title: "Almond - Error",
+                message: "You must complete the initial configuration of your Almond before you can perform this action."
+            });
         }
-    },
-};
+    } else if (!req.user) {
+        if (req.method === 'GET' || req.method === 'HEAD') {
+            if (!req.originalUrl.startsWith('/api') &&
+                !req.originalUrl.startsWith('/recording') &&
+                !req.originalUrl.startsWith('/ws'))
+                req.session.redirect_to = req.originalUrl;
+            res.redirect(Config.BASE_URL + '/user/login');
+        } else {
+            res.status(401).render('login_required', { page_title: "Almond - Error" });
+        }
+    } else {
+        next();
+    }
+}

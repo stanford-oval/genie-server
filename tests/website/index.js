@@ -26,7 +26,7 @@ async function seq(array) {
         if (fn === null)
             continue;
         console.log(`Running tests for ${fn}`);
-        await require(fn)();
+        await (await import(fn)).default();
     }
 }
 

@@ -18,15 +18,14 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
+import Q from 'q';
+import express from 'express';
+import * as Genie from 'genie-toolkit';
 
-const Q = require('q');
-const express = require('express');
-const Genie = require('genie-toolkit');
+import * as user from '../util/user';
+import platform from '../service/platform';
 
-const user = require('../util/user');
-const platform = require('../service/platform');
-
-const Config = require('../config');
+import * as Config from '../config';
 
 const router = express.Router();
 
@@ -119,4 +118,4 @@ router.post('/set-server-password', (req, res, next) => {
     }).catch(next);
 });
 
-module.exports = router;
+export default router;

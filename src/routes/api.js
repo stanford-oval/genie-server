@@ -19,13 +19,13 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
 
-const express = require('express');
-const passport = require('passport');
+import express from 'express';
+import passport from 'passport';
 
-const user = require('../util/user');
-const errorHandling = require('../util/error_handling');
+import * as user from '../util/user';
+import * as errorHandling from '../util/error_handling';
 
-const conversationHandler = require('./conversation');
+import conversationHandler from './conversation';
 
 let router = express.Router();
 
@@ -167,4 +167,4 @@ router.use('/', (req, res) => {
 // if something failed, return a 500 in json form, or the appropriate status code
 router.use(errorHandling.json);
 
-module.exports = router;
+export default router;

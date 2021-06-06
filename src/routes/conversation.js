@@ -37,7 +37,7 @@ class WebsocketAssistantDelegate {
     }
 }
 
-module.exports = function conversationHandler(ws, req, next) {
+export default function conversationHandler(ws, req, next) {
     Promise.resolve().then(async () => {
         const engine = req.app.engine;
 
@@ -85,4 +85,4 @@ module.exports = function conversationHandler(ws, req, next) {
         console.error('Error in API websocket: ' + e.message);
         ws.close();
     });
-};
+}

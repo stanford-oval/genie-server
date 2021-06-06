@@ -18,8 +18,7 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-
-function ninvoke(obj, method, ...args) {
+export function ninvoke(obj, method, ...args) {
     return new Promise((resolve, reject) => {
         obj[method](...args, (err, ...res) => {
             if (err)
@@ -33,5 +32,3 @@ function ninvoke(obj, method, ...args) {
         });
     });
 }
-
-module.exports = { ninvoke };

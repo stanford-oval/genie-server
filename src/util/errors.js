@@ -68,7 +68,7 @@ class InternalError extends Error {
     }
 }
 
-module.exports = {
+export {
     HTTPError,
     BadRequestError,
     ForbiddenError,
