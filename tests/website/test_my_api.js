@@ -169,15 +169,6 @@ async function testMyApiDevices(auth) {
     const listResult = JSON.parse(await request('/api/devices/list', 'GET', null, { auth }));
 
     assert.deepStrictEqual(listResult, [
-      { uniqueId: 'thingengine-own-server:81e0e8abba27202a',
-        name: 'Almond server (:81e0e8abba27202a)',
-        description: 'This is one of your own Almond apps.',
-        kind: 'org.thingpedia.builtin.thingengine',
-        version: 0,
-        ownerTier: 'server',
-        class: 'system',
-        isTransient: false,
-        authType: 'builtin' },
       { uniqueId: 'org.thingpedia.builtin.thingengine.server',
         name: 'Almond Smart Speaker',
         description: 'Commands that are specific to using Almond as a smart-speaker device.',
@@ -185,6 +176,15 @@ async function testMyApiDevices(auth) {
         version: 0,
         class: 'data',
         ownerTier: 'global',
+        isTransient: false,
+        authType: 'builtin' },
+      { uniqueId: 'thingengine-own-server:81e0e8abba27202a',
+        name: 'Genie server (:81e0e8abba27202a)',
+        description: 'This is one of your Genie apps.',
+        kind: 'org.thingpedia.builtin.thingengine',
+        version: 0,
+        ownerTier: 'server',
+        class: 'system',
         isTransient: false,
         authType: 'builtin' },
       { uniqueId: 'org.thingpedia.builtin.thingengine.builtin',
@@ -198,7 +198,7 @@ async function testMyApiDevices(auth) {
         authType: 'builtin' },
       { uniqueId: 'org.thingpedia.builtin.test',
         name: 'Test Device',
-        description: 'Test Almond in various ways',
+        description: 'Test Genie in various ways',
         kind: 'org.thingpedia.builtin.test',
         version: 0,
         ownerTier: 'global',
@@ -226,15 +226,6 @@ async function testMyApiDevices(auth) {
     const listResult2 = JSON.parse(await request('/api/devices/list', 'GET', null, { auth }));
     listResult2[listResult2.length-1].version = 0;
     assert.deepStrictEqual(listResult2, [
-      { uniqueId: 'thingengine-own-server:81e0e8abba27202a',
-        name: 'Almond server (:81e0e8abba27202a)',
-        description: 'This is one of your own Almond apps.',
-        kind: 'org.thingpedia.builtin.thingengine',
-        version: 0,
-        ownerTier: 'server',
-        class: 'system',
-        isTransient: false,
-        authType: 'builtin' },
       { uniqueId: 'org.thingpedia.builtin.thingengine.server',
         name: 'Almond Smart Speaker',
         description: 'Commands that are specific to using Almond as a smart-speaker device.',
@@ -242,6 +233,15 @@ async function testMyApiDevices(auth) {
         version: 0,
         class: 'data',
         ownerTier: 'global',
+        isTransient: false,
+        authType: 'builtin' },
+      { uniqueId: 'thingengine-own-server:81e0e8abba27202a',
+        name: 'Genie server (:81e0e8abba27202a)',
+        description: 'This is one of your Genie apps.',
+        kind: 'org.thingpedia.builtin.thingengine',
+        version: 0,
+        ownerTier: 'server',
+        class: 'system',
         isTransient: false,
         authType: 'builtin' },
       { uniqueId: 'org.thingpedia.builtin.thingengine.builtin',
@@ -255,7 +255,7 @@ async function testMyApiDevices(auth) {
         authType: 'builtin' },
       { uniqueId: 'org.thingpedia.builtin.test',
         name: 'Test Device',
-        description: 'Test Almond in various ways',
+        description: 'Test Genie in various ways',
         kind: 'org.thingpedia.builtin.test',
         version: 0,
         ownerTier: 'global',
@@ -277,7 +277,7 @@ async function testMyApiDevices(auth) {
 
 async function testMyApiConverse(auth) {
     // ignore the first conversation result as that will show the welcome message
-    JSON.parse(await request('/api/converse', 'POST', JSON.stringify({
+    const result0 = JSON.parse(await request('/api/converse', 'POST', JSON.stringify({
         command: {
             type: 'command',
             text: 'hello',
@@ -285,11 +285,13 @@ async function testMyApiConverse(auth) {
     }), { auth, dataContentType: 'application/json' }));
 
     const result1 = JSON.parse(await request('/api/converse', 'POST', JSON.stringify({
+        conversationId: result0.conversationId,
         command: {
             type: 'tt',
             code: 'now => @org.thingpedia.builtin.test.dup_data(data_in="foo") => notify;',
         }
     }), { auth, dataContentType: 'application/json' }));
+    delete result1.conversationId;
     delete result1.messages[1].uniqueId;
     assert.deepStrictEqual(result1, {
         askSpecial: null,
@@ -317,11 +319,13 @@ async function testMyApiConverse(auth) {
     });
 
     const result2 = JSON.parse(await request('/api/converse', 'POST', JSON.stringify({
+        conversationId: result0.conversationId,
         command: {
             type: 'command',
             text: 'yes',
         },
     }), { auth, dataContentType: 'application/json' }));
+    delete result2.conversationId;
     assert.deepStrictEqual(result2, {
         askSpecial: null,
         messages: [{
