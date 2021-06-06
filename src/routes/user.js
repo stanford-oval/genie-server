@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
+
 
 const Q = require('q');
 const express = require('express');
@@ -32,7 +32,7 @@ function makeRandom(bytes) {
     return crypto.randomBytes(bytes).toString('hex');
 }
 
-var router = express.Router();
+let router = express.Router();
 
 router.get('/configure', (req, res, next) => {
     if (user.isConfigured()) {
@@ -58,7 +58,7 @@ router.post('/configure', (req, res, next) => {
         return;
     }
 
-    var password;
+    let password;
     try {
         if (typeof req.body['password'] !== 'string' ||
             req.body['password'].length < 8 ||
@@ -83,7 +83,7 @@ router.post('/configure', (req, res, next) => {
         return Q.ninvoke(req, 'login', userObj);
     }).then(() => {
         // Redirection back to the original page
-        var redirect_to = req.session.redirect_to || '/';
+        let redirect_to = req.session.redirect_to || '/';
         delete req.session.redirect_to;
         res.redirect(redirect_to);
     }).catch((error) => {
@@ -107,7 +107,7 @@ router.post('/login', passport.authenticate('local', { failureRedirect: Config.B
                                                        failureFlash: true }), (req, res, next) => {
     user.unlock(req, req.body.password);
     // Redirection back to the original page
-    var redirect_to = req.session.redirect_to || (Config.BASE_URL + '/');
+    let redirect_to = req.session.redirect_to || (Config.BASE_URL + '/');
     delete req.session.redirect_to;
     res.redirect(303, redirect_to);
 });

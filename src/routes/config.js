@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
+
 
 const Q = require('q');
 const express = require('express');
@@ -34,19 +34,19 @@ router.use(user.requireLogIn);
 
 function config(req, res, next, userData, cloudData) {
     return Genie.IpAddressUtils.getServerName().then((host) => {
-        var port = res.app.get('port');
-        var serverAddress = 'http://' +
+        let port = res.app.get('port');
+        let serverAddress = 'http://' +
             (host.indexOf(':') >= 0 ? '[' + host + ']' : host)
             + ':' + port + Config.BASE_URL + '/config';
 
-        var prefs = platform.getSharedPreferences();
-        var cloudId = prefs.get('cloud-id');
-        var authToken = prefs.get('auth-token');
+        let prefs = platform.getSharedPreferences();
+        let cloudId = prefs.get('cloud-id');
+        let authToken = prefs.get('auth-token');
 
-        var qrcodeTarget = 'https://thingengine.stanford.edu/qrcode/' + host + '/'
+        let qrcodeTarget = 'https://thingengine.stanford.edu/qrcode/' + host + '/'
             + port + '/' + authToken;
 
-        var ipAddresses = Genie.IpAddressUtils.getServerAddresses(host);
+        let ipAddresses = Genie.IpAddressUtils.getServerAddresses(host);
         res.render('config', {
             page_title: "Configure Almond",
             csrfToken: req.csrfToken(),
@@ -91,7 +91,7 @@ router.post('/set-options', (req, res, next) => {
 });
 
 router.post('/set-server-password', (req, res, next) => {
-    var password;
+    let password;
     try {
         if (typeof req.body['password'] !== 'string' ||
             req.body['password'].length < 8 ||

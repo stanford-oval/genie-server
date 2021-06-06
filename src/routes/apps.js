@@ -17,10 +17,10 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
+
 
 const express = require('express');
-var router = express.Router();
+let router = express.Router();
 
 const user = require('../util/user');
 const Config = require('../config');

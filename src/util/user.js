@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
+
 
 const crypto = require('crypto');
 const util = require('util');
@@ -123,7 +123,7 @@ function initializePassport() {
     passport.use(new LocalStrategy((username, password, done) => {
         Promise.resolve().then(() => {
             try {
-                var user = model.get();
+                let user = model.get();
 
                 return hashPassword(user.salt, password).then((hash) => {
                     if (!crypto.timingSafeEqual(new Buffer(hash, 'hex'), new Buffer(user.password, 'hex')))
@@ -150,15 +150,15 @@ module.exports = {
     },
 
     register(password) {
-        var salt = makeRandom();
-        var sqliteKeySalt = makeRandom();
+        let salt = makeRandom();
+        let sqliteKeySalt = makeRandom();
         return hashPassword(salt, password).then((hash) => {
             return model.set(salt, sqliteKeySalt, hash);
         });
     },
 
     unlock(req, password) {
-        var user = model.get();
+        let user = model.get();
         hashPassword(user.sqliteKeySalt, password).then((key) => {
             req.app.frontend.unlock(key);
         });

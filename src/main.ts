@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -17,21 +17,22 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const Q = require('q');
-Q.longStackSupport = true;
 process.on('unhandledRejection', (up) => { throw up; });
 
-const child_process = require('child_process');
-const Genie = require('genie-toolkit');
-const WebFrontend = require('./frontend');
+import * as Tp from 'thingpedia';
+import * as child_process from 'child_process';
+import * as Genie from 'genie-toolkit';
+import * as stream from 'stream';
 
-const Config = require('./config');
+import WebFrontend from './frontend';
+import ServerPlatform from './service/platform';
+
+import * as Config from './config';
 
 let _stopped = false;
 let _running = false;
-let _engine, _frontend;
+let _engine : Genie.AssistantEngine, _frontend : WebFrontend;
 
 function handleStop() {
     if (_running)
@@ -43,7 +44,7 @@ function handleStop() {
 const DEBUG = false;
 
 const HOTWORD_DETECTED_ID = 1;
-async function init(platform) {
+async function init(platform : Tp.BasePlatform) {
     _engine = new Genie.AssistantEngine(platform, {
         cloudSyncUrl: Config.CLOUD_SYNC_URL,
         thingpediaUrl: Config.THINGPEDIA_URL,
@@ -66,11 +67,11 @@ async function init(platform) {
             subscriptionKey: Config.MS_SPEECH_RECOGNITION_PRIMARY_KEY
         });
 
-        let play;
+        let play : stream.Writable|null;
         const ensureNullPlayback = () => {
             if (play)
                 return;
-            play = platform.getCapability('sound').createPlaybackStream({
+            play = platform.getCapability('sound')!.createPlaybackStream({
                 format: 'S16LE',
                 rate: 16000,
                 channels: 1,
@@ -102,13 +103,13 @@ async function init(platform) {
         const soundEffects = platform.getCapability('sound-effects');
         if (soundEffects) {
             speech.on('wakeword', (hotword) => {
-                soundEffects.play('message-new-instant', HOTWORD_DETECTED_ID).catch((e) => {
+                (soundEffects.play as any)('message-new-instant', HOTWORD_DETECTED_ID).catch((e : Error) => {
                     console.error(`Failed to play hotword detection sound: ${e.message}`);
                 });
             });
 
             speech.on('no-match', () => {
-                soundEffects.play('dialog-warning', HOTWORD_DETECTED_ID).catch((e) => {
+                (soundEffects.play as any)('dialog-warning', HOTWORD_DETECTED_ID).catch((e : Error) => {
                     console.error(`Failed to play hotword no-match sound: ${e.message}`);
                 });
             });
@@ -123,7 +124,7 @@ async function main() {
     process.on('SIGINT', handleStop);
     process.on('SIGTERM', handleStop);
 
-    const platform = require('./service/platform');
+    const platform = new ServerPlatform();
     try {
 
         _frontend = new WebFrontend(platform);
@@ -136,11 +137,11 @@ async function main() {
                     if (DEBUG)
                         console.log('Unlock key: ' + key.toString('hex'));
                     platform._setSqliteKey(key);
-                    resolve(init(platform));
+                    resolve(init(platform as unknown as Tp.BasePlatform /* FIXME */));
                 });
             });
         } else {
-            await init(platform);
+            await init(platform as unknown as Tp.BasePlatform /* FIXME */);
             await _frontend.open();
         }
 

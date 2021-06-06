@@ -15,7 +15,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-"use strict";
+
 
 const Q = require('q');
 const events = require('events');
@@ -133,8 +133,8 @@ module.exports = class WebFrontend extends events.EventEmitter {
         });
 
         // i18n support
-        var gt = platform.getCapability('gettext');
-        var modir = path.resolve(path.dirname(module.filename), '../po');
+        let gt = platform.getCapability('gettext');
+        let modir = path.resolve(path.dirname(module.filename), '../po');
         try {
             gt.loadTextdomainDirectory('almond-server', modir);
         } catch(e) {

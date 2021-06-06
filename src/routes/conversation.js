@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
+
 
 class WebsocketAssistantDelegate {
     constructor(ws) {
@@ -66,7 +66,7 @@ module.exports = function conversationHandler(ws, req, next) {
         ws.on('message', (data) => {
             Promise.resolve().then(() => {
                 const parsed = JSON.parse(data);
-                switch(parsed.type) {
+                switch (parsed.type) {
                 case 'command':
                     return conversation.handleCommand(parsed.text);
                 case 'parsed':

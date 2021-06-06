@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
+
 
 const express = require('express');
 const passport = require('passport');
@@ -27,7 +27,7 @@ const errorHandling = require('../util/error_handling');
 
 const conversationHandler = require('./conversation');
 
-var router = express.Router();
+let router = express.Router();
 
 router.use('/', passport.authenticate(['host-based', 'bearer']), user.requireLogIn);
 

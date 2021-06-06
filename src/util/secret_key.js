@@ -17,16 +17,16 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
+
 
 const crypto = require('crypto');
 const platform = require('../service/platform');
 
 module.exports = {
     getSecretKey() {
-        var prefs = platform.getSharedPreferences();
+        let prefs = platform.getSharedPreferences();
 
-        var sessionKey = prefs.get('session-key');
+        let sessionKey = prefs.get('session-key');
         if (sessionKey === undefined) {
             sessionKey = crypto.randomBytes(32).toString('hex');
             prefs.set('session-key', sessionKey);

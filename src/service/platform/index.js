@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
+
 
 // Server platform
 
@@ -56,13 +56,13 @@ const Builtins = require('genie-toolkit/dist/lib/engine/devices/builtins');
 
 const Config = require('../../config');
 
-var _unzipApi = {
+let _unzipApi = {
     unzip(zipPath, dir) {
-        var args = ['-uo', zipPath, '-d', dir];
+        let args = ['-uo', zipPath, '-d', dir];
         return Q.nfcall(child_process.execFile, '/usr/bin/unzip', args, {
             maxBuffer: 10 * 1024 * 1024 }).then((zipResult) => {
-            var stdout = zipResult[0];
-            var stderr = zipResult[1];
+            let stdout = zipResult[0];
+            let stderr = zipResult[1];
             console.log('stdout', stdout);
             console.log('stderr', stderr);
         });
@@ -216,7 +216,7 @@ class SoundEffectsApi {
                 'media.role': 'voice-assistant',
                 [canberra.Property.EVENT_ID]: 'dialog-warning'
             });
-        } catch (e) {
+        } catch(e) {
             console.error(`Failed to cache event sound: ${e.message}`);
         }
     }
@@ -243,8 +243,7 @@ class SoundEffectsApi {
     }
 }
 
-
-class ServerPlatform extends Tp.BasePlatform {
+module.exports = class ServerPlatform extends Tp.BasePlatform {
     constructor() {
         super();
 
@@ -356,7 +355,7 @@ class ServerPlatform extends Tp.BasePlatform {
     //
     // Which capabilities are available affects which apps are allowed to run
     hasCapability(cap) {
-        switch(cap) {
+        switch (cap) {
         case 'code-download':
         case 'gps':
         case 'graphics-api':
@@ -388,7 +387,7 @@ class ServerPlatform extends Tp.BasePlatform {
     //
     // This will return null if hasCapability(cap) is false
     getCapability(cap) {
-        switch(cap) {
+        switch (cap) {
         case 'code-download':
             // We have the support to download code
             return _unzipApi;
@@ -517,12 +516,10 @@ class ServerPlatform extends Tp.BasePlatform {
     // Returns true if a change actually occurred, false if the change
     // was rejected
     setAuthToken(authToken) {
-        var oldAuthToken = this._prefs.get('auth-token');
+        let oldAuthToken = this._prefs.get('auth-token');
         if (oldAuthToken !== undefined && authToken !== oldAuthToken)
             return false;
         this._prefs.set('auth-token', authToken);
         return true;
     }
-}
-
-module.exports = new ServerPlatform;
+};

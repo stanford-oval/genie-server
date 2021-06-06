@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
+
 
 // load thingpedia to initialize the polyfill
 require('thingpedia');
@@ -66,7 +66,7 @@ async function checkAllImages(driver) {
     const currentUrl = await driver.getCurrentUrl();
     const images = await driver.findElements(WD.By.css('img'));
 
-    await Promise.all(images.map(async(img) => {
+    await Promise.all(images.map(async (img) => {
         const src = await img.getAttribute('src');
 
         // small optimization: we only check an image once

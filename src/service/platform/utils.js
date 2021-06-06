@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
+
 
 function ninvoke(obj, method, ...args) {
     return new Promise((resolve, reject) => {
