@@ -47,7 +47,7 @@ async function init(platform) {
     _engine = new Genie.AssistantEngine(platform, {
         cloudSyncUrl: Config.CLOUD_SYNC_URL,
         thingpediaUrl: Config.THINGPEDIA_URL,
-        nluModelUrl: Config.SEMPRE_URL,
+        nluModelUrl: Config.NLP_URL,
     });
     _frontend.setEngine(_engine);
 

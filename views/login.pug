@@ -1,13 +1,13 @@
 extends layout
 
 block page_name
-  | Login
+  = _("Login")
 
 block content
   if isLocked
-    p Your Almond is locked. Your must input your password to start it.
+    p.subtitle-msg=_("Your Almond is locked. Your must input your password to start it.")
   else
-    p You have been logged out. You must input your password again to access your Almond.
+    p.subtitle-msg=_("You have been logged out. You must input your password again to access your Almond.")
 
   each error in errors
     div.alert.alert-danger.alert-dismissible.fade.in(role='alert')
@@ -19,7 +19,7 @@ block content
     input(type='hidden',name='_csrf',value=csrfToken)
     input(type='hidden',name='username',value='ignored')
     div.form-group
-      label(for='password').control-label Password
+      label(for='password').control-label=_("Password")
       input(type='password',name='password',value=password).form-control#password
     div.form-group
-      button(type='submit').btn.btn-primary Log in
+      button(type='submit').btn.btn-primary.custom-btn=_("Log in")
