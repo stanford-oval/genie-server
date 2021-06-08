@@ -21,7 +21,6 @@
 
 .bottom-bar.fa,
 .bottom-bar.far {
-    cursor: pointer;
     border-radius: 60px;
     background-color: transparent;
     color: white;
@@ -62,6 +61,10 @@ p.device-icon-small {
     text-align: right;
     padding-top: 3em;
     width: 100%;
+}
+
+#back-top>a {
+    padding: 8px 14px;
 }
 
 #bttop-button {

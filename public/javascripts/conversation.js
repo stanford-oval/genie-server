@@ -28,6 +28,7 @@ $(() => {
             manageSpinner('remove');
             manageLostConnectionMsg('add');
             manageLostConnectionMsg('show');
+            scrollChat();
             return;
         }
 
@@ -133,6 +134,7 @@ $(() => {
         addVoteButtons();
         manageLostConnectionMsg('add');
         manageSpinner('remove');
+        scrollChat();
         return msg;
     }
 
@@ -245,7 +247,7 @@ $(() => {
 
     function buttonMessage(title, json) {
         var holder = $('<div>').addClass('col-xs-12 col-sm-6');
-        var btn = $('<a>').addClass('message message-button btn btn-default')
+        var btn = $('<a>').addClass('message message-button new-msg-button btn btn-default')
             .attr('href', '#').text(title);
         btn.click((event) => {
             handleParsedCommand(json, title);
@@ -263,7 +265,7 @@ $(() => {
             url = '/me' + url;*/
 
         var holder = $('<div>').addClass('col-xs-12 col-sm-6');
-        var btn = $('<a>').addClass('message message-button btn btn-default')
+        var btn = $('<a>').addClass('message message-button new-msg-button btn btn-default')
             .attr('href', url).attr("target", "_blank").attr("rel", "noopener").text(title);
         holder.append(btn);
         getGrid().append(holder);
@@ -272,7 +274,7 @@ $(() => {
 
     function yesnoMessage() {
         var holder = $('<div>').addClass('col-xs-6 col-sm-4 col-md-3');
-        var btn = $('<a>').addClass('message message-yesno btn btn-default')
+        var btn = $('<a>').addClass('message message-yesno new-msg-button btn btn-default')
             .attr('href', '#').text("Yes");
         btn.click((event) => {
             handleSpecial('yes', "Yes");
@@ -281,7 +283,7 @@ $(() => {
         holder.append(btn);
         getGrid().append(holder);
         holder = $('<div>').addClass('col-xs-6 col-sm-4 col-md-3');
-        btn = $('<a>').addClass('message message-yesno btn btn-default')
+        btn = $('<a>').addClass('message message-yesno new-msg-button btn btn-default')
             .attr('href', '#').text("No");
         btn.click(function(event) {
             handleSpecial('no', "No");
@@ -414,6 +416,7 @@ $(() => {
 
         manageLostConnectionMsg('add');
         manageSpinner('show');
+        scrollChat();
     }
 
     $('#input-form').submit((event) => {
