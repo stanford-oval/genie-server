@@ -76,5 +76,3 @@ export const ENABLE_DB_ENCRYPTION = false;
 export const NLP_URL = process.env.THINGENGINE_NLP_URL || 'https://nlp.almond.stanford.edu';
 export const THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://thingpedia.stanford.edu/thingpedia';
 export const CLOUD_SYNC_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://almond.stanford.edu';
-export const MS_SPEECH_RECOGNITION_PRIMARY_KEY = 'de1f02817356494483ba502b2ce95f6f';
-export const MS_SPEECH_RECOGNITION_SECONDARY_KEY = '3dc6ce0b832940f0b0c984a1517c457e';

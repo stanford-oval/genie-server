@@ -44,6 +44,9 @@ let canberra : typeof canberra_|null = null;
 import type WakeWordDetector_ from '../wake-word/snowboy';
 let WakeWordDetector : typeof WakeWordDetector_|null = null;
 
+import type webrtcvad_ from 'webrtcvad';
+let webrtcvad : typeof webrtcvad_|null = null;
+
 // FIXME
 import Builtins from 'genie-toolkit/dist/lib/engine/devices/builtins';
 import ThingEngineServerDevice from './thingengine.server';
@@ -240,6 +243,41 @@ export class SoundEffectsApi implements Tp.Capabilities.SoundEffectsApi {
     }
 }
 
+class VAD implements Tp.Capabilities.VadApi {
+    private _instance : webrtcvad_|null;
+    frameSize : number;
+
+    constructor() {
+        this._instance = null;
+        this.frameSize = 0;
+    }
+
+    setup(bitrate : number, level ?: number) {
+        if (this._instance)
+            this._instance = null;
+
+        if (webrtcvad) {
+            this._instance = new webrtcvad(bitrate, level);
+            // 16khz audio single-channel 16 bit: 10ms: 160b, 20ms: 320b, 30ms: 480b
+            this.frameSize = 320;
+            // console.log("setup VAD bitrate", bitrate, "level", level);
+            return true;
+        }
+
+        return false;
+    }
+
+    process(chunk : Buffer) {
+        if (!this._instance)
+            return false;
+        const n = chunk.length % this.frameSize;
+        let r = false;
+        for (let i = 0; i < n; i++)
+            r ||= this._instance.process(chunk.slice(i * this.frameSize, this.frameSize));
+        return r;
+    }
+}
+
 export class ServerPlatform extends Tp.BasePlatform {
     private _gettext : Gettext;
     private _filesDir : string;
@@ -248,6 +286,7 @@ export class ServerPlatform extends Tp.BasePlatform {
     private _prefs : Tp.Preferences;
     private _cacheDir : string;
     private _wakeWordDetector : WakeWordDetector_|null;
+    private _voiceDetector : VAD|null;
     private _soundEffects : SoundEffectsApi|null;
     private _sqliteKey : string|null;
     private _origin : string|null;
@@ -282,6 +321,7 @@ export class ServerPlatform extends Tp.BasePlatform {
         safeMkdirSync(this._cacheDir);
 
         this._wakeWordDetector = null;
+        this._voiceDetector = null;
         this._soundEffects = null;
         this.speech = null;
 
@@ -316,6 +356,13 @@ export class ServerPlatform extends Tp.BasePlatform {
             WakeWordDetector = (await import('../wake-word/snowboy')).default;
         } catch(e) {
             WakeWordDetector = null;
+        }
+
+        try {
+            webrtcvad = (await import('webrtcvad')).default;
+        } catch(e) {
+            console.log("VAD not available");
+            webrtcvad = null;
         }
     }
 
@@ -358,6 +405,9 @@ export class ServerPlatform extends Tp.BasePlatform {
 
             if (canberra)
                 this._soundEffects = new SoundEffectsApi();
+
+            if (webrtcvad && VAD)
+                this._voiceDetector = new VAD();
         } else {
             this._pulse = null;
         }
@@ -414,6 +464,8 @@ export class ServerPlatform extends Tp.BasePlatform {
         case 'wakeword-detector':
             this._ensurePulseAudio();
             return this._wakeWordDetector !== null;
+        case 'voice-detector':
+            return this._voiceDetector !== null;
 
         case 'sound-effects':
             this._ensurePulseAudio();
@@ -441,6 +493,8 @@ export class ServerPlatform extends Tp.BasePlatform {
         case 'wakeword-detector':
             this._ensurePulseAudio();
             return this._wakeWordDetector;
+        case 'voice-detector':
+            return this._voiceDetector;
         case 'sound-effects':
             this._ensurePulseAudio();
             return this._soundEffects;
