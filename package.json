@@ -43,12 +43,12 @@
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
-    "eslint": "^7.27.0",
+    "eslint": "^7.28.0",
     "form-data": "^4.0.0",
     "nodemon": "^2.0.7",
     "nyc": "^15.1.0",
     "parse5": "^6.0.1",
-    "selenium-webdriver": "^4.0.0-beta.3",
+    "selenium-webdriver": "^4.0.0-beta.4",
     "tough-cookie": "^4.0.0"
   },
   "nyc": {
