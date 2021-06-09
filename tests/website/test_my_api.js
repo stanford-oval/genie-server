@@ -17,12 +17,11 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const assert = require('assert');
-const WebSocket = require('ws');
-const { assertHttpError, request, sessionRequest } = require('./scaffold');
-const { login, } = require('./login');
+import assert from 'assert';
+import WebSocket from 'ws';
+import { assertHttpError, request, sessionRequest } from './scaffold';
+import { login, } from './login';
 
 async function getAccessToken(session) {
     return JSON.parse(await sessionRequest('/user/token', 'POST', '', session, {
@@ -278,7 +277,7 @@ async function testMyApiDevices(auth) {
 
 async function testMyApiConverse(auth) {
     // ignore the first conversation result as that will show the welcome message
-    JSON.parse(await request('/api/converse', 'POST', JSON.stringify({
+    const result0 = JSON.parse(await request('/api/converse', 'POST', JSON.stringify({
         command: {
             type: 'command',
             text: 'hello',
@@ -286,11 +285,13 @@ async function testMyApiConverse(auth) {
     }), { auth, dataContentType: 'application/json' }));
 
     const result1 = JSON.parse(await request('/api/converse', 'POST', JSON.stringify({
+        conversationId: result0.conversationId,
         command: {
             type: 'tt',
             code: 'now => @org.thingpedia.builtin.test.dup_data(data_in="foo") => notify;',
         }
     }), { auth, dataContentType: 'application/json' }));
+    delete result1.conversationId;
     delete result1.messages[1].uniqueId;
     assert.deepStrictEqual(result1, {
         askSpecial: null,
@@ -318,11 +319,13 @@ async function testMyApiConverse(auth) {
     });
 
     const result2 = JSON.parse(await request('/api/converse', 'POST', JSON.stringify({
+        conversationId: result0.conversationId,
         command: {
             type: 'command',
             text: 'yes',
         },
     }), { auth, dataContentType: 'application/json' }));
+    delete result2.conversationId;
     assert.deepStrictEqual(result2, {
         askSpecial: null,
         messages: [{
@@ -358,6 +361,6 @@ async function main() {
     const token = await getAccessToken(bob);
     await testMyApiOAuth(token);
 }
-module.exports = main;
+export default main;
 if (!module.parent)
     main();

@@ -10,7 +10,7 @@ export THINGENGINE_CLOUD_SYNC_URL=https://dev.almond.stanford.edu
 srcdir=`dirname $0`/..
 
 # unit tests
-node $srcdir/tests/unit
+ts-node $srcdir/tests/unit
 
 # integration tests
 # (these spawn the whole system, with all the bells and whistles,

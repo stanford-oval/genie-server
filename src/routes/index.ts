@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -17,13 +17,13 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const express = require('express');
+import express from 'express';
 
-const user = require('../util/user');
+import { ServerPlatform } from '../service/platform';
+import * as user from '../util/user';
 
-const conversationHandler = require('./conversation');
+import conversationHandler from './conversation';
 
 const router = express.Router();
 
@@ -32,7 +32,7 @@ router.get('/', user.requireLogIn, (req, res, next) => {
 });
 
 router.use('/ws/conversation', (req, res, next) => {
-    const compareTo = req.app.engine.platform.getOrigin();
+    const compareTo = req.app.genie.platform.getOrigin();
     if (req.headers.origin && req.headers.origin !== compareTo) {
         res.status(403).send('Forbidden Cross Origin Request');
         return;
@@ -50,14 +50,14 @@ router.get('/listen', user.requireLogIn, (req, res, next) => {
 });
 
 router.post('/listen', user.requireLogIn, (req, res, next) => {
-    const engine = req.app.engine;
-    const assistant = engine.platform.getCapability('assistant');
+    const engine = req.app.genie;
+    const platform = engine.platform as ServerPlatform;
 
-    assistant.hotword();
+    platform.speech!.wakeword();
     res.render('listen', {
         page_title: req._("Almond - Listen"),
         csrfToken: req.csrfToken()
     });
 });
 
-module.exports = router;
+export default router;

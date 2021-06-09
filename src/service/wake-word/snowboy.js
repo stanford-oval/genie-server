@@ -17,29 +17,28 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const stream = require('stream');
-const path = require('path');
-const snowboy = require('snowboy');
+import * as stream from 'stream';
+import * as path from 'path';
+import * as snowboy from 'snowboy';
 
 // keep 1.5 seconds of audio
 // (at 16kHz mono, 2 bytes per sample)
 const AUDIO_BUFFER = 1.5 * 16000 * 2;
 
-module.exports = class SnowboyDetectorStream extends stream.Writable {
+export default class SnowboyDetectorStream extends stream.Writable {
     constructor() {
         super();
 
         let models = new snowboy.Models();
         models.add({
-             file: path.resolve(path.dirname(module.filename), '../../data/wake-word/snowboy/computer.umdl'),
+             file: path.resolve(path.dirname(module.filename), '../../../data/wake-word/snowboy/computer.umdl'),
              sensitivity: 0.4,
              hotwords : 'computer'
         });
 
         this._detector = new snowboy.Detector({
-            resource: path.resolve(path.dirname(module.filename), '../../data/wake-word/snowboy/common.res'),
+            resource: path.resolve(path.dirname(module.filename), '../../../data/wake-word/snowboy/common.res'),
             models: models,
             audioGain: 1.0,
             applyFrontend: true,
@@ -80,4 +79,4 @@ module.exports = class SnowboyDetectorStream extends stream.Writable {
 
         this._detector.write(chunk, encoding, callback);
     }
-};
+}

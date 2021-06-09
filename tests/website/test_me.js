@@ -17,10 +17,9 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const { assertHttpError, assertRedirect, assertLoginRequired, sessionRequest } = require('./scaffold');
-const { login, startSession } = require('./login');
+import { assertHttpError, assertRedirect, assertLoginRequired, sessionRequest } from './scaffold';
+import { login, startSession } from './login';
 
 async function testMyStuff(bob, nobody) {
     await assertRedirect(sessionRequest('', 'GET', null, nobody, { followRedirects: false }), '/user/login');
@@ -67,6 +66,6 @@ async function main() {
     await testMyStuff(bob, nobody);
     await testMyDevices(bob, nobody);
 }
-module.exports = main;
+export default main;
 if (!module.parent)
     main();

@@ -1,8 +1,8 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
-// Copyright 2016-2019 The Board of Trustees of the Leland Stanford Junior University
+// Copyright 2018 The Board of Trustees of the Leland Stanford Junior University
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,20 +17,9 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const crypto = require('crypto');
-const platform = require('../service/platform');
+import * as crypto from 'crypto';
 
-module.exports = {
-    getSecretKey() {
-        var prefs = platform.getSharedPreferences();
-
-        var sessionKey = prefs.get('session-key');
-        if (sessionKey === undefined) {
-            sessionKey = crypto.randomBytes(32).toString('hex');
-            prefs.set('session-key', sessionKey);
-        }
-        return sessionKey;
-    },
-};
+export function makeRandom(size = 32) {
+    return crypto.randomBytes(size).toString('hex');
+}

@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -15,51 +15,91 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-"use strict";
 
-const Q = require('q');
-const events = require('events');
-const http = require('http');
+import Q from 'q';
+import * as events from 'events';
+import * as http from 'http';
+import * as Genie from 'genie-toolkit';
 
-const express = require('express');
-const path = require('path');
-const logger = require('morgan');
+import express from 'express';
+import * as path from 'path';
+import logger from 'morgan';
 //const favicon = require('serve-favicon');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const session = require('express-session');
-const csurf = require('csurf');
-const errorHandler = require('errorhandler');
-const expressWs = require('express-ws');
-const passport = require('passport');
-const connect_flash = require('connect-flash');
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import session from 'express-session';
+import csurf from 'csurf';
+import errorHandler from 'errorhandler';
+import expressWs from 'express-ws';
+import passport from 'passport';
+import connect_flash from 'connect-flash';
 
-const user = require('../util/user');
-const errorHandling = require('../util/error_handling');
-const secretKey = require('../util/secret_key');
+import * as user from './util/user';
+import * as errorHandling from './util/error_handling';
+import * as secretKey from './util/secret_key';
+import type { ServerPlatform } from './service/platform';
+import * as I18n from './util/i18n';
 
-const Config = require('../config');
+import * as Config from './config';
 
-module.exports = class WebFrontend extends events.EventEmitter {
-    constructor(platform) {
+declare global {
+    namespace Express {
+        interface Application {
+            frontend : WebFrontend;
+            //engine : Genie.AssistantEngine;
+            genie : Genie.AssistantEngine;
+        }
+
+        interface Request {
+            isLocked : boolean;
+            locale : string;
+
+            _ : (x : string) => string;
+            gettext : (x : string) => string;
+            ngettext : (x : string, x1 : string, n : number) => string;
+            pgettext : (c : string, x : string) => string;
+        }
+
+
+    }
+}
+
+declare module 'express-session' {
+    interface SessionData {
+        'device-redirect-to' : string;
+        redirect_to : string;
+    }
+}
+
+export default class WebFrontend extends events.EventEmitter {
+    private _platform : ServerPlatform;
+    private _app : express.Application;
+    private _server : http.Server;
+    private _isLocked = true;
+
+    constructor(platform : ServerPlatform) {
         super();
 
         this._platform = platform;
-
-        // all environments
         this._app = express();
         this._app.frontend = this;
         this._server = http.createServer(this._app);
+    }
+
+    async init() {
+        // all environments
         expressWs(this._app, this._server);
 
         // work around a crash in expressWs if a WebSocket route fails with an error
         // code and express-session tries to save the session
         this._app.use((req, res, next) => {
-            if (req.ws) {
-                const originalWriteHead = res.writeHead;
-                res.writeHead = function(statusCode) {
+            if ((req as any).ws) {
+                const originalWriteHead = res.writeHead as any;
+                res.writeHead = function(statusCode : number) : any {
+                    // eslint-disable-next-line prefer-rest-params
                     originalWriteHead.apply(this, arguments);
-                    http.ServerResponse.prototype.writeHead.apply(this, arguments);
+                    // eslint-disable-next-line prefer-rest-params
+                    return (http.ServerResponse.prototype.writeHead as any).apply(this, arguments);
                 };
             }
 
@@ -106,7 +146,7 @@ module.exports = class WebFrontend extends events.EventEmitter {
                 if (req.headers['x-forwarded-port']) {
                     port = (':' + req.headers['x-forwarded-port']);
                 } else if (req.headers['x-forwarded-host']) {
-                    let tmp = req.headers['x-forwarded-host'].split(':');
+                    const tmp = String(req.headers['x-forwarded-host']).split(':');
                     port = tmp[1] ? (':' + tmp[1]) : '';
                 } else {
                     port = '';
@@ -127,24 +167,25 @@ module.exports = class WebFrontend extends events.EventEmitter {
 
             res.locals.Config = Config;
             res.locals.THINGPEDIA_URL = Config.THINGPEDIA_URL;
-            res.locals.developerKey = (this._app.engine ? this._app.engine.platform.getSharedPreferences().get('developer-key') : '') || '';
+            res.locals.developerKey = (this._app.engine ?
+                (this._app.engine as unknown as Genie.AssistantEngine).platform.getSharedPreferences().get('developer-key') : '') || '';
 
             next();
         });
 
         // i18n support
-        var gt = platform.getCapability('gettext');
-        var modir = path.resolve(path.dirname(module.filename), '../po');
+        const gt = this._platform.getCapability('gettext');
+        const modir = path.resolve(path.dirname(module.filename), '../po');
         try {
-            gt.loadTextdomainDirectory('thingengine-platform-server', modir);
+            I18n.loadTextdomainDirectory(gt, this._platform.locale, 'almond-server', modir);
         } catch(e) {
             console.log('Failed to load translations: ' + e.message);
         }
-        const gettext = gt.dgettext.bind(gt, 'thingengine-platform-server');
-        const pgettext = gt.dpgettext.bind(gt, 'thingengine-platform-server');
-        const ngettext = gt.dngettext.bind(gt, 'thingengine-platform-server');
+        const gettext = gt.dgettext.bind(gt, 'almond-server');
+        const pgettext = gt.dpgettext.bind(gt, 'almond-server');
+        const ngettext = gt.dngettext.bind(gt, 'almond-server');
         this._app.use((req, res, next) => {
-            req.locale = platform.locale;
+            req.locale = this._platform.locale;
             req.gettext = gettext;
             req._ = req.gettext;
             req.pgettext = pgettext;
@@ -158,19 +199,19 @@ module.exports = class WebFrontend extends events.EventEmitter {
         });
 
         // mount /api before csurf so we can perform requests without the CSRF token
-        this._app.use('/api', require('../routes/api'));
+        this._app.use('/api', (await import('./routes/api')).default);
 
         this._app.use(csurf({ cookie: false }));
         this._app.use((req, res, next) => {
             res.locals.csrfToken = req.csrfToken();
             next();
         });
-        this._app.use('/', require('../routes/index'));
-        this._app.use('/apps', require('../routes/apps'));
-        this._app.use('/user', require('../routes/user'));
-        this._app.use('/config', require('../routes/config'));
-        this._app.use('/devices', require('../routes/devices'));
-        this._app.use('/recording', require('../routes/recording'));
+        this._app.use('/', (await import('./routes/index')).default);
+        this._app.use('/apps', (await import('./routes/apps')).default);
+        this._app.use('/user', (await import('./routes/user')).default);
+        this._app.use('/config', (await import('./routes/config')).default);
+        this._app.use('/devices', (await import('./routes/devices')).default);
+        this._app.use('/recording', (await import('./routes/recording')).default);
 
         this._app.use((req, res) => {
             // if we get here, we have a 404 response
@@ -204,14 +245,17 @@ module.exports = class WebFrontend extends events.EventEmitter {
         return this._app;
     }
 
-    setEngine(engine) {
-        this._app.engine = engine;
+    setEngine(engine : Genie.AssistantEngine) {
+        this._app.genie = engine;
+
+        // FIXME this code is broken because we're overwriting a method in express!
+        (this._app as any).engine = engine;
     }
 
-    unlock(key) {
+    unlock(key : string) {
         if (!this._isLocked)
             return;
         this._isLocked = false;
         this.emit('unlock', key);
     }
-};
+}

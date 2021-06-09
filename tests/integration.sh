@@ -46,7 +46,7 @@ EOF
 # set the server to require authentication so we can run the tests for login
 export THINGENGINE_HOST_BASED_AUTHENTICATION=disabled
 
-node $srcdir/main.js &
+node $srcdir/dist/main.js &
 serverpid=$!
 
 # in interactive mode, sleep forever
@@ -59,13 +59,13 @@ else
     sleep 30
 
     # run the automated link checker
-    node $srcdir/tests/linkcheck.js
+    ts-node $srcdir/tests/linkcheck.js
 
     # test the website by making HTTP requests directly
-    node $srcdir/tests/website
+    ts-node $srcdir/tests/website
 
     # test the website in a browser
-    SELENIUM_BROWSER=firefox node $srcdir/tests/test_website_selenium.js
+    SELENIUM_BROWSER=firefox ts-node $srcdir/tests/test_website_selenium.js
 fi
 
 kill $serverpid

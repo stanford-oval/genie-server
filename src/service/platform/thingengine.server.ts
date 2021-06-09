@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -17,11 +17,14 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const Tp = require('thingpedia');
+import * as Tp from 'thingpedia';
+
+import type PulseAudio from 'pulseaudio2';
 
 class UnavailableError extends Error {
+    code : string;
+
     constructor() {
         super('Sound is not supported in this version of Almond');
         this.code = 'ENOSUP';
@@ -30,22 +33,24 @@ class UnavailableError extends Error {
 
 const PA_BASE_VOLUME = 65536;
 
-function avg(array) {
+function avg(array : number[]) {
     let sum = 0;
     for (let i = 0; i < array.length; i++)
         sum += array[i];
     return sum / array.length;
 }
 
-module.exports = class ThingEngineServerDevice extends Tp.BaseDevice {
-    constructor(engine, state) {
+export default class ThingEngineServerDevice extends Tp.BaseDevice {
+    private _pulseaudio : PulseAudio|null;
+
+    constructor(engine : Tp.BaseEngine, state : { kind : string }) {
         super(engine, state);
 
         this.uniqueId = 'org.thingpedia.builtin.thingengine.server';
-        this._pulseaudio = this.platform.getCapability('sound');
+        this._pulseaudio = this.platform.getCapability('sound') as PulseAudio|null;
     }
 
-    checkAvailable() {
+    async checkAvailable() {
         return Tp.Availability.AVAILABLE;
     }
 
@@ -53,7 +58,7 @@ module.exports = class ThingEngineServerDevice extends Tp.BaseDevice {
         if (!this._pulseaudio)
             throw new UnavailableError();
         const server = await this._pulseaudio.info();
-        return (await this._pulseaudio.sink()).find((sink) => sink.name === server.default_sink_name);
+        return (await this._pulseaudio.sink()).find((sink) => sink.name === server.default_sink_name)!;
     }
 
     async do_raise_volume() {
@@ -77,7 +82,7 @@ module.exports = class ThingEngineServerDevice extends Tp.BaseDevice {
         // return the average volume as the volume
         return { volume: avg(sink.volume)/PA_BASE_VOLUME*100 };
     }
-    async do_set_volume({ volume }) {
+    async do_set_volume({ volume } : { volume : number }) {
         const sink = await this._getDefaultSink();
 
         // set the volume preserving the balance
@@ -85,7 +90,7 @@ module.exports = class ThingEngineServerDevice extends Tp.BaseDevice {
         await this._doSetVolume(sink, current, Math.round(volume * PA_BASE_VOLUME / 100));
     }
 
-    async _doSetVolume(sink, current, volume) {
+    async _doSetVolume(sink : PulseAudio.SourceOrSinkInfo, current : number, volume : number) {
         if (current === 0) {
             for (let i = 0; i < sink.volume.length; i++)
                 sink.volume[i] = volume;
@@ -95,17 +100,17 @@ module.exports = class ThingEngineServerDevice extends Tp.BaseDevice {
         }
 
         // mute if we lowered to 0
-        await this._pulseaudio.setSinkMute(sink.name, sink.volume.every((v) => v === 0));
-        await this._pulseaudio.setSinkVolume(sink.name, sink.volume);
+        await this._pulseaudio!.setSinkMute(sink.name, sink.volume.every((v) => v === 0));
+        await this._pulseaudio!.setSinkVolume(sink.name, sink.volume);
     }
     async do_mute() {
         const sink = await this._getDefaultSink();
 
-        await this._pulseaudio.setSinkMute(sink.name, 1);
+        await this._pulseaudio!.setSinkMute(sink.name, true);
     }
     async do_unmute() {
         const sink = await this._getDefaultSink();
 
-        await this._pulseaudio.setSinkMute(sink.name, 0);
+        await this._pulseaudio!.setSinkMute(sink.name, false);
     }
-};
+}

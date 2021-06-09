@@ -17,18 +17,17 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-require('thingpedia');
+import 'thingpedia';
 process.on('unhandledRejection', (up) => { throw up; });
 
 // Login to Web Almond with username and password
 // returns a Cookie header that can be used in subsequent requests
 
-const assert = require('assert');
-const Tp = require('thingpedia');
-const tough = require('tough-cookie');
-const minidom = require('./minidom');
+import assert from 'assert';
+import * as Tp from 'thingpedia';
+import * as tough from 'tough-cookie';
+import * as minidom from './minidom';
 
 function accumulateStream(stream) {
     return new Promise((resolve, reject) => {
@@ -79,7 +78,7 @@ async function login(session) {
     });
     return session;
 }
-module.exports = {
+export {
     login,
     startSession
 };

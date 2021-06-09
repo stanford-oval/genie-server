@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -17,18 +17,18 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const express = require('express');
-var router = express.Router();
 
-const user = require('../util/user');
-const Config = require('../config');
+import express from 'express';
+const router = express.Router();
+
+import * as user from '../util/user';
+import * as Config from '../config';
 
 router.use(user.requireLogIn);
 
 router.get('/', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
 
     res.render('apps_list', { page_title: 'Almond - My Rules',
                               message: '',
@@ -38,7 +38,7 @@ router.get('/', (req, res, next) => {
 
 router.post('/delete', (req, res, next) => {
     Promise.resolve().then(async () => {
-        const engine = req.app.engine;
+        const engine = req.app.genie;
 
         const id = req.body.id;
         const deleted = await engine.deleteApp(id);
@@ -53,4 +53,4 @@ router.post('/delete', (req, res, next) => {
     }).catch(next);
 });
 
-module.exports = router;
+export default router;

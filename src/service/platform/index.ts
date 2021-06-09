@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -17,52 +17,47 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
 // Server platform
 
-const Q = require('q');
-const fs = require('fs');
-const os = require('os');
-const events = require('events');
-const Tp = require('thingpedia');
-const child_process = require('child_process');
-const Gettext = require('node-gettext');
-const path = require('path');
-let PulseAudio;
-try {
-    PulseAudio = require('pulseaudio2');
-} catch(e) {
-    PulseAudio = null;
-}
-let canberra;
-try {
-    canberra = require('canberra');
-} catch(e) {
-    canberra = null;
-}
+/// <reference types="./pulseaudio2" />
+/// <reference types="./canberra" />
 
-const _graphicsApi = require('./graphics');
+import * as fs from 'fs';
+import * as os from 'os';
+import * as events from 'events';
+import * as Tp from 'thingpedia';
+import * as child_process from 'child_process';
+import Gettext from 'node-gettext';
+import * as path from 'path';
+import * as util from 'util';
+import * as Genie from 'genie-toolkit';
 
-let WakeWordDetector;
-try {
-    WakeWordDetector = require('../wake-word/snowboy');
-} catch(e) {
-    WakeWordDetector = null;
-}
+import * as _graphicsApi from './graphics';
+
+import type PulseAudio_ from 'pulseaudio2';
+let PulseAudio : typeof PulseAudio_|null = null;
+
+import type * as canberra_ from 'canberra';
+let canberra : typeof canberra_|null = null;
+
+import type WakeWordDetector_ from '../wake-word/snowboy';
+let WakeWordDetector : typeof WakeWordDetector_|null = null;
+
+import type webrtcvad_ from 'webrtcvad';
+let webrtcvad : typeof webrtcvad_|null = null;
 
 // FIXME
-const Builtins = require('genie-toolkit/dist/lib/engine/devices/builtins');
+import Builtins from 'genie-toolkit/dist/lib/engine/devices/builtins';
+import ThingEngineServerDevice from './thingengine.server';
 
-const Config = require('../../config');
+import * as Config from '../../config';
 
-var _unzipApi = {
+const _unzipApi : Tp.Capabilities.UnzipApi = {
     unzip(zipPath, dir) {
-        var args = ['-uo', zipPath, '-d', dir];
-        return Q.nfcall(child_process.execFile, '/usr/bin/unzip', args, {
-            maxBuffer: 10 * 1024 * 1024 }).then((zipResult) => {
-            var stdout = zipResult[0];
-            var stderr = zipResult[1];
+        const args = ['-uo', zipPath, '-d', dir];
+        return util.promisify(child_process.execFile)('/usr/bin/unzip', args, {
+            maxBuffer: 10 * 1024 * 1024 }).then(({ stdout, stderr }) => {
             console.log('stdout', stdout);
             console.log('stderr', stderr);
         });
@@ -93,7 +88,7 @@ const _contentApi = {
 const _telephoneApi = JavaAPI.makeJavaAPI('Telephone', ['call', 'callEmergency'], [], []);
 */
 
-const _contentApi = {
+const _contentApi : Tp.Capabilities.ContentApi = {
     getStream(url) {
         return new Promise((resolve, reject) => {
             if (url.startsWith('file:///')) {
@@ -103,7 +98,7 @@ const _contentApi = {
                         reject(err);
                         return;
                     }
-                    let stream = fs.createReadStream(path);
+                    const stream : Tp.Helpers.Content.ContentTypeStream = fs.createReadStream(path);
                     stream.contentType = String(stdout).trim();
                     resolve(stream);
                 });
@@ -114,7 +109,7 @@ const _contentApi = {
     }
 };
 
-function safeMkdirSync(dir) {
+function safeMkdirSync(dir : string) {
     try {
         fs.mkdirSync(dir);
     } catch(e) {
@@ -125,14 +120,14 @@ function safeMkdirSync(dir) {
 
 function getUserConfigDir() {
     if (process.platform === 'win32')
-        return process.env.APPDATA;
+        return process.env.APPDATA!;
     if (process.env.XDG_CONFIG_HOME)
         return process.env.XDG_CONFIG_HOME;
     return os.homedir() + '/.config';
 }
 function getUserCacheDir() {
     if (process.platform === 'win32')
-        return process.env.TEMP;
+        return process.env.TEMP!;
     if (process.env.XDG_CACHE_HOME)
         return process.env.XDG_CACHE_HOME;
     return os.homedir() + '/.cache';
@@ -150,27 +145,30 @@ function getCacheDir() {
         return getUserCacheDir() + '/almond-server';
 }
 
-const _gpsApi = {
-    start() {},
-    stop() {},
+class GpsApi implements Tp.Capabilities.GpsApi {
+    private _location : Tp.Capabilities.Location|null = null;
+    onlocationchanged : ((loc : Tp.Capabilities.Location) => void)|null = null;
 
-    _location: null,
-    onlocationchanged: null,
+    async start() {}
+    async stop() {}
 
-    setLocation(v) {
+    setLocation(v : Tp.Capabilities.Location) {
         this._location = v;
         if (this.onlocationchanged)
-            this.onlocationchanged(null, v);
-    },
+            this.onlocationchanged(v);
+    }
 
     async getCurrentLocation() {
-        return this._location;
+        return this._location!;
     }
-};
+}
+const _gpsApi = new GpsApi;
 
 // A simple Audio Player based on GStreamer
-class Player extends events.EventEmitter {
-    constructor(child) {
+class Player extends events.EventEmitter implements Tp.Capabilities.Player {
+    private _child : child_process.ChildProcess;
+
+    constructor(child : child_process.ChildProcess) {
         super();
         this._child = child;
 
@@ -188,8 +186,8 @@ class Player extends events.EventEmitter {
     }
 }
 
-const _audioPlayerApi = {
-    play(urls) {
+const _audioPlayerApi : Tp.Capabilities.AudioPlayerApi = {
+    async play(urls : string[]) {
         return new Player(child_process.spawn('gst-play-1.0', [ "-q" ].concat(urls), {
             stdio: ['ignore', process.stdout, process.stderr]
         }));
@@ -200,42 +198,44 @@ const LOCAL_SOUND_EFFECTS = ['news-intro'];
 const KNOWN_SOUND_EFFECTS = ['alarm-clock-elapsed', 'audio-channel-front-center', 'audio-channel-front-left', 'audio-channel-front-right', 'audio-channel-rear-center', 'audio-channel-rear-left', 'audio-channel-rear-right', 'audio-channel-side-left', 'audio-channel-side-right', 'audio-test-signal', 'audio-volume-change', 'bell', 'camera-shutter', 'complete', 'device-added', 'device-removed', 'dialog-error', 'dialog-information', 'dialog-warning', 'message-new-instant', 'message', 'network-connectivity-established', 'network-connectivity-lost', 'phone-incoming-call', 'phone-outgoing-busy', 'phone-outgoing-calling', 'power-plug', 'power-unplug', 'screen-capture', 'service-login', 'service-logout', 'suspend-error', 'trash-empty', 'window-attention', 'window-question'];
 
 const SOUND_EFFECT_ID = 0;
-class SoundEffectsApi {
+export class SoundEffectsApi implements Tp.Capabilities.SoundEffectsApi {
+    private _ctx : canberra_.Context;
+
     constructor() {
-        this._ctx = new canberra.Context({
-            [canberra.Property.APPLICATION_ID]: 'edu.stanford.Almond',
+        this._ctx = new canberra!.Context({
+            [canberra!.Property.APPLICATION_ID]: 'edu.stanford.Almond',
         });
 
         try {
             this._ctx.cache({
                 'media.role': 'voice-assistant',
-                [canberra.Property.EVENT_ID]: 'message-new-instant'
+                [canberra!.Property.EVENT_ID]: 'message-new-instant'
             });
 
             this._ctx.cache({
                 'media.role': 'voice-assistant',
-                [canberra.Property.EVENT_ID]: 'dialog-warning'
+                [canberra!.Property.EVENT_ID]: 'dialog-warning'
             });
-        } catch (e) {
+        } catch(e) {
             console.error(`Failed to cache event sound: ${e.message}`);
         }
     }
 
-    getURL(name) {
+    getURL(name : string) {
         if (LOCAL_SOUND_EFFECTS.includes(name))
-            return 'file://' + path.resolve(path.dirname(module.filename), '../../data/sound-effects/' + name + '.oga');
+            return 'file://' + path.resolve(path.dirname(module.filename), '../../../data/sound-effects/' + name + '.oga');
         else if (KNOWN_SOUND_EFFECTS.includes(name))
             return 'file:///usr/share/sounds/freedesktop/stereo/' + name + '.oga';
         else
             return undefined;
     }
 
-    play(name, id = SOUND_EFFECT_ID) {
-        const options = {
+    play(name : string, id = SOUND_EFFECT_ID) {
+        const options : Record<string, string> = {
             'media.role': 'voice-assistant',
         };
         if (LOCAL_SOUND_EFFECTS.includes(name))
-            options['media.filename'] = path.resolve(path.dirname(module.filename), '../../data/sound-effects/' + name + '.oga');
+            options['media.filename'] = path.resolve(path.dirname(module.filename), '../../../data/sound-effects/' + name + '.oga');
         else
             options['event.id'] = name;
 
@@ -243,21 +243,16 @@ class SoundEffectsApi {
     }
 }
 
-let webrtcvad;
-try {
-    webrtcvad = require('webrtcvad').default;
-} catch(e) {
-    console.log("VAD not available");
-    webrtcvad = null;
-}
+class VAD implements Tp.Capabilities.VadApi {
+    private _instance : webrtcvad_|null;
+    frameSize : number;
 
-class VAD {
     constructor() {
         this._instance = null;
         this.frameSize = 0;
     }
 
-    setup(bitrate, level) {
+    setup(bitrate : number, level ?: number) {
         if (this._instance)
             this._instance = null;
 
@@ -272,17 +267,38 @@ class VAD {
         return false;
     }
 
-    process(chunk) {
+    process(chunk : Buffer) {
         if (!this._instance)
             return false;
-        let n = chunk.length % this.frameSize, r = 0;
+        const n = chunk.length % this.frameSize;
+        let r = false;
         for (let i = 0; i < n; i++)
-            r += this._instance.process(chunk.slice(i * this.frameSize, this.frameSize));
+            r ||= this._instance.process(chunk.slice(i * this.frameSize, this.frameSize));
         return r;
     }
 }
 
-class ServerPlatform extends Tp.BasePlatform {
+export class ServerPlatform extends Tp.BasePlatform {
+    private _gettext : Gettext;
+    private _filesDir : string;
+    private _locale : string;
+    private _timezone : string;
+    private _prefs : Tp.Preferences;
+    private _cacheDir : string;
+    private _wakeWordDetector : WakeWordDetector_|null;
+    private _voiceDetector : VAD|null;
+    private _soundEffects : SoundEffectsApi|null;
+    private _sqliteKey : string|null;
+    private _origin : string|null;
+    private _pulse : PulseAudio_|null|undefined;
+    speech : Genie.SpeechHandler|null;
+
+    private _serverDev : {
+        kind : string;
+        class : string;
+        module : Tp.BaseDevice.DeviceClass<ThingEngineServerDevice>
+    };
+
     constructor() {
         super();
 
@@ -291,8 +307,15 @@ class ServerPlatform extends Tp.BasePlatform {
         this._filesDir = getFilesDir();
         safeMkdirSync(this._filesDir);
 
-        this._setLocale();
-        this._timezone = process.env.TZ;
+        let locale = 'en-US';
+        if (process.env.LOCALE)
+            locale = process.env.LOCALE;
+        this._locale = locale;
+        // normalize this._locale to something that Intl can grok
+        this._locale = this._locale.split(/[-_.@]/).slice(0, 2).join('-');
+        this._gettext.setLocale(this._locale);
+
+        this._timezone = process.env.TZ!;
         this._prefs = new Tp.Helpers.FilePreferences(this._filesDir + '/prefs.db');
         this._cacheDir = getCacheDir();
         safeMkdirSync(this._cacheDir);
@@ -300,27 +323,53 @@ class ServerPlatform extends Tp.BasePlatform {
         this._wakeWordDetector = null;
         this._voiceDetector = null;
         this._soundEffects = null;
+        this.speech = null;
 
         this._sqliteKey = null;
         this._origin = null;
 
         this._serverDev = {
             kind: 'org.thingpedia.builtin.thingengine.server',
-            class: fs.readFileSync(path.resolve(__dirname, '../../data/thingengine.server.tt')).toString(),
-            module: require('./thingengine.server')
+            class: fs.readFileSync(path.resolve(__dirname, '../../../data/thingengine.server.tt')).toString(),
+            module: ThingEngineServerDevice
         };
 
         // HACK: thingengine-core will try to load thingengine-own-desktop from the db
         // before PairedEngineManager calls getPlatformDevice(), which can result in loading
         // the device as unsupported (and that would be bad)
         // to avoid that, we inject it eagerly here
-        Builtins.default[this._serverDev.kind] = this._serverDev;
+        (Builtins as any)[this._serverDev.kind] = this._serverDev;
+    }
+
+    async init() {
+        try {
+            PulseAudio = (await import('pulseaudio2')).default;
+        } catch(e) {
+            PulseAudio = null;
+        }
+        try {
+            canberra = (await import('canberra'));
+        } catch(e) {
+            canberra = null;
+        }
+        try {
+            WakeWordDetector = (await import('../wake-word/snowboy')).default;
+        } catch(e) {
+            WakeWordDetector = null;
+        }
+
+        try {
+            webrtcvad = (await import('webrtcvad')).default;
+        } catch(e) {
+            console.log("VAD not available");
+            webrtcvad = null;
+        }
     }
 
     async _ensurePulseConfig() {
         try {
             let hasFilterHeuristics = false, hasFilterApply = false;
-            const pulseModList = await this._pulse.modules();
+            const pulseModList = await this._pulse!.modules();
             for (let i = 0; i < pulseModList.length; i++) {
                 const mod = pulseModList[i];
                 if (mod.name === 'module-filter-heuristics')
@@ -328,25 +377,25 @@ class ServerPlatform extends Tp.BasePlatform {
                 if (mod.name === 'module-filter-apply')
                     hasFilterApply = true;
                 if (mod.name === 'module-role-ducking')
-                    await this._pulse.unloadModule(mod.index);
+                    await this._pulse!.unloadModule(mod.index);
             }
             if (!hasFilterHeuristics)
-                await this._pulse.loadModule("module-filter-heuristics");
+                await this._pulse!.loadModule("module-filter-heuristics");
             if (!hasFilterApply)
-                await this._pulse.loadModule("module-filter-apply");
-            await this._pulse.loadModule("module-role-ducking", "trigger_roles=voice-assistant ducking_roles=music volume=40% global=true");
+                await this._pulse!.loadModule("module-filter-apply");
+            await this._pulse!.loadModule("module-role-ducking", "trigger_roles=voice-assistant ducking_roles=music volume=40% global=true");
         } catch(e) {
             console.error("failed to configure PulseAudio");
         }
     }
 
-    _ensurePulseAudio() {
+    private _ensurePulseAudio() {
         if (this._pulse !== undefined)
             return;
 
         if (PulseAudio) {
             this._pulse = new PulseAudio();
-            this._pulse.on('error', (err) => { console.error('error on PulseAudio', err); });
+            this._pulse.on('error', (err : Error) => { console.error('error on PulseAudio', err); });
             this._pulse.on('connection', () => {
                 this._ensurePulseConfig();
             });
@@ -384,7 +433,7 @@ class ServerPlatform extends Tp.BasePlatform {
     // this platform
     // (eg we don't need discovery on the cloud, and we don't need graphdb,
     // messaging or the apps on the phone client)
-    hasFeature(feature) {
+    hasFeature(feature : string) {
         return true;
     }
 
@@ -397,8 +446,8 @@ class ServerPlatform extends Tp.BasePlatform {
     // connectivity, stable IP, local device discovery, bluetooth, etc.)
     //
     // Which capabilities are available affects which apps are allowed to run
-    hasCapability(cap) {
-        switch(cap) {
+    hasCapability(cap : string) {
+        switch (cap) {
         case 'code-download':
         case 'gps':
         case 'graphics-api':
@@ -431,8 +480,8 @@ class ServerPlatform extends Tp.BasePlatform {
     // platform
     //
     // This will return null if hasCapability(cap) is false
-    getCapability(cap) {
-        switch(cap) {
+    getCapability<T extends keyof Tp.Capabilities.CapabilityMap>(cap : T) : Tp.Capabilities.CapabilityMap[T] {
+        switch (cap) {
         case 'code-download':
             // We have the support to download code
             return _unzipApi;
@@ -500,17 +549,7 @@ class ServerPlatform extends Tp.BasePlatform {
         return this._filesDir + '/sqlite.db';
     }
 
-    _setLocale() {
-        let locale = 'en-US';
-        if (process.env.LOCALE)
-            locale = process.env.LOCALE;
-        this._locale = locale;
-        // normalize this._locale to something that Intl can grok
-        this._locale = this._locale.split(/[-_.@]/).slice(0, 2).join('-');
-        this._gettext.setLocale(this._locale);
-    }
-
-    _setSqliteKey(key) {
+    _setSqliteKey(key : Buffer) {
         this._sqliteKey = key.toString('hex');
     }
 
@@ -528,16 +567,16 @@ class ServerPlatform extends Tp.BasePlatform {
 
     // Get the ThingPedia developer key, if one is configured
     getDeveloperKey() {
-        return this._prefs.get('developer-key');
+        return this._prefs.get('developer-key') as string|undefined ?? null;
     }
 
     // Change the ThingPedia developer key, if possible
     // Returns true if the change actually happened
-    setDeveloperKey(key) {
+    setDeveloperKey(key : string|null) {
         return this._prefs.set('developer-key', key);
     }
 
-    _setOrigin(origin) {
+    _setOrigin(origin : string) {
         this._origin = origin;
     }
 
@@ -545,25 +584,25 @@ class ServerPlatform extends Tp.BasePlatform {
         return Config.CLOUD_SYNC_URL;
     }
 
-    getOrigin() {
+    getOrigin() : string {
         if (process.env.THINGENGINE_ORIGIN)
             return process.env.THINGENGINE_ORIGIN;
-        return this._origin;
+        return this._origin!;
     }
 
     getCloudId() {
-        return this._prefs.get('cloud-id');
+        return this._prefs.get('cloud-id') as string|undefined ?? null;
     }
 
     getAuthToken() {
-        return this._prefs.get('auth-token');
+        return this._prefs.get('auth-token') as string|undefined;
     }
 
     // Change the auth token
     // Returns true if a change actually occurred, false if the change
     // was rejected
-    setAuthToken(authToken) {
-        var oldAuthToken = this._prefs.get('auth-token');
+    setAuthToken(authToken : string) {
+        const oldAuthToken = this._prefs.get('auth-token');
         if (oldAuthToken !== undefined && authToken !== oldAuthToken)
             return false;
         this._prefs.set('auth-token', authToken);
@@ -571,4 +610,4 @@ class ServerPlatform extends Tp.BasePlatform {
     }
 }
 
-module.exports = new ServerPlatform;
+export default new ServerPlatform();

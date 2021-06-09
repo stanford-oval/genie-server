@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -17,23 +17,23 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const express = require('express');
-var router = express.Router();
 
-const user = require('../util/user');
-const Config = require('../config');
+import express from 'express';
+const router = express.Router();
+
+import * as user from '../util/user';
+import * as Config from '../config';
 
 router.use(user.requireLogIn);
 
 router.get('/', (req, res, next) => {
     res.render('devices_list', { page_title: 'Almond - My Skills',
-                                 devices: req.app.engine.getDeviceInfos() });
+                                 devices: req.app.genie.getDeviceInfos() });
 });
 
 router.get('/create', (req, res, next) => {
-    if (req.query.class && ['online', 'physical', 'data'].indexOf(req.query.class) < 0) {
+    if (req.query.class && ['online', 'physical', 'data'].indexOf(req.query.class as string) < 0) {
         res.status(404).render('error', { page_title: req._("Thingpedia - Error"),
                                           message: req._("Invalid device class") });
         return;
@@ -46,7 +46,7 @@ router.get('/create', (req, res, next) => {
 });
 
 router.post('/create', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
     Promise.resolve().then(async () => {
         if (typeof req.body['kind'] !== 'string' ||
             req.body['kind'].length === 0) {
@@ -72,7 +72,7 @@ router.post('/create', (req, res, next) => {
 });
 
 router.post('/delete', (req, res, next) => {
-    const engine = req.app.engine;
+    const engine = req.app.genie;
     Promise.resolve().then(async () => {
         const id = req.body.id;
         const removed = await engine.deleteDevice(id);
@@ -89,16 +89,16 @@ router.post('/delete', (req, res, next) => {
 router.get('/oauth2/:kind', (req, res, next) => {
     const kind = req.params.kind;
 
-    const redirect = encodeURIComponent(req.app.engine.platform.getOrigin() + Config.BASE_URL);
+    const redirect = encodeURIComponent(req.app.genie.platform.getOrigin() + Config.BASE_URL);
     const url = Config.CLOUD_SYNC_URL + `/proxy?redirect=${redirect}&kind=${kind}`;
     res.redirect(url);
 });
 
 router.get('/oauth2/callback/:kind', (req, res, next) => {
     const kind = req.params.kind;
-    const engine = req.app.engine;
+    const engine = req.app.genie;
     Promise.resolve().then(async () => {
-        await engine.completeOAuth(kind, req.url, req.session);
+        await engine.completeOAuth(kind, req.url, req.session as unknown as Record<string, string>);
         res.redirect(Config.BASE_URL + '/devices?class=online');
     }).catch((e) => {
         console.log(e.stack);
@@ -108,4 +108,4 @@ router.get('/oauth2/callback/:kind', (req, res, next) => {
 });
 
 
-module.exports = router;
+export default router;

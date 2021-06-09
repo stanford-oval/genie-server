@@ -17,12 +17,11 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const stream = require('stream');
-const child_process = require('child_process');
-const byline = require('byline');
-const path = require('path');
+import * as stream from 'stream';
+import * as child_process from 'child_process';
+import byline from 'byline';
+import * as path from 'path';
 
 // This file is based on mycroft-precise/runner/runner.py
 //
@@ -76,12 +75,12 @@ class TriggerDetector {
     }
 }
 
-module.exports = class DetectorStream extends stream.Writable {
+export default class DetectorStream extends stream.Writable {
     constructor() {
         // keep chunks small, to reduce latency
         super({ highWaterMark: 128 });
 
-        this._modelPath = path.resolve(path.dirname(module.filename), '../../data/wake-word/almond.net');
+        this._modelPath = path.resolve(path.dirname(module.filename), '../../../data/wake-word/almond.net');
         this._hotword = path.basename(this._modelPath).split('.')[0];
 
         this._detector = new TriggerDetector(2048);
@@ -155,4 +154,4 @@ module.exports = class DetectorStream extends stream.Writable {
         if (this._child)
             this._child.kill();
     }
-};
+}

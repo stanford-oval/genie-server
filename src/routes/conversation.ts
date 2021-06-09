@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -17,10 +17,15 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-class WebsocketAssistantDelegate {
-    constructor(ws) {
+import express from 'express';
+import * as Genie from 'genie-toolkit';
+import WebSocket from 'ws';
+
+class WebsocketAssistantDelegate implements Genie.DialogueAgent.ConversationDelegate {
+    private _ws : WebSocket;
+
+    constructor(ws : WebSocket) {
         this._ws = ws;
     }
 
@@ -28,23 +33,23 @@ class WebsocketAssistantDelegate {
         // voice doesn't go through SpeechHandler, hence hypotheses don't go through here!
     }
 
-    setExpected(what) {
+    setExpected(what : string|null) {
         this._ws.send(JSON.stringify({ type: 'askSpecial', ask: what }));
     }
 
-    addMessage(msg) {
+    async addMessage(msg : Genie.DialogueAgent.Protocol.Message) {
         this._ws.send(JSON.stringify(msg));
     }
 }
 
-module.exports = function conversationHandler(ws, req, next) {
+export default function conversationHandler(ws : WebSocket, req : express.Request, next : express.NextFunction) {
     Promise.resolve().then(async () => {
-        const engine = req.app.engine;
+        const engine = req.app.genie;
 
         const delegate = new WebsocketAssistantDelegate(ws);
 
         let opened = false;
-        const conversationId = req.query.id || 'main';
+        const conversationId = String(req.query.id || 'main');
         ws.on('error', (err) => {
             console.error(err);
             ws.close();
@@ -65,8 +70,8 @@ module.exports = function conversationHandler(ws, req, next) {
 
         ws.on('message', (data) => {
             Promise.resolve().then(() => {
-                const parsed = JSON.parse(data);
-                switch(parsed.type) {
+                const parsed = JSON.parse(String(data));
+                switch (parsed.type) {
                 case 'command':
                     return conversation.handleCommand(parsed.text);
                 case 'parsed':
@@ -85,4 +90,4 @@ module.exports = function conversationHandler(ws, req, next) {
         console.error('Error in API websocket: ' + e.message);
         ws.close();
     });
-};
+}

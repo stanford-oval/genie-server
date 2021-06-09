@@ -1,4 +1,4 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
@@ -17,21 +17,22 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const Q = require('q');
-Q.longStackSupport = true;
 process.on('unhandledRejection', (up) => { throw up; });
 
-const child_process = require('child_process');
-const Genie = require('genie-toolkit');
-const WebFrontend = require('./service/frontend');
+import * as child_process from 'child_process';
+import * as Genie from 'genie-toolkit';
+import * as stream from 'stream';
 
-const Config = require('./config');
+import WebFrontend from './frontend';
+import type { ServerPlatform, SoundEffectsApi } from './service/platform';
+import platform from './service/platform';
+
+import * as Config from './config';
 
 let _stopped = false;
 let _running = false;
-let _engine, _frontend;
+let _engine : Genie.AssistantEngine, _frontend : WebFrontend;
 
 function handleStop() {
     if (_running)
@@ -43,7 +44,7 @@ function handleStop() {
 const DEBUG = false;
 
 const HOTWORD_DETECTED_ID = 1;
-async function init(platform) {
+async function init(platform : ServerPlatform) {
     _engine = new Genie.AssistantEngine(platform, {
         cloudSyncUrl: Config.CLOUD_SYNC_URL,
         thingpediaUrl: Config.THINGPEDIA_URL,
@@ -63,14 +64,15 @@ async function init(platform) {
 
     if (platform.hasCapability('sound')) {
         const speech = new Genie.SpeechHandler(conversation, platform, {
-            nlUrl: Config.NL_URL
+            nlUrl: Config.NLP_URL
         });
+        platform.speech = speech;
 
-        let play;
+        let play : stream.Writable|null;
         const ensureNullPlayback = () => {
             if (play)
                 return;
-            play = platform.getCapability('sound').createPlaybackStream({
+            play = platform.getCapability('sound')!.createPlaybackStream({
                 format: 'S16LE',
                 rate: 16000,
                 channels: 1,
@@ -99,16 +101,16 @@ async function init(platform) {
         speech.on('no-match', stopNullPlayback);
         speech.on('match', stopNullPlayback);
 
-        const soundEffects = platform.getCapability('sound-effects');
+        const soundEffects = platform.getCapability('sound-effects') as SoundEffectsApi;
         if (soundEffects) {
             speech.on('wakeword', (hotword) => {
-                soundEffects.play('message-new-instant', HOTWORD_DETECTED_ID).catch((e) => {
+                soundEffects.play('message-new-instant', HOTWORD_DETECTED_ID).catch((e : Error) => {
                     console.error(`Failed to play hotword detection sound: ${e.message}`);
                 });
             });
 
             speech.on('no-match', () => {
-                soundEffects.play('dialog-warning', HOTWORD_DETECTED_ID).catch((e) => {
+                soundEffects.play('dialog-warning', HOTWORD_DETECTED_ID).catch((e : Error) => {
                     console.error(`Failed to play hotword no-match sound: ${e.message}`);
                 });
             });
@@ -120,13 +122,14 @@ async function init(platform) {
 }
 
 async function main() {
+    await platform.init();
+
     process.on('SIGINT', handleStop);
     process.on('SIGTERM', handleStop);
 
-    const platform = require('./service/platform');
     try {
-
         _frontend = new WebFrontend(platform);
+        await _frontend.init();
 
         if (Config.ENABLE_DB_ENCRYPTION) {
             await _frontend.open();

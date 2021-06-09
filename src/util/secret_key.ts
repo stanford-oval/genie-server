@@ -1,8 +1,8 @@
-// -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
+// -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
 // This file is part of Almond
 //
-// Copyright 2019 The Board of Trustees of the Leland Stanford Junior University
+// Copyright 2016-2019 The Board of Trustees of the Leland Stanford Junior University
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,17 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-import * as minidom from './minidom';
+import * as crypto from 'crypto';
 
-function getCsrfToken(htmlString) {
-    const [body] = minidom.getElementsByTagName(minidom.parse(htmlString), 'body');
-    return minidom.getAttribute(body, 'data-csrf-token');
+import platform from '../service/platform';
+
+export function getSecretKey() {
+    const prefs = platform.getSharedPreferences();
+
+    let sessionKey = prefs.get('session-key') as string|undefined;
+    if (sessionKey === undefined) {
+        sessionKey = crypto.randomBytes(32).toString('hex');
+        prefs.set('session-key', sessionKey);
+    }
+    return sessionKey;
 }
-
-export { getCsrfToken };

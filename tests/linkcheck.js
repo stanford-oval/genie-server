@@ -17,7 +17,7 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
+
 
 // load thingpedia to initialize the polyfill
 require('thingpedia');
@@ -36,9 +36,9 @@ process.on('unhandledRejection', (up) => { throw up; });
 // Set the COOKIE environment variable to set a cookie
 // on request pages.
 
-const Tp = require('thingpedia');
-const Url = require('url');
-const minidom = require('./util/minidom');
+import * as Tp from 'thingpedia';
+import * as Url from 'url';
+import * as minidom from './util/minidom';
 
 // some pages are intentionally missing from the test
 // environment, but they exist in the real thing

@@ -4,6 +4,7 @@
 home/
 node_modules/
 .nyc_output/
+dist/
 
 public/javascripts/brassau.js
 public/javascripts/friendhub.js

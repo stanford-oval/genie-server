@@ -17,13 +17,12 @@
 // limitations under the License.
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
-"use strict";
 
-const assert = require('assert');
-const Tp = require('thingpedia');
-const qs = require('qs');
-const Url = require('url');
-const FormData = require('form-data');
+import assert from 'assert';
+import * as Tp from 'thingpedia';
+import * as qs from 'qs';
+import * as Url from 'url';
+import FormData from 'form-data';
 
 const DEBUG = false;
 const SERVER_ORIGIN = 'http://127.0.0.1:3000';
@@ -134,7 +133,7 @@ async function assertBlocked(path, bob, nobody) {
         403, 'You do not have permission to perform this operation.');
 }
 
-module.exports = {
+export {
     request,
     sessionRequest,
     assertHttpError,
