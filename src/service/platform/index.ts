@@ -245,10 +245,12 @@ export class SoundEffectsApi implements Tp.Capabilities.SoundEffectsApi {
 
 class VAD implements Tp.Capabilities.VadApi {
     private _instance : webrtcvad_|null;
+    private _previousChunk : Buffer|null;
     frameSize : number;
 
     constructor() {
         this._instance = null;
+        this._previousChunk = null;
         this.frameSize = 0;
     }
 
@@ -270,11 +272,22 @@ class VAD implements Tp.Capabilities.VadApi {
     process(chunk : Buffer) {
         if (!this._instance)
             return false;
-        const n = chunk.length % this.frameSize;
-        let r = false;
-        for (let i = 0; i < n; i++)
-            r ||= this._instance.process(chunk.slice(i * this.frameSize, this.frameSize));
-        return r;
+
+        if (this._previousChunk)
+            chunk = Buffer.concat([this._previousChunk, chunk], this._previousChunk.length + chunk.length);
+
+        let anySound = false;
+        let offset : number;
+        for (offset = 0; offset < chunk.length && offset + this.frameSize <= chunk.length; offset += this.frameSize) {
+            const sliced = chunk.slice(offset, offset + this.frameSize);
+            const sound = this._instance.process(sliced);
+            anySound = anySound || sound;
+        }
+        if (offset < chunk.length)
+            this._previousChunk = chunk.slice(offset);
+        else
+            this._previousChunk = null;
+        return anySound;
     }
 }
 
