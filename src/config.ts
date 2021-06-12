@@ -73,6 +73,14 @@ export const HOST_BASED_AUTHENTICATION = process.env.THINGENGINE_HOST_BASED_AUTH
 */
 export const ENABLE_DB_ENCRYPTION = false;
 
+/**
+  Adjust operation to run inside an Home Assistant add-on.
+
+  This affects the behavior of the OAuth proxy.
+ */
+export const IN_HOME_ASSISTANT_ADDON = !!process.env.THINGENGINE_IN_HOME_ASSISTANT_ADDON;
+
 export const NLP_URL = process.env.THINGENGINE_NLP_URL || 'https://nlp.almond.stanford.edu';
 export const THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://thingpedia.stanford.edu/thingpedia';
 export const CLOUD_SYNC_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://almond.stanford.edu';
+export const OAUTH_REDIRECT_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://thingengine.stanford.edu';

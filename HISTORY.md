@@ -1,3 +1,15 @@
+2.0.1
+=====
+
+* OAuth inside the Home Assistant add-on now should work fully without issues,
+  and without resorting to opening a separate port [#214].
+* Misc UI improvements [#208].
+* Documentation fixes [#212, #213].
+
+Contributors to this release:
+- Ashton Eby
+- Francesco Galuppi
+
 2.0.0
 =====
 
@@ -28,7 +40,7 @@ development cycle.
 * Build system fixes [#172].
 
 Contributors to this release:
-- Francesco Gialuppi
+- Francesco Galuppi
 - Antonio Muratore
 
 2.0.0-alpha.1

@@ -18,7 +18,8 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-
+import * as Tp from 'thingpedia';
+import * as qs from 'qs';
 import express from 'express';
 const router = express.Router();
 
@@ -87,11 +88,29 @@ router.post('/delete', (req, res, next) => {
 });
 
 router.get('/oauth2/:kind', (req, res, next) => {
-    const kind = req.params.kind;
+    Promise.resolve().then(async () => {
+        const kind = req.params.kind;
 
-    const redirect = encodeURIComponent(req.app.genie.platform.getOrigin() + Config.BASE_URL);
-    const url = Config.CLOUD_SYNC_URL + `/proxy?redirect=${redirect}&kind=${kind}`;
-    res.redirect(url);
+        const origin = req.app.genie.platform.getOrigin();
+        let redirect;
+        if (Config.IN_HOME_ASSISTANT_ADDON) {
+            const info = JSON.parse(await Tp.Helpers.Http.get('http://supervisor/addons/self/info', {
+                auth: 'Bearer ' + process.env.SUPERVISOR_TOKEN
+            }));
+
+            // redirect to the Home Assistant add-on page, with a crafted query string
+            // the query string will be read by JS code inside the Almond page, which will perform
+            // the actual redirect
+            redirect = origin + '/hassio/ingress/' + info.data.slug + '?'
+                + qs.stringify({ almond_redirect: Config.BASE_URL + '/devices/oauth2/callback/' + kind });
+        } else {
+            // redirect directly to the add-on page
+            redirect = origin + Config.BASE_URL;
+        }
+
+        const url = Config.CLOUD_SYNC_URL + `/proxy?` + qs.stringify({ redirect, kind });
+        res.redirect(url);
+    }).catch(next);
 });
 
 router.get('/oauth2/callback/:kind', (req, res, next) => {

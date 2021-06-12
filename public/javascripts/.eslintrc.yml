@@ -4,6 +4,7 @@ env:
 globals:
   $: false
 extends: 'eslint:recommended'
+root: true
 rules:
   indent: off
   linebreak-style:

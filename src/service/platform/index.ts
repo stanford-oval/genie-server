@@ -594,7 +594,7 @@ export class ServerPlatform extends Tp.BasePlatform {
     }
 
     getOAuthRedirect() {
-        return Config.CLOUD_SYNC_URL;
+        return Config.OAUTH_REDIRECT_URL;
     }
 
     getOrigin() : string {
