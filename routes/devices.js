@@ -107,7 +107,7 @@ router.get('/oauth2/:kind', (req, res, next) => {
                 + qs.stringify({ almond_redirect: Config.BASE_URL + '/devices/oauth2/callback/' + kind });
         } else {
             // redirect directly to the add-on page
-            redirect = encodeURIComponent(origin + Config.BASE_URL);
+            redirect = origin + Config.BASE_URL;
         }
 
         const url = Config.CLOUD_SYNC_URL + `/proxy?` + qs.stringify({ redirect, kind });
