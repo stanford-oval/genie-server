@@ -80,7 +80,7 @@ export const ENABLE_DB_ENCRYPTION = false;
  */
 export const IN_HOME_ASSISTANT_ADDON = !!process.env.THINGENGINE_IN_HOME_ASSISTANT_ADDON;
 
-export const NLP_URL = process.env.THINGENGINE_NLP_URL || 'https://nlp.almond.stanford.edu';
-export const THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://thingpedia.stanford.edu/thingpedia';
-export const CLOUD_SYNC_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://almond.stanford.edu';
-export const OAUTH_REDIRECT_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://thingengine.stanford.edu';
+export const NLP_URL = process.env.THINGENGINE_NLP_URL || 'https://nlp-staging.almond.stanford.edu';
+export const THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://dev.almond.stanford.edu/thingpedia';
+export const CLOUD_SYNC_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://dev.almond.stanford.edu';
+export const OAUTH_REDIRECT_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://dev.almond.stanford.edu';
