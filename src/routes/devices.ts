@@ -29,7 +29,7 @@ import * as Config from '../config';
 router.use(user.requireLogIn);
 
 router.get('/', (req, res, next) => {
-    res.render('devices_list', { page_title: 'Almond - My Skills',
+    res.render('devices_list', { page_title: 'Genie - My Skills',
                                  devices: req.app.genie.getDeviceInfos() });
 });
 
@@ -40,7 +40,7 @@ router.get('/create', (req, res, next) => {
         return;
     }
 
-    res.render('devices_create', { page_title: req._("Almond - Configure device"),
+    res.render('devices_create', { page_title: req._("Genie - Configure device"),
                                    klass: req.query.class,
                                    ownTier: 'cloud',
                                  });
@@ -51,7 +51,7 @@ router.post('/create', (req, res, next) => {
     Promise.resolve().then(async () => {
         if (typeof req.body['kind'] !== 'string' ||
             req.body['kind'].length === 0) {
-            res.status(400).render('error', { page_title: "Almond - Error",
+            res.status(400).render('error', { page_title: "Genie - Error",
                                               message: "Missing or invalid parameter kind" });
             return;
         }
@@ -79,7 +79,7 @@ router.post('/delete', (req, res, next) => {
         const removed = await engine.deleteDevice(id);
 
         if (!removed) {
-            res.status(404).render('error', { page_title: "Almond - Error",
+            res.status(404).render('error', { page_title: "Genie - Error",
                                               message: "Not found." });
             return;
         }
@@ -99,7 +99,7 @@ router.get('/oauth2/:kind', (req, res, next) => {
             }));
 
             // redirect to the Home Assistant add-on page, with a crafted query string
-            // the query string will be read by JS code inside the Almond page, which will perform
+            // the query string will be read by JS code inside the Genie page, which will perform
             // the actual redirect
             redirect = origin + '/hassio/ingress/' + info.data.slug + '?'
                 + qs.stringify({ almond_redirect: Config.BASE_URL + '/devices/oauth2/callback/' + kind });
@@ -121,7 +121,7 @@ router.get('/oauth2/callback/:kind', (req, res, next) => {
         res.redirect(Config.BASE_URL + '/devices?class=online');
     }).catch((e) => {
         console.log(e.stack);
-        res.status(400).render('error', { page_title: "Almond - Error",
+        res.status(400).render('error', { page_title: "Genie - Error",
                                           message: e.message });
     });
 });

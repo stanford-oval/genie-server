@@ -18,7 +18,6 @@
 //
 // Author: Silei Xu <silei@cs.stanford.edu>
 
-import * as fs from 'fs';
 import express from 'express';
 
 import * as user from '../util/user';
@@ -114,53 +113,20 @@ router.post('/comment', (req, res, next) => {
     }).catch(next);
 });
 
-router.post('/save', (req, res, next) => {
-    const engine = req.app.genie;
-
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation(req.body.id);
-    }).then((conversation) => {
-        if (!conversation) {
-            res.status(404);
-            return res.json({ error: 'No conversation found' });
-        } else {
-            return conversation.saveLog().then(() => res.json({ status:'ok' }));
-        }
-    }).catch(next);
-});
-
 router.get('/log/:id.txt', (req, res, next) => {
     const engine = req.app.genie;
 
     Promise.resolve().then(() => {
-        return engine.assistant.getConversation((req.params as any).id);
-    }).then((conversation) => {
-        if (!conversation || !conversation.log) {
+        const conversation = engine.assistant.getConversation((req.params as any).id);
+        if (!conversation) {
             res.status(404);
-            res.json({ error: 'No conversation found' });
-        } else {
-            res.set('Content-Type', 'text/plain');
-            res.set('Content-Disposition', `attachment; filename="log-${conversation.id}.txt"`);
-            fs.createReadStream(conversation.log).pipe(res);
+            res.send('No conversation found');
+            return;
         }
-    }).catch(next);
-});
 
-router.get('/log/:id', (req, res, next) => {
-    const engine = req.app.genie;
-
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation(req.params.id);
-    }).then((conversation) => {
-        if (!conversation || !conversation.log) {
-            res.status(404);
-            res.json({ error: 'No conversation found' });
-        } else {
-            res.json({
-                status: 'ok',
-                log: fs.readFileSync(conversation.log, 'utf-8')
-            });
-        }
+        res.set('Content-Type', 'text/plain');
+        res.set('Content-Disposition', `attachment; filename="log-${conversation.id}.txt"`);
+        conversation.readLog().pipe(res);
     }).catch(next);
 });
 

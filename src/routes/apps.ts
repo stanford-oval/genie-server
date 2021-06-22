@@ -30,7 +30,7 @@ router.use(user.requireLogIn);
 router.get('/', (req, res, next) => {
     const engine = req.app.genie;
 
-    res.render('apps_list', { page_title: 'Almond - My Rules',
+    res.render('apps_list', { page_title: 'Genie - My Rules',
                               message: '',
                               csrfToken: req.csrfToken(),
                               apps: engine.getAppInfos() });
@@ -43,7 +43,7 @@ router.post('/delete', (req, res, next) => {
         const id = req.body.id;
         const deleted = await engine.deleteApp(id);
         if (!deleted) {
-            res.status(404).render('error', { page_title: "Almond - Error",
+            res.status(404).render('error', { page_title: "Genie - Error",
                                               message: "Not found." });
             return;
         }

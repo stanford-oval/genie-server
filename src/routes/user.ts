@@ -33,13 +33,13 @@ router.get('/configure', (req, res, next) => {
     if (user.isConfigured()) {
         res.status(400).render('error', {
             message: "User already configured",
-            page_title: "Almond - Error"
+            page_title: "Genie - Error"
         });
         return;
     }
     res.render('configure', {
         csrfToken: req.csrfToken(),
-        page_title: "Almond - Setup",
+        page_title: "Genie - Setup",
         errors: []
     });
 });
@@ -48,7 +48,7 @@ router.post('/configure', (req, res, next) => {
     if (user.isConfigured()) {
         res.status(400).render('error', {
             message: "User already configured",
-            page_title: "Almond - Error"
+            page_title: "Genie - Error"
         });
         return;
     }
@@ -66,7 +66,7 @@ router.post('/configure', (req, res, next) => {
     } catch(e) {
         res.render('configure', {
             csrfToken: req.csrfToken(),
-            page_title: "Almond - Setup",
+            page_title: "Genie - Setup",
             errors: [e.message]
         });
         return;
@@ -83,7 +83,7 @@ router.post('/configure', (req, res, next) => {
     }).catch((error) => {
         res.render('configure', {
             csrfToken: req.csrfToken(),
-            page_title: "Almond - Setup",
+            page_title: "Genie - Setup",
             errors: [error.message]
         });
     });
@@ -93,7 +93,7 @@ router.get('/login', (req, res, next) => {
     res.render('login', {
         csrfToken: req.csrfToken(),
         errors: req.flash('error'),
-        page_title: "Almond - Login"
+        page_title: "Genie - Login"
     });
 });
 

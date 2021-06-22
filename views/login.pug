@@ -5,9 +5,9 @@ block page_name
 
 block content
   if isLocked
-    p.subtitle-msg=_("Your Almond is locked. Your must input your password to start it.")
+    p.subtitle-msg=_("Your Genie is locked. Your must input your password to start it.")
   else
-    p.subtitle-msg=_("You have been logged out. You must input your password again to access your Almond.")
+    p.subtitle-msg=_("You have been logged out. You must input your password again to access your Genie.")
 
   each error in errors
     div.alert.alert-danger.alert-dismissible.fade.in(role='alert')

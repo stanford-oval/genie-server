@@ -24,16 +24,16 @@ html
   body(data-developer-key=developerKey,data-thingpedia-url=Config.THINGPEDIA_URL,data-base-url=Config.BASE_URL,data-csrf-token=csrfToken)
     a#anch-top.anchor(href='#')
     nav.navbar-inverse.navbar.navbar-fixed-top(role="banner")
-      
+
       div.navbar-header
         button(class="navbar-toggle collapsed", data-toggle="collapse", data-target="#page-nav")
           span.sr-only Toggle navigation
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        span.navbar-brand.scroller.hidden-xs.hidden-sm 
+        span.navbar-brand.scroller.hidden-xs.hidden-sm
           img.logo_top(src=Config.BASE_URL + '/images/almond.png')
-          | Almond
+          | Genie
         span.navbar-brand.scroller.hidden-md.hidden-lg(aria-hidden='true')
           block page_name
 
@@ -58,7 +58,7 @@ html
           div.row
             div.col-xs-12
               p
-                small!= _("Almond is part of a research project of the <a href='https://oval.cs.stanford.edu'>Open Virtual Assistant Lab</a> at Stanford University.")
+                small!= _("Genie is part of a research project of the <a href='https://oval.cs.stanford.edu'>Open Virtual Assistant Lab</a> at Stanford University.")
               p
                 small
-                  != _("Almond is free software, distributed under the <a href='https://opensource.org/licenses/Apache-2.0'>Apache license, version 2.0</a>. ")
+                  != _("Genie is free software, distributed under the <a href='https://opensource.org/licenses/Apache-2.0'>Apache license, version 2.0</a>. ")
