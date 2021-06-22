@@ -4,10 +4,10 @@ block page_name
   = _("Initial Configuration")
 
 block content
-  h2= _("Welcome to Almond!")
+  h2= _("Welcome to Genie!")
 
   p.subtitle-conf-msg
-    = _("You must configure a password before you use your Almond.")
+    = _("You must configure a password before you use your Genie.")
     if Config.ENABLE_DB_ENCRYPTION
       = _("This password will be used to generate a secure encryption key to store your saved credentials.")
 
@@ -35,7 +35,7 @@ block content
               =_("I agree to grant consent to this research.")
     div.form-group
       button(type='submit').btn.btn-primary#configure-btn= _("Configure")
-    
+
 
 
 mixin consent_form
@@ -43,14 +43,14 @@ mixin consent_form
 
   div.consent-form
     p
-      = _("You are invited to participate in a research study on virtual assistants. With your consent, the Almond virtual assistant will record the commands you give it.")
-      = _("Recording the commands will allow Almond virtual assistant to improve its understanding of natural language. The collection is completely confidential, and personal data (such as emails and phone numbers) will be stripped automatically.")
+      = _("You are invited to participate in a research study on virtual assistants. With your consent, the Genie virtual assistant will record the commands you give it.")
+      = _("Recording the commands will allow Genie virtual assistant to improve its understanding of natural language. The collection is completely confidential, and personal data (such as emails and phone numbers) will be stripped automatically.")
       = _("You must be 18 or older to participate, and currently residing in the United States.")
 
     h3= _("Risks and Benefits")
     p
-      = _("We do not foresee any risk from this study. The benefits which may reasonably be expected to result from this study are that the open-source Almond virtual assistant improves over time. We cannot and do not guarantee or promise that you will receive any benefits from this study.")
-      = _("Your decision whether or not to participate in this study will not affect the functionality of the Almond virtual assistant service, or your ability to use it.")
+      = _("We do not foresee any risk from this study. The benefits which may reasonably be expected to result from this study are that the open-source Genie virtual assistant improves over time. We cannot and do not guarantee or promise that you will receive any benefits from this study.")
+      = _("Your decision whether or not to participate in this study will not affect the functionality of the Genie virtual assistant service, or your ability to use it.")
       = _("You will not receive any payment for your participation.")
 
     h3= _("Participant Rights")

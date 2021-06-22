@@ -98,7 +98,7 @@ function assertLoginRequired(request) {
         if (!err.detail || !err.code)
             throw err;
         assert.deepStrictEqual(err.code, 401);
-        assert(err.detail.indexOf('This Almond instance is configured to require login') >= 0);
+        assert(err.detail.indexOf('This Genie instance is configured to require login') >= 0);
     });
 }
 

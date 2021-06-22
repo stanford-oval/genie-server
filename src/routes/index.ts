@@ -28,7 +28,7 @@ import conversationHandler from './conversation';
 const router = express.Router();
 
 router.get('/', user.requireLogIn, (req, res, next) => {
-    res.render('conversation', { page_title: req._("Almond - Chat") });
+    res.render('conversation', { page_title: req._("Genie - Chat") });
 });
 
 router.use('/ws/conversation', (req, res, next) => {
@@ -44,7 +44,7 @@ router.ws('/ws/conversation', conversationHandler);
 
 router.get('/listen', user.requireLogIn, (req, res, next) => {
     res.render('listen', {
-        page_title: req._("Almond - Listen"),
+        page_title: req._("Genie - Listen"),
         csrfToken: req.csrfToken()
     });
 });
@@ -55,7 +55,7 @@ router.post('/listen', user.requireLogIn, (req, res, next) => {
 
     platform.speech!.wakeword();
     res.render('listen', {
-        page_title: req._("Almond - Listen"),
+        page_title: req._("Genie - Listen"),
         csrfToken: req.csrfToken()
     });
 });

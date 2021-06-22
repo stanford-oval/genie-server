@@ -8,7 +8,7 @@ block styles
   link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/conversation.css')
 
 block page_name
-  = _("Chat with Almond")
+  = _("Chat with Genie")
 
 block content
   div#chat_upper_container
@@ -26,11 +26,11 @@ block content
 
     div#toolbar
       div.form-inline
-        
+
         div.form-group#save-log
           i.far.fa-save#save-button
           span= _("Save Conversation Log")
-      
+
 
     div.modal#recording-save
       div.modal-dialog
@@ -41,12 +41,12 @@ block content
             p.small= _("Privacy warning: The log may include your account and device names, as well as the results from performing actions on your accounts.")
           div.new-button.modal-footer
             button.btn.btn-primary#recording-download= _("Download")
-            a(target='_blank',rel='noopener').btn.btn-primary#recording-share= _("Share with Almond Team")
+            a(target='_blank',rel='noopener').btn.btn-primary#recording-share= _("Share with Genie Team")
             button.btn.btn-default#recording-save-done= _("Done")
 
     div#conversation.single
       div#chat
-      
+
       div#input-block
         span(role='button').hidden#cancel
           span(aria-hidden='true').glyphicon.glyphicon-remove-circle
@@ -55,8 +55,8 @@ block content
           div.form-group.has-feedback#input-form-group
             label(for='#chat-input').sr-only= _("Command:")
             input(type='text', placeholder=_("Write your command or answer here"), value=command ? command : '').form-control#input
-    
-    div#hidden-container 
+
+    div#hidden-container
       div.help-block.hidden= _("Lost connection to the server.")
       div.almond-thinking.hidden
         span

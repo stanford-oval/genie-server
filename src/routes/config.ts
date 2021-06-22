@@ -49,7 +49,7 @@ function config(req : express.Request, res : express.Response, next : express.Ne
 
         const ipAddresses = Genie.IpAddressUtils.getServerAddresses(host);
         res.render('config', {
-            page_title: "Configure Almond",
+            page_title: "Configure Genie",
             csrfToken: req.csrfToken(),
             server: {
                 name: host, port: port,
