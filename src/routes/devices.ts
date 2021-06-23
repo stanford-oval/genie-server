@@ -117,7 +117,8 @@ router.get('/oauth2/callback/:kind', (req, res, next) => {
     const kind = req.params.kind;
     const engine = req.app.genie;
     Promise.resolve().then(async () => {
-        await engine.completeOAuth(kind, req.url, req.session as unknown as Record<string, string>);
+        const session = (req.query.proxy_session || {}) as Record<string, string>;
+        await engine.completeOAuth(kind, req.url, session);
         res.redirect(Config.BASE_URL + '/devices?class=online');
     }).catch((e) => {
         console.log(e.stack);
