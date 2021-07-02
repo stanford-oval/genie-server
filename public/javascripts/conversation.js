@@ -266,7 +266,7 @@ $(() => {
 
         var holder = $('<div>').addClass('col-xs-12 col-sm-6');
         var btn = $('<a>').addClass('message message-button new-msg-button btn btn-default')
-            .attr('href', url).attr("target", "_blank").attr("rel", "noopener").text(title);
+            .attr('href', baseUrl + url).attr("target", "_blank").attr("rel", "noopener").text(title);
         holder.append(btn);
         getGrid().append(holder);
         maybeScroll(holder);
