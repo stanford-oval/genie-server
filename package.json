@@ -50,7 +50,7 @@
     "@types/errorhandler": "^1.5.0",
     "@types/express": "^4.17.12",
     "@types/express-session": "^1.17.3",
-    "@types/express-ws": "^3.0.0",
+    "@types/express-ws": "^3.0.1",
     "@types/gettext-parser": "^4.0.1",
     "@types/gm": "^1.18.9",
     "@types/morgan": "^1.9.2",
