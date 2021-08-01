@@ -59,7 +59,7 @@
     "@types/passport-http-bearer": "^1.0.36",
     "@types/passport-local": "^1.0.33",
     "@types/passport-strategy": "^0.2.35",
-    "@types/q": "^1.5.4",
+    "@types/q": "^1.5.5",
     "@types/serve-static": "^1.13.9",
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.1",
