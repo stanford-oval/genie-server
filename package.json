@@ -54,7 +54,7 @@
     "@types/gettext-parser": "^4.0.1",
     "@types/gm": "^1.18.9",
     "@types/morgan": "^1.9.2",
-    "@types/node": "^15.12.5",
+    "@types/node": "^16.4.10",
     "@types/passport": "^1.0.6",
     "@types/passport-http-bearer": "^1.0.36",
     "@types/passport-local": "^1.0.33",
