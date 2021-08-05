@@ -1,7 +1,7 @@
 FROM docker.io/fedora:33
 
 # Install all deps in the standard repos
-RUN dnf -y install git zip unzip nodejs make gcc gcc-c++ gettext findutils
+RUN dnf -y install git zip unzip nodejs make gcc gcc-c++ gettext findutils wget
 
 RUN mkdir /opt/almond
 
