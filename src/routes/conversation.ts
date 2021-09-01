@@ -68,7 +68,7 @@ export default function conversationHandler(ws : WebSocket, req : express.Reques
             showWelcome: true,
             debug: true,
         });
-        await conversation.addOutput(delegate, true);
+        await conversation.addOutput(delegate, !req.query.skip_history);
         await conversation.startRecording();
         opened = true;
         ws.send(JSON.stringify({ type: 'id', id : conversation.id }));
