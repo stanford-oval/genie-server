@@ -67,6 +67,7 @@ export default function conversationHandler(ws : WebSocket, req : express.Reques
         const conversation = await engine.assistant.getOrOpenConversation(conversationId, {
             showWelcome: true,
             debug: true,
+            syncDevices: !!req.query.sync_devices
         });
         await conversation.addOutput(delegate, !req.query.skip_history);
         await conversation.startRecording();
