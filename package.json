@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.1",
-    "@types/connect-flash": "0.0.36",
+    "@types/connect-flash": "0.0.37",
     "@types/cookie-parser": "^1.4.2",
     "@types/csurf": "^1.11.2",
     "@types/errorhandler": "^1.5.0",
