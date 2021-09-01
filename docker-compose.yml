@@ -2,8 +2,9 @@ version: "3.7"
 services:
   web:
     build: .
-    volumes:
-      - ${XDG_RUNTIME_DIR}/pulse:/run/pulse
-      - /var/lib/almond-server:/var/lib/almond-server
+    # volumes:
+      # - ${XDG_RUNTIME_DIR}/pulse:/run/pulse
+      # - /var/lib/almond-server:/var/lib/almond-server
+      # - .:/opt/almond
     ports:
       - "3000:3000"

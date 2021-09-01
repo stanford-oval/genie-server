@@ -5,10 +5,11 @@
   "private": true,
   "scripts": {
     "start": "node dist/main.js",
+    "start:dev": "node --inspect=5858 -r ts-node/register ./src/main.ts",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx ./src ./tests",
     "test": "nyc ./tests/everything.sh",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "debug": "nodemon --legacy-watch --watch ./routes --watch ./util --exec ts-node src/main.js",
+    "debug": "nodemon",
     "prepare": "tsc --build tsconfig.json"
   },
   "resolutions": {},
@@ -80,5 +81,19 @@
       "tests/**",
       "coverage/**"
     ]
+  },
+  "nodemonConfig": {
+    "ignore": [
+      ".git",
+      "node_modules"
+    ],
+    "watch": [
+      "src"
+    ],
+    "exec": "npm run start:dev",
+    "ext": "ts,js",
+    "env": {
+      "NODE_ENV": "development"
+    }
   }
 }
