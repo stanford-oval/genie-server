@@ -34,7 +34,7 @@
     "serve-favicon": "^2.4.3",
     "thingpedia": "^2.10.0-alpha.2",
     "uuid": "^8.3.1",
-    "ws": "^7.5.4"
+    "ws": "^8.2.1"
   },
   "optionalDependencies": {
     "canberra": "^0.1.2",
