@@ -31,7 +31,13 @@ import conversationHandler from './conversation';
 
 const router = express.Router();
 
-router.use('/', passport.authenticate(['host-based', 'bearer']), user.requireLogIn);
+router.use('/', (req, res, next) => {
+    if (req.user) {
+        next();
+        return;
+    }
+    passport.authenticate('bearer')(req, res, next);
+ }, user.requireLogIn);
 
 router.post('/converse', (req, res, next) => {
     const command = req.body.command;
