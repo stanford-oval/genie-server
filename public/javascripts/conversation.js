@@ -323,6 +323,10 @@ $(() => {
             updateSpinner(false);
             return;
         }
+        if (parsed.type === 'hypothesis') {
+            $('#input').val(parsed.hypothesis);
+            return;
+        }
 
         if (parsed.id <= lastMessageId)
             return;
@@ -356,10 +360,6 @@ $(() => {
 
             case 'link':
                 linkMessage(parsed.title, parsed.url);
-                break;
-
-            case 'hypothesis':
-                $('#input').val(parsed.hypothesis);
                 break;
 
             case 'command':

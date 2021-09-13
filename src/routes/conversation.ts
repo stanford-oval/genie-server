@@ -30,8 +30,8 @@ class WebsocketAssistantDelegate implements Genie.DialogueAgent.ConversationDele
         this._ws = ws;
     }
 
-    async setHypothesis() {
-        // voice doesn't go through SpeechHandler, hence hypotheses don't go through here!
+    async setHypothesis(hypothesis : string) {
+        this._ws.send(JSON.stringify({ type: 'hypothesis', hypothesis }));
     }
 
     async setExpected(what : string|null) {
