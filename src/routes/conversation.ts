@@ -20,38 +20,11 @@
 
 import express from 'express';
 import * as Genie from 'genie-toolkit';
-import * as Tp from 'thingpedia';
 import WebSocket from 'ws';
-
-class WebsocketAssistantDelegate implements Genie.DialogueAgent.ConversationDelegate {
-    private _ws : WebSocket;
-
-    constructor(ws : WebSocket) {
-        this._ws = ws;
-    }
-
-    async setHypothesis(hypothesis : string) {
-        this._ws.send(JSON.stringify({ type: 'hypothesis', hypothesis }));
-    }
-
-    async setExpected(what : string|null) {
-        this._ws.send(JSON.stringify({ type: 'askSpecial', ask: what }));
-    }
-
-    async addDevice(uniqueId : string, state : Tp.BaseDevice.DeviceState) {
-        this._ws.send(JSON.stringify({ type: 'new-device', uniqueId, state }));
-    }
-
-    async addMessage(msg : Genie.DialogueAgent.Protocol.Message) {
-        this._ws.send(JSON.stringify(msg));
-    }
-}
 
 export default function conversationHandler(ws : WebSocket, req : express.Request, next : express.NextFunction) {
     Promise.resolve().then(async () => {
         const engine = req.app.genie;
-
-        const delegate = new WebsocketAssistantDelegate(ws);
 
         let opened = false;
         const conversationId = String(req.query.id || 'main');
@@ -61,39 +34,34 @@ export default function conversationHandler(ws : WebSocket, req : express.Reques
         });
         ws.on('close', () => {
             if (opened)
-                conversation.removeOutput(delegate);
+                wrapper.stop();
             opened = false;
         });
         const conversation = await engine.assistant.getOrOpenConversation(conversationId, {
             showWelcome: true,
             debug: true,
-            syncDevices: !!req.query.sync_devices
+            log: true
         });
-        await conversation.addOutput(delegate, !req.query.skip_history);
-        await conversation.startRecording();
+        const wrapper = new Genie.DialogueAgent.Protocol.WebSocketConnection(conversation, async (msg) => ws.send(JSON.stringify(msg)), {
+            syncDevices: !!req.query.sync_devices,
+            replayHistory: !req.query.skip_history
+        });
+        await wrapper.start();
         opened = true;
-        ws.send(JSON.stringify({ type: 'id', id : conversation.id }));
 
         ws.on('message', (data) => {
             Promise.resolve().then(() => {
                 const parsed = JSON.parse(String(data));
-                switch (parsed.type) {
-                case 'command':
-                    return conversation.handleCommand(parsed.text);
-                case 'parsed':
-                    return conversation.handleParsedCommand(parsed.json, parsed.title);
-                case 'tt':
-                    return conversation.handleThingTalk(parsed.code);
-                default:
-                    throw new Error('Invalid command type ' + parsed.type);
-                }
+                return wrapper.handle(parsed);
             }).catch((e) => {
-                console.error(e.stack);
-                ws.send(JSON.stringify({ type: 'error', error:e.message }));
+                // either the message didn't parse as json, or we had an error sending the error
+                // (ie the websocket is closed)
+                // eat the error and close the socket
+                ws.terminate();
             });
         });
     }).catch((e) => {
         console.error('Error in API websocket: ' + e.message);
-        ws.close();
+        ws.terminate();
     });
 }
