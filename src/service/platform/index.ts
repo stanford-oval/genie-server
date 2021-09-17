@@ -32,6 +32,7 @@ import Gettext from 'node-gettext';
 import * as path from 'path';
 import * as util from 'util';
 import * as Genie from 'genie-toolkit';
+import { Temporal } from '@js-temporal/polyfill';
 
 import * as _graphicsApi from './graphics';
 
@@ -328,7 +329,7 @@ export class ServerPlatform extends Tp.BasePlatform {
         this._locale = this._locale.split(/[-_.@]/).slice(0, 2).join('-');
         this._gettext.setLocale(this._locale);
 
-        this._timezone = process.env.TZ!;
+        this._timezone = Temporal.Now.timeZone().id;
         this._prefs = new Tp.Helpers.FilePreferences(this._filesDir + '/prefs.db');
         this._cacheDir = getCacheDir();
         safeMkdirSync(this._cacheDir);
