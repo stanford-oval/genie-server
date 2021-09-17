@@ -37,6 +37,22 @@ export default function conversationHandler(ws : WebSocket, req : express.Reques
                 wrapper.stop();
             opened = false;
         });
+
+        let initQueue : any[] = [];
+        ws.on('message', (data) => {
+            Promise.resolve().then(async () => {
+                const parsed = JSON.parse(String(data));
+                if (opened)
+                    await wrapper.handle(parsed);
+                else
+                    initQueue.push(parsed);
+            }).catch((e) => {
+                // either the message didn't parse as json, or we had an error sending the error
+                // (ie the websocket is closed)
+                // eat the error and close the socket
+                ws.terminate();
+            });
+        });
         const conversation = await engine.assistant.getOrOpenConversation(conversationId, {
             showWelcome: true,
             debug: true,
@@ -47,19 +63,11 @@ export default function conversationHandler(ws : WebSocket, req : express.Reques
             replayHistory: !req.query.skip_history
         });
         await wrapper.start();
+        for (const msg of initQueue)
+            await wrapper.handle(msg);
         opened = true;
+        initQueue = [];
 
-        ws.on('message', (data) => {
-            Promise.resolve().then(() => {
-                const parsed = JSON.parse(String(data));
-                return wrapper.handle(parsed);
-            }).catch((e) => {
-                // either the message didn't parse as json, or we had an error sending the error
-                // (ie the websocket is closed)
-                // eat the error and close the socket
-                ws.terminate();
-            });
-        });
     }).catch((e) => {
         console.error('Error in API websocket: ' + e.message);
         ws.terminate();
