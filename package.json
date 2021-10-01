@@ -67,7 +67,7 @@
     "coveralls": "^3.1.1",
     "eslint": "^7.32.0",
     "form-data": "^4.0.0",
-    "nodemon": "^2.0.12",
+    "nodemon": "^2.0.13",
     "nyc": "^15.1.0",
     "parse5": "^6.0.1",
     "selenium-webdriver": "^4.0.0-rc-1",
