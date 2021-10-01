@@ -4,7 +4,7 @@ FROM docker.io/fedora:33
 RUN dnf -y module install nodejs:12 && \
     dnf -y install git curl pulseaudio-libs-devel zip unzip nodejs make \
                    gcc gcc-c++ gettext libcanberra-devel atlas-devel blas-devel \
-                   python2 findutils
+                   python2 findutils wget
 
 RUN mkdir /opt/almond
 

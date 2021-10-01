@@ -2,20 +2,48 @@ branches:
   except:
   - "/^wip/"
 language: node_js
-dist: bionic
+dist: focal
 addons:
   firefox: latest-esr
-node_js:
-- '12'
-before_install:
-- mkdir geckodriver/
-- wget https://github.com/mozilla/geckodriver/releases/download/v0.22.0/geckodriver-v0.22.0-linux64.tar.gz
-- tar xvf geckodriver-v0.22.0-linux64.tar.gz -C geckodriver/
-- export PATH="`pwd`/cvc4:`pwd`/geckodriver:$PATH"
-- sudo apt-get update -q -y
-- sudo apt-get install -y pulseaudio graphicsmagick libpulse-dev libcanberra-dev libatlas-base-dev unzip
-- pulseaudio --start
-script:
-- npm run lint
-- LOCALE="en-US" TZ="America/Los_Angeles" npm test
-after_success: npm run coverage
+node_js: '12'
+services:
+- docker
+
+stages:
+  - test
+  - name: docker
+    if: type = push AND branch = master AND repo = stanford-oval/almond-server
+jobs:
+  include:
+    - name: Test
+      stage: test
+      before_install:
+      - mkdir geckodriver/
+      - wget https://github.com/mozilla/geckodriver/releases/download/v0.22.0/geckodriver-v0.22.0-linux64.tar.gz
+      - tar xvf geckodriver-v0.22.0-linux64.tar.gz -C geckodriver/
+      - export PATH="`pwd`/cvc4:`pwd`/geckodriver:$PATH"
+      - sudo apt-get update -q -y
+      - sudo apt-get install -y pulseaudio graphicsmagick libpulse-dev libcanberra-dev libatlas-base-dev unzip
+      - pulseaudio --start
+      script:
+      - npm run lint
+      - LOCALE="en-US" TZ="America/Los_Angeles" npm test
+      after_success: npm run coverage
+    - name: Docker (portable)
+      stage: docker
+      install:
+      - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      script:
+      - docker build -f Dockerfile.portable -t stanfordoval/almond-server:latest-portable .
+      after_success:
+      - docker push stanfordoval/almond-server:latest-portable
+    - name: Docker
+      stage: docker
+      install:
+      - mkdir -vp ~/.docker/cli-plugins/
+      - curl --silent -L "https://github.com/docker/buildx/releases/download/v0.3.0/buildx-v0.3.0.linux-amd64" > ~/.docker/cli-plugins/docker-buildx
+      - chmod a+x ~/.docker/cli-plugins/docker-buildx
+      - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      - docker buildx create --use
+      script:
+      - docker buildx build --platform linux/amd64 -t stanfordoval/almond-server:latest --push .
