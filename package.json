@@ -27,7 +27,7 @@
     "gm": "^1.23.1",
     "morgan": "^1.8.2",
     "node-gettext": "^3.0.0",
-    "passport": "^0.4.0",
+    "passport": "^0.5.0",
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.0.0",
     "pug": "^3.0.2",
