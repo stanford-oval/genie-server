@@ -49,7 +49,7 @@ import type webrtcvad_ from 'webrtcvad';
 let webrtcvad : typeof webrtcvad_|null = null;
 
 // FIXME
-import Builtins from 'genie-toolkit/dist/lib/engine/devices/builtins';
+import * as Builtins from 'genie-toolkit/dist/lib/engine/devices/builtins';
 import ThingEngineServerDevice from './thingengine.server';
 
 import * as Config from '../../config';
@@ -352,7 +352,7 @@ export class ServerPlatform extends Tp.BasePlatform {
         // before PairedEngineManager calls getPlatformDevice(), which can result in loading
         // the device as unsupported (and that would be bad)
         // to avoid that, we inject it eagerly here
-        (Builtins as any)[this._serverDev.kind] = this._serverDev;
+        (Builtins as any).modules[this._serverDev.kind] = this._serverDev;
     }
 
     async init() {
