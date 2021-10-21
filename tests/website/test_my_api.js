@@ -39,7 +39,7 @@ async function testMyApiCreateGetApp(auth) {
     }), { auth, dataContentType: 'application/json' }));
 
     assert(result.uniqueId.startsWith('uuid-'));
-    assert.strictEqual(result.description, 'Get get data on test with count 2 and size 10 byte.');
+    assert.strictEqual(result.description, 'Get get data on test with count 2 and size 10 bytes.');
     assert.strictEqual(result.code, '@org.thingpedia.builtin.test.get_data(count=2, size=10byte);');
     assert.strictEqual(result.icon, 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test');
     assert.deepStrictEqual(result.errors, []);
@@ -82,7 +82,7 @@ async function testMyApiCreateWhenApp(auth) {
     }), { auth, dataContentType: 'application/json' }));
 
     assert(result.uniqueId.startsWith('uuid-'));
-    assert.strictEqual(result.description, 'Notify me when there are new get data on test with size 10 byte.');
+    assert.strictEqual(result.description, 'Notify me when there are new get data on test with size 10 bytes.');
     assert.strictEqual(result.code, 'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));');
     assert.strictEqual(result.icon, 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test');
     assert.deepStrictEqual(result.results, []);
@@ -132,7 +132,7 @@ async function testMyApiListApps(auth, uniqueId) {
     assert.deepStrictEqual(listResult, [{
         uniqueId,
         name: 'Test',
-        description: 'Notify me when there are new get data on test with size 10 byte.',
+        description: 'Notify me when there are new get data on test with size 10 bytes.',
         error: null,
         code: 'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));',
         icon: 'org.thingpedia.builtin.test',
@@ -144,7 +144,7 @@ async function testMyApiListApps(auth, uniqueId) {
     assert.deepStrictEqual(getResult, {
         uniqueId,
         name: 'Test',
-        description: 'Notify me when there are new get data on test with size 10 byte.',
+        description: 'Notify me when there are new get data on test with size 10 bytes.',
         error: null,
         code: 'monitor(@org.thingpedia.builtin.test.get_data(size=10byte));',
         icon: 'org.thingpedia.builtin.test',
