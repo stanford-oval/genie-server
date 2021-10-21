@@ -49,7 +49,7 @@ import type webrtcvad_ from 'webrtcvad';
 let webrtcvad : typeof webrtcvad_|null = null;
 
 // FIXME
-import Builtins from 'genie-toolkit/dist/lib/engine/devices/builtins';
+import { modules as Builtins } from 'genie-toolkit/dist/lib/engine/devices/builtins';
 import ThingEngineServerDevice from './thingengine.server';
 
 import * as Config from '../../config';
