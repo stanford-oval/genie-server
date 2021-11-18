@@ -18,7 +18,6 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-import * as crypto from 'crypto';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import ConfigParser from 'configparser';
@@ -57,15 +56,8 @@ export default class ClientManager {
 
         if (Config.HOST_BASED_AUTHENTICATION === 'disabled') {
             config.set('general', 'auth_mode', 'bearer');
-
             const prefs = platform.getSharedPreferences();
-            let accessToken = prefs.get('access-token') as string|undefined;
-            if (accessToken === undefined) {
-                accessToken = crypto.randomBytes(32).toString('hex');
-                prefs.set('access-token', accessToken);
-            }
-
-            config.set('general', 'accessToken', accessToken);
+            config.set('general', 'accessToken', prefs.get('access-token'));
         } else {
             config.set('general', 'auth_mode', 'none');
         }

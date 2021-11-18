@@ -20,6 +20,7 @@
 
 // Server platform
 
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as Tp from 'thingpedia';
@@ -181,6 +182,11 @@ export class ServerPlatform extends Tp.BasePlatform {
 
         this._timezone = Temporal.Now.timeZone().id;
         this._prefs = new Tp.Helpers.FilePreferences(this._filesDir + '/prefs.db');
+        let accessToken = this._prefs.get('access-token') as string|undefined;
+        if (accessToken === undefined) {
+            accessToken = crypto.randomBytes(32).toString('hex');
+            this._prefs.set('access-token', accessToken);
+        }
         this._cacheDir = getCacheDir();
         safeMkdirSync(this._cacheDir);
 
