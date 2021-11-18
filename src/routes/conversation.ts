@@ -34,7 +34,7 @@ export default function conversationHandler(ws : WebSocket, req : express.Reques
         });
         ws.on('close', () => {
             if (opened)
-                wrapper.stop();
+                wrapper.destroy();
             opened = false;
         });
 
