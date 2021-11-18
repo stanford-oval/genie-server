@@ -1,4 +1,4 @@
-class @org.thingpedia.builtin.thingengine.server extends @org.thingpedia.iot.speaker
+class @org.thingpedia.builtin.thingengine.server
 #_[thingpedia_name="Almond Smart Speaker"]
 #_[thingpedia_description="Commands that are specific to using Almond as a smart-speaker device."]
 #_[name="Almond Smart Speaker"]

@@ -100,9 +100,9 @@ async function testMyApiCreateWhenApp(auth) {
                 assert.deepStrictEqual(parsed, {
                     result: {
                         appId: result.uniqueId,
-                        raw: { data: '!!!!!!!!!!', size: 10 },
+                        raw: { data: '""""""""""', size: 10 },
                         type: 'org.thingpedia.builtin.test:get_data',
-                        formatted: [{ type: 'text', text: 'Notification from Test: the answer is !!!!!!!!!!' }],
+                        formatted: [{ type: 'text', text: 'Notification from Test: the answer is """""""""".' }],
                         icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test'
                     }
                 });
@@ -110,9 +110,9 @@ async function testMyApiCreateWhenApp(auth) {
                 assert.deepStrictEqual(parsed, {
                     result: {
                         appId: result.uniqueId,
-                        raw: { data: '""""""""""', size: 10 },
+                        raw: { data: '##########', size: 10 },
                         type: 'org.thingpedia.builtin.test:get_data',
-                        formatted: [{ type: 'text', text: 'Notification from Test: the answer is """""""""".' }],
+                        formatted: [{ type: 'text', text: 'Notification from Test: the answer is ##########.' }],
                         icon: 'https://thingpedia.stanford.edu/thingpedia/api/v3/devices/icon/org.thingpedia.builtin.test'
                     }
                 });
@@ -315,6 +315,11 @@ async function testMyApiConverse(auth) {
             type: 'text',
             text: 'The answer is foofoo.',
             icon: 'org.thingpedia.builtin.test'
+        }, {
+            id: 5,
+            type: 'text',
+            text: 'foofoo',
+            icon: 'org.thingpedia.builtin.test'
         }]
     });
 
@@ -329,11 +334,11 @@ async function testMyApiConverse(auth) {
     assert.deepStrictEqual(result2, {
         askSpecial: null,
         messages: [{
-            id: 5,
+            id: 6,
             type: 'command',
             command: 'yes',
         }, {
-            id: 6,
+            id: 7,
             type: 'text',
             text: 'Sorry, I did not understand that. Can you rephrase it?',
             icon: 'org.thingpedia.builtin.test'
