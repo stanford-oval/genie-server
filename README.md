@@ -4,23 +4,25 @@
 
 ## End User Programmable Virtual Assistants
 
-This repository contains home server version of Genie, the end user programmable
-assistant. It is a single-user version, suitable for running on low-power
-devices and smart speakers.
+This repository contains the standalone version of Genie, the end user programmable
+assistant. It is a single-user version, suitable for running on home servers and
+smart speakers.
 
 Genie is a research project from the Stanford University Open Virtual Assistant Lab.
 You can find more information at <https://oval.cs.stanford.edu>.
 
-## Running almond-server
+## Running Genie standalone
 
-The recommended way to run almond-server is through [podman](https://podman.io/), a replacement for [docker](https://docs.docker.com/install/) that allows
+The recommended way to run Genie is through [podman](https://podman.io/), a replacement for [docker](https://docs.docker.com/install/) that allows
 the container to run as your regular user (and thus access PulseAudio from your normal session). You can find the installation instructions [here](https://podman.io/getting-started/installation).
+If you use regular docker rather than podman, audio support might not work.
 
 To run, use the command:
 ```bash
-podman run --name almond -p 3000:3000 \
+podman run --name genie -p 3000:3000 \
     -v /dev/shm:/dev/shm \
     -v $XDG_RUNTIME_DIR/pulse:/run/pulse \
+    -e PULSE_SERVER=unix:/run/pulse/native \
     --security-opt label=disable \
     docker.io/stanfordoval/almond-server
 ```
@@ -29,22 +31,14 @@ You can now navigate to [127.0.0.1:3000](http://127.0.0.1:3000) to access Genie,
 
 To manage the container later, you can use:
 ```bash
-podman start almond # start the container again
-podman stop almond # stop the container
-podman logs almond # look at the most recent logs of a running container
-```
-
-### I am a Mac!
-
-Voice support is only available on Linux. On Mac or Windows, you can use the following docker command:
-
-```bash
-docker run --name almond -p 3000:3000 stanfordoval/almond-server:latest-portable
+podman start genie # start the container again
+podman stop genie # stop the container
+podman logs genie # look at the most recent logs of a running container
 ```
 
 ## Development setup
 
-To develop almond-server, you should clone this repository, then install the dependencies with:
+To develop genie-server, you should clone this repository, then install the dependencies with:
 
 ```bash
 dnf -y install nodejs gettext make gcc-c++ GraphicsMagick zip unzip # Fedora/RHEL
@@ -56,11 +50,6 @@ You can then build the repository with:
 npm install
 ```
 
-This will only install the minimal set of dependencies, and will not install any voice support. To enable voice, you must also run (Linux only):
-```
-dnf -y install pulseaudio pulseaudio-libs-devel libcanberra-devel blas-devel atlas-devel sound-theme-freedesktop # Fedora/RHEL
-apt -y install pulseaudio libpulse-dev libcanberra-dev libatlas-base-dev sound-theme-freedesktop # Ubuntu/Debian
-```
-then run `npm install` again to pick up the new dependencies.
+This will only install the minimal set of dependencies, and will not install any voice support. To enable voice, you must also install [genie-client-cpp](https://github.com/stanford-oval/genie-client-cpp).
 
-After installing the dependencies locally, the server can be started using `npm start`.
+After installing the dependencies locally, the server can be started using `npm start`. The server is accessible on port 3000.
