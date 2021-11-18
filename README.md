@@ -23,6 +23,7 @@ podman run --name genie -p 3000:3000 \
     -v /dev/shm:/dev/shm \
     -v $XDG_RUNTIME_DIR/pulse:/run/pulse \
     -e PULSE_SERVER=unix:/run/pulse/native \
+    -v $XDG_CONFIG_HOME/genie-server:/var/lib/genie-server \
     --security-opt label=disable \
     docker.io/stanfordoval/almond-server
 ```
