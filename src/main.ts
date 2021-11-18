@@ -20,12 +20,10 @@
 
 process.on('unhandledRejection', (up) => { throw up; });
 
-import * as child_process from 'child_process';
 import * as Genie from 'genie-toolkit';
-import * as stream from 'stream';
 
 import WebFrontend from './frontend';
-import type { ServerPlatform, SoundEffectsApi } from './service/platform';
+import type { ServerPlatform } from './service/platform';
 import platform from './service/platform';
 
 import * as Config from './config';
@@ -43,7 +41,6 @@ function handleStop() {
 
 const DEBUG = false;
 
-const HOTWORD_DETECTED_ID = 1;
 async function init(platform : ServerPlatform) {
     _engine = new Genie.AssistantEngine(platform, {
         cloudSyncUrl: Config.CLOUD_SYNC_URL,
@@ -61,69 +58,10 @@ async function init(platform : ServerPlatform) {
         inactivityTimeout: 30000, // pick a low inactivity timeout to turn off the microphone
         contextResetTimeout: 30000,
     });
-
-    if (platform.hasCapability('sound')) {
-        const speech = new Genie.SpeechHandler(conversation, platform, {
-            nlUrl: Config.NLP_URL
-        });
-        platform.speech = speech;
-
-        let play : stream.Writable|null;
-        const ensureNullPlayback = () => {
-            if (play)
-                return;
-            play = platform.getCapability('sound')!.createPlaybackStream({
-                format: 'S16LE',
-                rate: 16000,
-                channels: 1,
-                stream: 'genie-voice-null',
-                properties: {
-                    'media.role': 'voice-assistant',
-                    'filter.want': 'echo-cancel',
-                }
-            });
-        };
-
-        const stopNullPlayback = () => {
-            if (play) {
-                play.end();
-                play = null;
-            }
-        };
-
-        speech.on('wakeword', (hotword) => {
-            child_process.spawn('xset', ['dpms', 'force', 'on']).on('error', (err) => {
-                console.error(`Failed to wake up the screen: ${err.message}`);
-            });
-            ensureNullPlayback();
-         });
-
-        speech.on('no-match', stopNullPlayback);
-        speech.on('match', stopNullPlayback);
-
-        const soundEffects = platform.getCapability('sound-effects') as SoundEffectsApi;
-        if (soundEffects) {
-            speech.on('wakeword', (hotword) => {
-                soundEffects.play('message-new-instant', HOTWORD_DETECTED_ID).catch((e : Error) => {
-                    console.error(`Failed to play hotword detection sound: ${e.message}`);
-                });
-            });
-
-            speech.on('no-match', () => {
-                soundEffects.play('dialog-warning', HOTWORD_DETECTED_ID).catch((e : Error) => {
-                    console.error(`Failed to play hotword no-match sound: ${e.message}`);
-                });
-            });
-        }
-
-        speech.start();
-    }
     await conversation.start();
 }
 
 async function main() {
-    await platform.init();
-
     process.on('SIGINT', handleStop);
     process.on('SIGTERM', handleStop);
 
