@@ -20,7 +20,6 @@
 
 import Q from 'q';
 import express from 'express';
-import * as Genie from 'genie-toolkit';
 
 import * as user from '../util/user';
 import platform from '../service/platform';
@@ -31,51 +30,38 @@ const router = express.Router();
 
 router.use(user.requireLogIn);
 
-function config(req : express.Request, res : express.Response, next : express.NextFunction,
+async function config(req : express.Request, res : express.Response, next : express.NextFunction,
                 userData : { username ?: string, password ?: string, error ?: unknown },
                 cloudData : { username ?: string, error ?: unknown }) {
-    return Genie.IpAddressUtils.getServerName().then((host) => {
-        const port = res.app.get('port');
-        const serverAddress = 'http://' +
-            (host.indexOf(':') >= 0 ? '[' + host + ']' : host)
-            + ':' + port + Config.BASE_URL + '/config';
+    const prefs = platform.getSharedPreferences();
+    const cloudId = prefs.get('cloud-id');
+    const authToken = prefs.get('auth-token');
 
-        const prefs = platform.getSharedPreferences();
-        const cloudId = prefs.get('cloud-id');
-        const authToken = prefs.get('auth-token');
-
-        const qrcodeTarget = 'https://thingengine.stanford.edu/qrcode/' + host + '/'
-            + port + '/' + authToken;
-
-        const ipAddresses = Genie.IpAddressUtils.getServerAddresses(host);
-        res.render('config', {
-            page_title: "Configure Genie",
-            csrfToken: req.csrfToken(),
-            server: {
-                name: host, port: port,
-                address: serverAddress,
-                extraAddresses: ipAddresses,
-                initialSetup: authToken === undefined
-            },
-            user: {
-                isConfigured: user.isConfigured(),
-                username: userData.username || req.user,
-                password: userData.password,
-                error: userData.error
-            },
-            cloud: {
-                isConfigured: cloudId !== undefined,
-                error: cloudData.error,
-                username: cloudData.username,
-                id: cloudId
-            },
-            settings: {
-                data_collection: prefs.get('sabrina-store-log') === 'yes',
-                voice_input: prefs.get('enable-voice-input') === undefined ? true : prefs.get('enable-voice-input'),
-                voice_output: prefs.get('enable-voice-output') === undefined ? true : prefs.get('enable-voice-output'),
-            },
-            qrcodeTarget: qrcodeTarget
-        });
+    res.render('config', {
+        page_title: "Configure Genie",
+        csrfToken: req.csrfToken(),
+        server: {
+            origin: res.app.genie.platform.getOrigin(),
+            initialSetup: authToken === undefined
+        },
+        user: {
+            isConfigured: user.isConfigured(),
+            username: userData.username || req.user,
+            password: userData.password,
+            error: userData.error
+        },
+        cloud: {
+            isConfigured: cloudId !== undefined,
+            error: cloudData.error,
+            username: cloudData.username,
+            id: cloudId
+        },
+        settings: {
+            data_collection: prefs.get('sabrina-store-log') === 'yes',
+            voice_input: prefs.get('enable-voice-input') === undefined ? true : prefs.get('enable-voice-input'),
+            voice_output: prefs.get('enable-voice-output') === undefined ? true : prefs.get('enable-voice-output'),
+        },
+        accessToken: prefs.get('access-token'),
     });
 }
 
