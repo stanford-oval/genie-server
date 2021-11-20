@@ -21,16 +21,21 @@
 process.on('unhandledRejection', (up) => { throw up; });
 
 import * as Genie from 'genie-toolkit';
+import which from 'which';
+import * as fs from 'fs';
 
 import WebFrontend from './frontend';
 import type { ServerPlatform } from './service/platform';
 import platform from './service/platform';
+import ClientManager from './service/client-manager';
 
 import * as Config from './config';
 
 let _stopped = false;
 let _running = false;
-let _engine : Genie.AssistantEngine, _frontend : WebFrontend;
+let _engine : Genie.AssistantEngine,
+    _frontend : WebFrontend,
+    _clientManager : ClientManager;
 
 function handleStop() {
     if (_running)
@@ -61,6 +66,26 @@ async function init(platform : ServerPlatform) {
     await conversation.start();
 }
 
+function spawnClient() {
+    if (!process.env.PULSE_SERVER && !fs.existsSync(process.env.XDG_RUNTIME_DIR + '/pulse/native')) {
+        console.log('Skipping audio because PulseAudio is not available');
+        return;
+    }
+
+    which('genie-client', (err, resolved) => {
+        if (err) {
+            console.log(`Skipping audio because genie-client-cpp is not found: ${err}`);
+            return;
+        }
+
+        // great, we found it!
+        _clientManager = new ClientManager(Number(process.env.PORT || 3000));
+        _clientManager.start().catch((e) => {
+            console.error(`Failed to spawn genie-client-cpp: ${e}`);
+        });
+    });
+}
+
 async function main() {
     process.on('SIGINT', handleStop);
     process.on('SIGTERM', handleStop);
@@ -89,9 +114,12 @@ async function main() {
             console.log('Ready');
             if (!_stopped) {
                 _running = true;
+                spawnClient();
                 await _engine.run();
             }
         } finally {
+            if (_clientManager)
+                _clientManager.stop();
             try {
                 await _engine.close();
             } catch(error) {

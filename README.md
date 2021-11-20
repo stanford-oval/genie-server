@@ -1,6 +1,6 @@
 # Genie For Home Servers
 
-[![Build Status](https://travis-ci.com/stanford-oval/almond-server.svg?branch=master)](https://travis-ci.com/stanford-oval/almond-server) [![Coverage Status](https://coveralls.io/repos/github/stanford-oval/almond-server/badge.svg?branch=master)](https://coveralls.io/github/stanford-oval/almond-server?branch=master) [![Dependency Status](https://david-dm.org/stanford-oval/almond-server/status.svg)](https://david-dm.org/stanford-oval/almond-server) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/stanford-oval/almond-server.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/stanford-oval/almond-server/context:javascript)
+[![Build Status](https://travis-ci.com/stanford-oval/genie-server.svg?branch=master)](https://travis-ci.com/stanford-oval/genie-server) [![Coverage Status](https://coveralls.io/repos/github/stanford-oval/genie-server/badge.svg?branch=master)](https://coveralls.io/github/stanford-oval/genie-server?branch=master) [![Dependency Status](https://david-dm.org/stanford-oval/genie-server/status.svg)](https://david-dm.org/stanford-oval/genie-server) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/stanford-oval/genie-server.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/stanford-oval/genie-server/context:javascript)
 
 ## End User Programmable Virtual Assistants
 
@@ -23,6 +23,7 @@ podman run --name genie -p 3000:3000 \
     -v /dev/shm:/dev/shm \
     -v $XDG_RUNTIME_DIR/pulse:/run/pulse \
     -e PULSE_SERVER=unix:/run/pulse/native \
+    -v $XDG_CONFIG_HOME/genie-server:/var/lib/genie-server \
     --security-opt label=disable \
     docker.io/stanfordoval/almond-server
 ```

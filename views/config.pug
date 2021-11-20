@@ -8,27 +8,42 @@ block page_name
   = _("Configuration")
 
 block content
+  div.modal.fade#add-new-ingress-token(role='dialog')
+    div.modal-dialog(role='document')
+      div.modal-content
+        div.modal-header
+          a.close(data-dismiss='modal', aria-label="Close")
+            span(aria-hidden='true') ×
+          h4.modal-title= _("New Client")
+        div.modal-body
+          p=_("To configure a new speaker to connect to this server, you need to create an access token for it.")
+          p= _("Enter a name for the speaker. The new access token will appear in the list of configured clients.")
+
+          form(action=Config.BASE_URL + '/config/ingress-token', method='post',data-toggle='validator')
+            input(type='hidden',name='_csrf',value=csrfToken)
+            div.form-group
+              label(for='ingress-token-name').control-label=_("Name")
+              input(type='name',name='name',required=true).form-control#ingress-token-name
+
+            div.new-button.form-group
+              button(type='submit').btn.btn-primary=_("Create")
+
   div.panel.panel-default.config-unit
     div.panel-heading
       h2.panel-title=_("Server")
     div.panel-body.panel-body-conf
-      p=_("The server is up and running at: ")
-        | #{server.name}
-        | ,
-        = _(" port")
-        | #{server.port}
-        | .
-
-      if server.extraAddresses.length > 0
-        p=_("The server is also reachable at: ")
-          | #{server.extraAddresses.join(', ')}
-          | .
+      p=_("The server is up and running at: %s").format(server.origin)
 
       //if server.initialSetup
         p.text-danger The server is in initial setup mode and thus open to
           |  all external access. Pair your phone now!
 
-      p=_("Access to this server requires a password.")
+      if Config.IN_HOME_ASSISTANT_ADDON
+        p=_("Access to this server is controlled by Home Assistant.")
+      else if Config.HOST_BASED_AUTHENTICATION !== 'insecure'
+        p=_("Access to this server requires a password.")
+      else
+        p.text-danger= _("This server has no authentication.")
       p.new-button
         a.btn.btn-primary(role='button',data-toggle='collapse',href='#change-server-password',aria-expanded=(user.error != null))
           =_("Change Password")
@@ -84,6 +99,34 @@ block content
 
         div.new-button.form-group
           button(type='submit').btn.btn-primary=_("Save")
+
+  div.panel.panel-default.config-unit
+    div.panel-heading
+      h2.panel-title= _("External Clients")
+
+    div.panel-body.panel-body-conf
+      p=_("Use the following configuration to connect a client to this server:")
+      p
+        strong=_("URL: ")
+        = `${server.origin}${Config.BASE_URL}/api/conversation`
+      if Config.IN_HOME_ASSISTANT_ADDON
+        p
+          strong= _("Authentication mode: ")
+          code home-assistant
+        p
+          strong= _("Access token: ")
+          =_("go to the Home Assistant UI to create a long-lived access token")
+      else
+        p
+          strong= _("Authentication mode: ")
+          code bearer
+        p
+          strong= _("Access token: ")
+          code= accessToken
+      p
+        strong= _("Conversation ID: ")
+        = _("associate a unique conversation ID for each client you wish to connect.")
+
 
   //-div.panel.panel-default.config-unit
     div.panel-heading

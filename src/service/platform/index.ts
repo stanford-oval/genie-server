@@ -20,6 +20,7 @@
 
 // Server platform
 
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as Tp from 'thingpedia';
@@ -31,9 +32,6 @@ import * as Genie from 'genie-toolkit';
 import { Temporal } from '@js-temporal/polyfill';
 
 import * as _graphicsApi from './graphics';
-
-// FIXME
-import { modules as Builtins } from 'genie-toolkit/dist/lib/engine/devices/builtins';
 import ThingEngineServerDevice from './thingengine.server';
 
 import * as Config from '../../config';
@@ -184,6 +182,11 @@ export class ServerPlatform extends Tp.BasePlatform {
 
         this._timezone = Temporal.Now.timeZone().id;
         this._prefs = new Tp.Helpers.FilePreferences(this._filesDir + '/prefs.db');
+        let accessToken = this._prefs.get('access-token') as string|undefined;
+        if (accessToken === undefined) {
+            accessToken = crypto.randomBytes(32).toString('hex');
+            this._prefs.set('access-token', accessToken);
+        }
         this._cacheDir = getCacheDir();
         safeMkdirSync(this._cacheDir);
 
@@ -197,12 +200,6 @@ export class ServerPlatform extends Tp.BasePlatform {
             class: fs.readFileSync(path.resolve(__dirname, '../../../data/thingengine.server.tt')).toString(),
             module: ThingEngineServerDevice
         };
-
-        // HACK: thingengine-core will try to load thingengine-own-desktop from the db
-        // before PairedEngineManager calls getPlatformDevice(), which can result in loading
-        // the device as unsupported (and that would be bad)
-        // to avoid that, we inject it eagerly here
-        (Builtins as any)[this._serverDev.kind] = this._serverDev;
     }
 
     get type() {
