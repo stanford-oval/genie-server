@@ -1,7 +1,5 @@
 FROM docker.io/debian:10
 
-ARG GENIE_CLIENT_CPP_VERSION=e6d11ea6582883ef74df68a884d87444f63a113b
-
 # Base env settings
 ENV LANG="en_US.utf8"
 
@@ -33,6 +31,8 @@ RUN apt-get update && \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         nodejs
+
+ARG GENIE_CLIENT_CPP_VERSION=a2e8146a92ac8f4dec14f150421b278313a21ada
 
 # Install genie-client
 RUN \
