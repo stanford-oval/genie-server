@@ -78,5 +78,8 @@
       "tests/**",
       "coverage/**"
     ]
+  },
+  "optionalDependencies": {
+    "pulseaudio2": "^0.5.2"
   }
 }
