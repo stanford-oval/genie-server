@@ -28,7 +28,10 @@ import platform from './platform';
 import * as Config from '../config';
 
 const MODULE_ROLE_DUCKING_ARGUMENTS = 'trigger_roles=voice-assistant ducking_roles=music volume=20% global=true';
-const MODULE_ECHO_CANCEL_ARGUMENTS = 'source_name=echosrc sink_name=echosink channels=2 rate=48000 aec_method=webrtc aec_args="analog_gain_control=0 digital_gain_control=1 agc_start_volume=255"';
+
+// FIXME reenable webrtc when Home Assistant enables it in the build of PulseAudio
+//const MODULE_ECHO_CANCEL_ARGUMENTS = 'source_name=echosrc sink_name=echosink channels=2 rate=48000 aec_method=webrtc aec_args="analog_gain_control=0 digital_gain_control=1 agc_start_volume=255"';
+const MODULE_ECHO_CANCEL_ARGUMENTS = 'source_name=echosrc sink_name=echosink rate=48000';
 
 /**
  * Manage a genie client running in the same container/machine as almond-server
