@@ -103,6 +103,7 @@ RUN \
         gettext \
         sudo \
         wget \
+        libpulse-dev \
     && rm -rf /opt/genie-server/node_modules \
     && npm config set unsafe-perm \
     && su genie-server -c 'npm ci' \
@@ -112,6 +113,7 @@ RUN \
         pkg-config \
         git \
         python-dev \
+        libpulse-dev \
     \
     && rm -rf \
         /opt/genie-server/.[!.]* \

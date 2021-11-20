@@ -21,8 +21,7 @@
 import * as path from 'path';
 import * as child_process from 'child_process';
 import ConfigParser from 'configparser';
-
-import type PulseAudio from 'pulseaudio2';
+import PulseAudio from 'pulseaudio2';
 
 import platform from './platform';
 
@@ -52,7 +51,7 @@ export default class ClientManager {
     }
 
     private async _loadPulseConfig() {
-        const client = new ((await import('pulseaudio2')).default)();
+        const client = new PulseAudio();
 
         const sinks = await client.sink();
         const hasEchoSink = sinks.some((s) => s.name === 'echosink');
