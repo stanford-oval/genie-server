@@ -26,9 +26,8 @@ block content
     each dev, i in devices
       div.col-lg-4.col-sm-6.col-xs-12
         div.panel.panel-default.installed-dev
-          div.content-head
-            a(href=Config.THINGPEDIA_URL + '/devices/by-id/' + dev.kind).panel-heading
-              h2.panel-title= dev.name
+          a(href=Config.THINGPEDIA_URL + '/devices/by-id/' + dev.kind).panel-heading.text-center
+            h2.panel-title= dev.name
           div.panel-body
             p.device-icon-small
               img(src=THINGPEDIA_URL + '/api/v3/devices/icon/' + dev.kind, alt="Icon for " + dev.name)
@@ -45,14 +44,20 @@ block content
                     input(type='hidden' name='id',value=dev.uniqueId)
                     input(type='hidden' name='_csrf',value=csrfToken)
                     if datasource
-                      button(type='submit').bottom-bar.fa.power-off
+                      button(type='submit').btn.btn-default
+                        span.fa.power-off
+                        span.sr-only= _("Disable")
                     else
-                      button(type='submit').bottom-bar.fa.fa-trash-alt
+                      button(type='submit').btn.btn-default
+                        span.fa.fa-trash-alt
+                        span.sr-only= _("Delete")
 
-                form.hidden.form-inline(action=Config.BASE_URL + '/devices/config' method="post").form-config
+                //-form.hidden.form-inline(action=Config.BASE_URL + '/devices/config' method="post").form-config
                   input(type='hidden' name='id',value=dev.uniqueId)
                   input(type='hidden' name='_csrf',value=csrfToken)
-                  button(type='submit').bottom-bar.fa.fa-cog
+                  button(type='submit').btn.btn-default.fa.fa-cog
   div.row
     div#back-top.hidden
-      a(href= '#anch_top').btn.btn-primary#bttop-button.fas.fa-arrow-circle-up
+      a(href='#page-title').btn.btn-primary
+        span.fas.fa-arrow-circle-up
+        span.sr-only=_("Scroll to top")

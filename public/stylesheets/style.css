@@ -226,7 +226,7 @@ pre code {
     font-size: 1.2em;
 }
 
-.panel {
+/*.panel {
     min-height: 13.9em;
     height: 100%;
     border-bottom-left-radius: 19px;
@@ -277,6 +277,7 @@ pre code {
     background-color: #d8d8d8 !important;
     color: #000;
 }
+*/
 
 .row.display-flex {
     display: flex;
@@ -297,6 +298,7 @@ pre code {
     margin-left: 15px;
 }
 
+/*
 #new-skills>a {
     font-weight: 600;
     font-size: 1.3em;
@@ -343,3 +345,4 @@ pre code {
     padding-top: 100px;
     margin-top: -100px;
 }
+*/
