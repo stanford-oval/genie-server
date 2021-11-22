@@ -8,7 +8,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx ./src ./tests",
     "test": "nyc ./tests/everything.sh",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "debug": "nodemon --legacy-watch --watch ./routes --watch ./util --exec ts-node src/main.js",
+    "debug": "nodemon --watch ./src --exec ts-node src/main.ts",
     "prepare": "tsc --build tsconfig.json"
   },
   "resolutions": {},
