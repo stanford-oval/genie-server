@@ -149,12 +149,12 @@ pre code {
     font-weight: 500;
 }
 
-.navbar-brand.hidden-sm {
+/*.navbar-brand.hidden-sm {
     font-weight: bold;
     line-height: 21px;
     height: 47px;
     font-size: 26px;
-}
+}*/
 
 .custom-btn {
     border-radius: 10px;
@@ -206,10 +206,10 @@ pre code {
     border-radius: 10px;
 }
 
-.logo_top {
-    width: 55px;
-    float: left;
+#logo {
+    height: 100%;
     margin-right: 10px;
+    display: inline;
 }
 
 .subtitle-msg {
