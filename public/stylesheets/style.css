@@ -8,15 +8,9 @@ body {
 }
 
 #page-body {
-    margin-top: 45px;
-    min-height: calc(100vh - 195px);
-    height: auto !important;
-}
-
-#page-body.container,
-#page-body.container-fluid {
+    margin-top: 60px;
     padding-bottom: 30px;
-    min-height: calc(100vh - 145px);
+    min-height: calc(100vh - 160px);
 }
 
 #page-title {
