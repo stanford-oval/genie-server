@@ -59,6 +59,7 @@ async function init(platform : ServerPlatform) {
     const conversation = _engine.assistant.openConversation('main', {
         showWelcome: true,
         debug: true,
+        log: true,
         deleteWhenInactive: false,
         inactivityTimeout: 30000, // pick a low inactivity timeout to turn off the microphone
         contextResetTimeout: 30000,

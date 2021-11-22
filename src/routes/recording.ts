@@ -26,38 +26,6 @@ const router = express.Router();
 
 router.use(user.requireLogIn);
 
-router.post('/start', (req, res, next) => {
-    const engine = req.app.genie;
-
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation(req.body.id);
-    }).then((conversation) => {
-        if (!conversation) {
-            res.status(404);
-            return res.json({ error: 'No conversation found' });
-        } else {
-            conversation.startRecording();
-            return res.json({ status: 'ok' });
-        }
-    }).catch(next);
-});
-
-router.post('/stop', (req, res, next) => {
-    const engine = req.app.genie;
-
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation(req.body.id);
-    }).then((conversation) => {
-        if (!conversation) {
-            res.status(404);
-            return res.json({ error: 'No conversation found' });
-        } else {
-            conversation.endRecording();
-            return res.json({ status:'ok' });
-        }
-    }).catch(next);
-});
-
 router.get('/status/:id', (req, res, next) => {
     const engine = req.app.genie;
 
