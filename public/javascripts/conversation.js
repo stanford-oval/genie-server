@@ -461,7 +461,7 @@ $(() => {
         $.get(baseUrl + '/recording/log/' + conversationId + '.txt').then((res) => {
             $('#recording-log').text(res);
             const email = 'oval-bug-reports@lists.stanford.edu';
-            const subject = 'Almond Conversation Log';
+            const subject = 'Genie Conversation Log';
             const body = encodeURIComponent(res);
             $('#recording-share').prop('href', `mailto:${email}?subject=${subject}&body=${body}`);
             $('#recording-save').modal('toggle');
@@ -469,7 +469,7 @@ $(() => {
     });
 
     $('#recording-download').click(() => {
-        window.open(baseUrl + '/recording/log/' + conversationId + '.txt', "Almond Conversation Log");
+        window.open(baseUrl + '/recording/log/' + conversationId + '.txt', "Genie Conversation Log");
     });
 
     $('#recording-save-done').click(() => {

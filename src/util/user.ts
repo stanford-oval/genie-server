@@ -1,6 +1,6 @@
 // -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
-// This file is part of Almond
+// This file is part of Genie
 //
 // Copyright 2016-2019 The Board of Trustees of the Leland Stanford Junior University
 //
@@ -190,8 +190,8 @@ export function requireLogIn(req : express.Request, res : express.Response, next
             res.redirect(Config.BASE_URL + '/user/configure');
         } else {
             res.status(401).render('error', {
-                page_title: "Almond - Error",
-                message: "You must complete the initial configuration of your Almond before you can perform this action."
+                page_title: "Genie - Error",
+                message: "You must complete the initial configuration of your Genie before you can perform this action."
             });
         }
     } else if (!req.user) {
@@ -202,7 +202,7 @@ export function requireLogIn(req : express.Request, res : express.Response, next
                 req.session.redirect_to = req.originalUrl;
             res.redirect(Config.BASE_URL + '/user/login');
         } else {
-            res.status(401).render('login_required', { page_title: "Almond - Error" });
+            res.status(401).render('login_required', { page_title: "Genie - Error" });
         }
     } else {
         next();

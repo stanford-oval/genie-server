@@ -1,6 +1,6 @@
 // -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
-// This file is part of Almond
+// This file is part of Genie
 //
 // Copyright 2018 The Board of Trustees of the Leland Stanford Junior University
 //
@@ -28,7 +28,7 @@ const WebKit = imports.gi.WebKit2;
 
 const BrowserWindow = GObject.registerClass(class BrowserWindow extends Gtk.ApplicationWindow {
     _init(app) {
-        super._init({ application: app, title: "Almond" });
+        super._init({ application: app, title: "Genie" });
 
         let webview = new WebKit.WebView({
             web_context: app.webContext,

@@ -1,6 +1,6 @@
 // -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
-// This file is part of Almond
+// This file is part of Genie
 //
 // Copyright 2019 The Board of Trustees of the Leland Stanford Junior University
 //
@@ -24,19 +24,19 @@ import * as Tp from 'thingpedia';
 export function html(err : any, req : express.Request, res : express.Response, next : express.NextFunction) {
     if (err instanceof Tp.OAuthError || err instanceof Tp.ImplementationError) {
         res.status(500).render('error', {
-            page_title: req._("Almond - Error"),
+            page_title: req._("Genie - Error"),
             message: req._("There is a problem with the Thingpedia account or device you are trying to configure: %s. Please report this issue to the developer of Thingpedia device.").format(err.message)
         });
     } else if (typeof err.status === 'number') {
         // oauth2orize errors, bodyparser errors
         res.status(err.status).render('error', {
-            page_title: req._("Almond - Error"),
+            page_title: req._("Genie - Error"),
             message: err.expose === false ? req._("Code: %d").format(err.status) : err
         });
     } else if (err.code === 'EBADCSRFTOKEN') {
         // csurf errors
         res.status(403).render('error', {
-            page_title: req._("Almond - Forbidden"),
+            page_title: req._("Genie - Forbidden"),
             message: err,
 
             // make sure we have a csrf token in the page
@@ -48,7 +48,7 @@ export function html(err : any, req : express.Request, res : express.Response, n
         // util/db errors
         // if we get here, we have a 404 response
         res.status(404).render('error', {
-            page_title: req._("Almond - Page Not Found"),
+            page_title: req._("Genie - Page Not Found"),
             message: req._("The requested page does not exist.")
         });
     } else if (err.code === 'EPERM' || err.code === 'EACCESS') {
@@ -68,14 +68,14 @@ export function html(err : any, req : express.Request, res : express.Response, n
         // who fuzzes and looks for 500 errors.
         console.error(err);
         res.status(403).render('error', {
-            page_title: req._("Almond - Error"),
+            page_title: req._("Genie - Error"),
             message: req._("You do not have permission to perform the requested operation.")
         });
     } else {
         // bugs
         console.error(err);
         res.status(500).render('error', {
-            page_title: req._("Almond - Internal Server Error"),
+            page_title: req._("Genie - Internal Server Error"),
             message: req._("Code: %s").format(err.code || err.sqlState || err.errno || err.name)
         });
     }

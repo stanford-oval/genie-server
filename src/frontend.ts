@@ -1,6 +1,6 @@
 // -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
-// This file is part of Almond
+// This file is part of Genie
 //
 // Copyright 2017-2019 The Board of Trustees of the Leland Stanford Junior University
 //
@@ -216,7 +216,7 @@ export default class WebFrontend extends events.EventEmitter {
         this._app.use((req, res) => {
             // if we get here, we have a 404 response
             res.status(404).render('error', {
-                page_title: req._("Almond - Page Not Found"),
+                page_title: req._("Genie - Page Not Found"),
                 message: req._("The requested page does not exist.")
             });
         });
