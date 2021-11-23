@@ -42,13 +42,13 @@ podman logs genie # look at the most recent logs of a running container
 To develop genie-server, you should clone this repository, then install the dependencies with:
 
 ```bash
-dnf -y install nodejs gettext make gcc-c++ GraphicsMagick zip unzip # Fedora/RHEL
-apt -y install nodejs gettext build-essential make g++ graphicsmagick zip unzip # Ubuntu/Debian
+dnf -y install nodejs gettext make gcc-c++ GraphicsMagick zip unzip pulseaudio-libs-devel # Fedora/RHEL
+apt -y install nodejs gettext build-essential make g++ graphicsmagick zip unzip libpulse-dev # Ubuntu/Debian
 ```
 
 You can then build the repository with:
 ```
-npm install
+npm ci
 ```
 
 This will only install the minimal set of dependencies, and will not install any voice support. To enable voice, you must also install [genie-client-cpp](https://github.com/stanford-oval/genie-client-cpp).
