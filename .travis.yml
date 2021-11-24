@@ -12,7 +12,7 @@ services:
 stages:
   - test
   - name: docker
-    if: type = push AND branch = master AND repo = stanford-oval/almond-server
+    if: type = push AND branch = master AND repo = stanford-oval/genie-server
 jobs:
   include:
     - name: Test
@@ -29,14 +29,6 @@ jobs:
       - npm run lint
       - LOCALE="en-US" TZ="America/Los_Angeles" npm test
       after_success: npm run coverage
-    - name: Docker (portable)
-      stage: docker
-      install:
-      - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-      script:
-      - docker build -f Dockerfile.portable -t stanfordoval/almond-server:latest-portable .
-      after_success:
-      - docker push stanfordoval/almond-server:latest-portable
     - name: Docker
       stage: docker
       install:
