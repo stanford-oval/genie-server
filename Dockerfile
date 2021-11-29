@@ -32,7 +32,7 @@ RUN apt-get update && \
     && apt-get install -y --no-install-recommends \
         nodejs
 
-ARG GENIE_CLIENT_CPP_VERSION=a2e8146a92ac8f4dec14f150421b278313a21ada
+ARG GENIE_CLIENT_CPP_VERSION=48c6b78defc39e2e842a5e11cc80fb1a7391f371
 
 # Install genie-client
 RUN \
