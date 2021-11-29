@@ -32,7 +32,7 @@ RUN apt-get update && \
     && apt-get install -y --no-install-recommends \
         nodejs
 
-ARG GENIE_CLIENT_CPP_VERSION=a65c5a79384e9e93930ee90cd6fe1a204e6830a1
+ARG GENIE_CLIENT_CPP_VERSION=47d06087f158610e84db29df20e07475873a881f
 
 # Install genie-client
 RUN \
@@ -59,6 +59,8 @@ RUN \
         "https://github.com/stanford-oval/genie-client-cpp" /src \
     && cd /src \
     && git checkout ${GENIE_CLIENT_CPP_VERSION} \
+    && git submodule init \
+    && git submodule update --recursive \
     && ./scripts/get-assets.sh ${BUILD_ARCH} \
     && meson build \
     && ninja -C build \
