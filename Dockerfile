@@ -11,8 +11,14 @@ RUN apt-get update && \
         gnupg \
         pulseaudio \
         pulseaudio-utils \
+        libpulse0 \
+        libpulse-mainloop-glib0 \
+        libasound2 \
         libjson-glib-1.0-0 \
         libevdev2 \
+        libsoup2.4-1 \
+        libspeexdsp1 \
+        libwebrtc-audio-processing1 \
         sound-theme-freedesktop \
         unzip \
         sqlite \
@@ -32,7 +38,7 @@ RUN apt-get update && \
     && apt-get install -y --no-install-recommends \
         nodejs
 
-ARG GENIE_CLIENT_CPP_VERSION=47d06087f158610e84db29df20e07475873a881f
+ARG GENIE_CLIENT_CPP_VERSION=4ce98bf019e2bb11bb394b32f8342b7f31a759cf
 
 # Install genie-client
 RUN \
@@ -100,11 +106,8 @@ RUN \
         build-essential \
         pkg-config \
         git \
-        nginx \
         python-dev \
         gettext \
-        sudo \
-        wget \
         libpulse-dev \
     && rm -rf /opt/genie-server/node_modules \
     && npm config set unsafe-perm \
