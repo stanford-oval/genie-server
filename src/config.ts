@@ -19,6 +19,15 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
 /**
+ * Options passed to Genie conversations
+ */
+export const CONVERSATION_OPTIONS = {
+  showWelcome: true,
+  debug: true,
+  log: true
+};
+
+/**
   The URL prefix at which all almond-server APIs and pages are exposed.
 
   This configuration is provided to simplify reverse-proxying almond-server.
