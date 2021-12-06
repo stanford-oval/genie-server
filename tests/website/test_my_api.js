@@ -1,6 +1,6 @@
 // -*- mode: js; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
-// This file is part of Almond
+// This file is part of Genie
 //
 // Copyright 2019-2020 The Board of Trustees of the Leland Stanford Junior University
 //
@@ -169,15 +169,6 @@ async function testMyApiDevices(auth) {
     const listResult = JSON.parse(await request('/api/devices/list', 'GET', null, { auth }));
 
     assert.deepStrictEqual(listResult, [
-      { uniqueId: 'org.thingpedia.builtin.thingengine.server',
-        name: 'Almond Smart Speaker',
-        description: 'Commands that are specific to using Almond as a smart-speaker device.',
-        kind: 'org.thingpedia.builtin.thingengine.server',
-        version: 0,
-        class: 'data',
-        ownerTier: 'global',
-        isTransient: false,
-        authType: 'builtin' },
       { uniqueId: 'thingengine-own-server:81e0e8abba27202a',
         name: 'Genie server (:81e0e8abba27202a)',
         description: 'This is one of your Genie apps.',
@@ -185,6 +176,15 @@ async function testMyApiDevices(auth) {
         version: 0,
         ownerTier: 'server',
         class: 'system',
+        isTransient: false,
+        authType: 'builtin' },
+      { uniqueId: 'org.thingpedia.builtin.thingengine.server',
+        name: 'Genie Smart Speaker',
+        description: 'Commands that are specific to using Genie as a smart-speaker device.',
+        kind: 'org.thingpedia.builtin.thingengine.server',
+        version: 0,
+        class: 'data',
+        ownerTier: 'global',
         isTransient: false,
         authType: 'builtin' },
       { uniqueId: 'org.thingpedia.builtin.thingengine.builtin',
@@ -226,15 +226,6 @@ async function testMyApiDevices(auth) {
     const listResult2 = JSON.parse(await request('/api/devices/list', 'GET', null, { auth }));
     listResult2[listResult2.length-1].version = 0;
     assert.deepStrictEqual(listResult2, [
-      { uniqueId: 'org.thingpedia.builtin.thingengine.server',
-        name: 'Almond Smart Speaker',
-        description: 'Commands that are specific to using Almond as a smart-speaker device.',
-        kind: 'org.thingpedia.builtin.thingengine.server',
-        version: 0,
-        class: 'data',
-        ownerTier: 'global',
-        isTransient: false,
-        authType: 'builtin' },
       { uniqueId: 'thingengine-own-server:81e0e8abba27202a',
         name: 'Genie server (:81e0e8abba27202a)',
         description: 'This is one of your Genie apps.',
@@ -242,6 +233,15 @@ async function testMyApiDevices(auth) {
         version: 0,
         ownerTier: 'server',
         class: 'system',
+        isTransient: false,
+        authType: 'builtin' },
+      { uniqueId: 'org.thingpedia.builtin.thingengine.server',
+        name: 'Genie Smart Speaker',
+        description: 'Commands that are specific to using Genie as a smart-speaker device.',
+        kind: 'org.thingpedia.builtin.thingengine.server',
+        version: 0,
+        class: 'data',
+        ownerTier: 'global',
         isTransient: false,
         authType: 'builtin' },
       { uniqueId: 'org.thingpedia.builtin.thingengine.builtin',
@@ -362,7 +362,7 @@ async function testMyApiOAuth(accessToken) {
 async function main() {
     const bob = await login();
 
-    // user (web almond) api
+    // user (web genie) api
     const token = await getAccessToken(bob);
     await testMyApiOAuth(token);
 }

@@ -136,7 +136,7 @@ block content
         p You successfully logged in with your cloud account.
         p Your cloud ID is <samp>#{cloud.id}</samp>
       else
-        p You did not log in to a Almond Cloud account.
+        p You did not log in to a Genie Cloud account.
         //You can do it now.
 
         //if cloud.error
@@ -169,7 +169,7 @@ block content
       h2.panel-title Phone
     div.panel-body
       div#config-phone-desktop-browser
-        p!= _("To link your phone to this Almond, you must visit the address <samp>%s</samp> from a mobile browser.").format(server.address)
+        p!= _("To link your phone to this Genie, you must visit the address <samp>%s</samp> from a mobile browser.").format(server.address)
 
         p!= _("Alternatively, you can scan this QR code:")
           div#qrcode-target= qrcodeTarget

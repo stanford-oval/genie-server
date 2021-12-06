@@ -8,7 +8,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx ./src ./tests",
     "test": "nyc ./tests/everything.sh",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "debug": "nodemon --legacy-watch --watch ./routes --watch ./util --exec ts-node src/main.js",
+    "debug": "nodemon --watch ./src --exec ts-node src/main.ts",
     "prepare": "tsc --build tsconfig.json"
   },
   "resolutions": {},
@@ -35,7 +35,7 @@
     "pulseaudio2": "^0.5.4",
     "q": "^1.5.0",
     "serve-favicon": "^2.4.3",
-    "thingpedia": "^2.10.0-alpha.5",
+    "thingpedia": "^2.10.0-alpha.6",
     "uuid": "^8.3.1",
     "which": "^2.0.2",
     "ws": "^7.5.6"

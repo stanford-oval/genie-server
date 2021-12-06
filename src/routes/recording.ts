@@ -1,6 +1,6 @@
 // -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
-// This file is part of Almond
+// This file is part of Genie
 //
 // Copyright 2016-2020 The Board of Trustees of the Leland Stanford Junior University
 //
@@ -27,44 +27,6 @@ import * as Config from '../config';
 const router = express.Router();
 
 router.use(user.requireLogIn);
-
-router.post('/start', (req, res, next) => {
-    const engine = req.app.genie;
-
-    Promise.resolve().then(async () => {
-        const conversation = await engine.assistant.getOrOpenConversation(req.body.id, Config.CONVERSATION_OPTIONS);
-        if (!conversation) {
-            res.status(404);
-            return res.json({ error: 'No conversation found' });
-        } else {
-            try {
-                await conversation.startRecording();
-                return res.json({ status: 'ok' });
-            } finally {
-                await engine.assistant.closeConversation(conversation.id);
-            }
-        }
-    }).catch(next);
-});
-
-router.post('/stop', (req, res, next) => {
-    const engine = req.app.genie;
-
-    Promise.resolve().then(async () => {
-        const conversation = await engine.assistant.getOrOpenConversation(req.body.id, Config.CONVERSATION_OPTIONS);
-        if (!conversation) {
-            res.status(404);
-            return res.json({ error: 'No conversation found' });
-        } else {
-            try {
-                await conversation.endRecording();
-                return res.json({ status: 'ok' });
-            } finally {
-                await engine.assistant.closeConversation(conversation.id);
-            }
-        }
-    }).catch(next);
-});
 
 router.get('/status/:id', (req, res, next) => {
     const engine = req.app.genie;

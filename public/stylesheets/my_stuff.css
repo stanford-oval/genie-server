@@ -19,7 +19,7 @@
     justify-content: space-between;
 }
 
-.bottom-bar.fa,
+/*.bottom-bar.fa,
 .bottom-bar.far {
     border-radius: 60px;
     background-color: transparent;
@@ -37,6 +37,7 @@
 .bottom-bar.far:hover {
     background-color: #8c1515;
 }
+*/
 
 .form-inline.form-config {
     float: right;
@@ -57,7 +58,7 @@ p.device-icon-small {
     padding-right: 1em;
 }
 
-#back-top {
+/*#back-top {
     text-align: right;
     padding-top: 3em;
     width: 100%;
@@ -72,3 +73,4 @@ p.device-icon-small {
     font-weight: 600;
     font-size: 2em;
 }
+*/

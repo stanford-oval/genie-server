@@ -8,15 +8,9 @@ body {
 }
 
 #page-body {
-    margin-top: 45px;
-    min-height: calc(100vh - 195px);
-    height: auto !important;
-}
-
-#page-body.container,
-#page-body.container-fluid {
+    margin-top: 60px;
     padding-bottom: 30px;
-    min-height: calc(100vh - 145px);
+    min-height: calc(100vh - 160px);
 }
 
 #page-title {
@@ -149,12 +143,12 @@ pre code {
     font-weight: 500;
 }
 
-.navbar-brand.hidden-sm {
+/*.navbar-brand.hidden-sm {
     font-weight: bold;
     line-height: 21px;
     height: 47px;
     font-size: 26px;
-}
+}*/
 
 .custom-btn {
     border-radius: 10px;
@@ -198,7 +192,7 @@ pre code {
 
 .msg-button {
     width: 100%;
-    text-align: center;
+    text-align: left;
     padding: 50px 0px;
 }
 
@@ -206,10 +200,10 @@ pre code {
     border-radius: 10px;
 }
 
-.logo_top {
-    width: 55px;
-    float: left;
+#logo {
+    height: 100%;
     margin-right: 10px;
+    display: inline;
 }
 
 .subtitle-msg {
@@ -226,7 +220,7 @@ pre code {
     font-size: 1.2em;
 }
 
-.panel {
+/*.panel {
     min-height: 13.9em;
     height: 100%;
     border-bottom-left-radius: 19px;
@@ -277,6 +271,7 @@ pre code {
     background-color: #d8d8d8 !important;
     color: #000;
 }
+*/
 
 .row.display-flex {
     display: flex;
@@ -297,6 +292,7 @@ pre code {
     margin-left: 15px;
 }
 
+/*
 #new-skills>a {
     font-weight: 600;
     font-size: 1.3em;
@@ -343,3 +339,4 @@ pre code {
     padding-top: 100px;
     margin-top: -100px;
 }
+*/

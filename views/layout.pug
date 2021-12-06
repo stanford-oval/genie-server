@@ -11,8 +11,7 @@ html
     link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/style.css')
     block styles
     script(src="https://code.jquery.com/jquery-3.4.1.min.js",integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=",crossorigin="anonymous")
-    script(src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js",integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd",
-      crossorigin="anonymous")
+    script(src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js",integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd", crossorigin="anonymous")
     script(src=Config.BASE_URL + '/javascripts/validator.min.js')
     script(src=Config.BASE_URL + '/javascripts/jstz.min.js')
     script(src=Config.BASE_URL + '/javascripts/shared.js')
@@ -23,7 +22,7 @@ html
   - var includefooter = true;
   body(data-developer-key=developerKey,data-thingpedia-url=Config.THINGPEDIA_URL,data-base-url=Config.BASE_URL,data-csrf-token=csrfToken)
     a#anch-top.anchor(href='#')
-    nav.navbar-inverse.navbar.navbar-fixed-top(role="banner")
+    nav.navbar-default.navbar.navbar-fixed-top(role="banner")
 
       div.navbar-header
         button(class="navbar-toggle collapsed", data-toggle="collapse", data-target="#page-nav")
@@ -31,10 +30,10 @@ html
           span.icon-bar
           span.icon-bar
           span.icon-bar
-        span.navbar-brand.scroller.hidden-xs.hidden-sm
-          img.logo_top(src=Config.BASE_URL + '/images/almond.png')
+        a.navbar-brand.hidden-xs.hidden-sm(href=Config.BASE_URL + '/')
+          //img#logo(src=Config.BASE_URL + '/images/almond.png')
           | Genie
-        span.navbar-brand.scroller.hidden-md.hidden-lg(aria-hidden='true')
+        span.navbar-brand.hidden-md.hidden-lg(aria-hidden='true')
           block page_name
 
       div.navbar-collapse.collapse(role="navigation")#page-nav

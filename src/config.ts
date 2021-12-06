@@ -1,6 +1,6 @@
 // -*- mode: typescript; indent-tabs-mode: nil; js-basic-offset: 4 -*-
 //
-// This file is part of Almond
+// This file is part of Genie
 //
 // Copyright 2017-2020 The Board of Trustees of the Leland Stanford Junior University
 //
@@ -28,9 +28,9 @@ export const CONVERSATION_OPTIONS = {
 };
 
 /**
-  The URL prefix at which all almond-server APIs and pages are exposed.
+  The URL prefix at which all genie-server APIs and pages are exposed.
 
-  This configuration is provided to simplify reverse-proxying almond-server.
+  This configuration is provided to simplify reverse-proxying genie-server.
   If set, it should start with a slash, not end in a slash, and have no two consecutive slashes.
 
   Good: /foo /foo/bar
@@ -39,9 +39,9 @@ export const CONVERSATION_OPTIONS = {
 export const BASE_URL = process.env.THINGENGINE_BASE_URL || '';
 
 /**
-  Set this to true if Almond is served behind a reverse proxy.
+  Set this to true if Genie is served behind a reverse proxy.
 
-  If true, Almond will trust the X-Forwarded-* headers, the default host-based authentication
+  If true, Genie will trust the X-Forwarded-* headers, the default host-based authentication
   will be "proxied-ip", and the default origin will not use a port.
 */
 export const HAS_REVERSE_PROXY = !!process.env.THINGENGINE_HAS_REVERSE_PROXY;
@@ -50,7 +50,7 @@ export const HAS_REVERSE_PROXY = !!process.env.THINGENGINE_HAS_REVERSE_PROXY;
   Enable host-based authentication.
 
   Host-based authentication is an alternative authentication scheme that allows connections
-  from localhost. It is useful to integrate Almond with other software, for example to build
+  from localhost. It is useful to integrate Genie with other software, for example to build
   a smart gateway or smart speaker product.
 
   The following options are allowed:
@@ -90,6 +90,6 @@ export const ENABLE_DB_ENCRYPTION = false;
 export const IN_HOME_ASSISTANT_ADDON = !!process.env.THINGENGINE_IN_HOME_ASSISTANT_ADDON;
 
 export const NLP_URL = process.env.THINGENGINE_NLP_URL || 'https://nlp-staging.almond.stanford.edu';
-export const THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://dev.almond.stanford.edu/thingpedia';
-export const CLOUD_SYNC_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://dev.almond.stanford.edu';
-export const OAUTH_REDIRECT_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://dev.almond.stanford.edu';
+export const THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://dev.genie.stanford.edu/thingpedia';
+export const CLOUD_SYNC_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://dev.genie.stanford.edu';
+export const OAUTH_REDIRECT_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://dev.genie.stanford.edu';

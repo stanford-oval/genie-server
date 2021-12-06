@@ -1,11 +1,5 @@
 "use strict";
 $(function() {
-    window.Almond = {
-        getThingpedia: function() {
-            return 'https://thingpedia.stanford.edu';
-        }
-    };
-
     const top = window.parent;
     const url = new URL(top.location.href);
     const params = url.searchParams;

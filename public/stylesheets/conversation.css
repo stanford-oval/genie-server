@@ -16,9 +16,12 @@
     overflow-y: scroll;
     height: -webkit-fill-available;
     padding: 20px 35px;
-    min-height: 566px;
-    height: calc(100vh - 385px);
+    min-height: 500px;
     overflow-anchor: none;
+}
+
+#conversation.single #chat {
+    height: calc(100vh - 420px);
 }
 
 #conversation .message-container {
@@ -82,8 +85,6 @@
 
 #conversation {
     overflow: hidden;
-    height: auto;
-    max-height: 500px;
     margin: auto;
     max-width: 800px;
     background-color: #ece5dd6b;
@@ -224,7 +225,7 @@
 
 .col-sm-12 ::-webkit-scrollbar-track {}
 
-.form-inline {
+#toolbar .form-inline {
     background-color: #d8d8d8;
     color: #000;
     line-height: 2.2em;
