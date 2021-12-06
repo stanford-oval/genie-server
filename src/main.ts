@@ -55,16 +55,7 @@ async function init(platform : ServerPlatform) {
     _frontend.setEngine(_engine);
 
     await _engine.open();
-
-    const conversation = _engine.assistant.openConversation('main', {
-        showWelcome: true,
-        debug: true,
-        log: true,
-        deleteWhenInactive: false,
-        inactivityTimeout: 30000, // pick a low inactivity timeout to turn off the microphone
-        contextResetTimeout: 30000,
-    });
-    await conversation.start();
+    await _engine.assistant.getOrOpenConversation('main', Config.CONVERSATION_OPTIONS);
 }
 
 function spawnClient() {

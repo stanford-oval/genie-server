@@ -22,6 +22,8 @@ import express from 'express';
 
 import * as user from '../util/user';
 
+import * as Config from '../config';
+
 const router = express.Router();
 
 router.use(user.requireLogIn);
@@ -29,33 +31,42 @@ router.use(user.requireLogIn);
 router.get('/status/:id', (req, res, next) => {
     const engine = req.app.genie;
 
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation(req.params.id);
-    }).then((conversation) => {
+    Promise.resolve().then(async () => {
+        const conversation = await engine.assistant.getOrOpenConversation(req.body.id, Config.CONVERSATION_OPTIONS);
         if (!conversation) {
             res.status(404);
-            res.json({ error: 'No conversation found' });
+            return res.json({ error: 'No conversation found' });
         } else {
-            res.json({ status: conversation.inRecordingMode ? 'on' : 'off' });
+            try {
+                return res.json({ status: conversation.inRecordingMode ? 'on' : 'off' });
+            } finally {
+                await engine.assistant.closeConversation(conversation.id);
+            }
         }
     }).catch(next);
 });
 
 router.post('/vote/:vote', (req, res, next) => {
     const engine = req.app.genie;
+    const vote = req.params.vote;
+    if (vote !== 'up' && vote !== 'down') {
+        res.status(400);
+        res.json({ error: 'Invalid voting option' });
+        return;
+    }
 
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation(req.body.id);
-    }).then((conversation) => {
-        if (req.params.vote !== 'up' && req.params.vote !== 'down') {
-            res.status(400);
-            return res.json({ error: 'Invalid voting option' });
-        } else if (!conversation) {
+    Promise.resolve().then(async () => {
+        const conversation = await engine.assistant.getOrOpenConversation(req.body.id, Config.CONVERSATION_OPTIONS);
+        if (!conversation) {
             res.status(404);
             return res.json({ error: 'No conversation found' });
         } else {
-            conversation.voteLast(req.params.vote);
-            return res.json({ status:'ok' });
+            try {
+                await conversation.voteLast(vote);
+                return res.json({ status:'ok' });
+            } finally {
+                await engine.assistant.closeConversation(conversation.id);
+            }
         }
     }).catch(next);
 });
@@ -68,15 +79,18 @@ router.post('/comment', (req, res, next) => {
         return;
     }
 
-    Promise.resolve().then(() => {
-        return engine.assistant.getConversation(req.body.id);
-    }).then((conversation) => {
+    Promise.resolve().then(async () => {
+        const conversation = await engine.assistant.getOrOpenConversation(req.body.id, Config.CONVERSATION_OPTIONS);
         if (!conversation) {
             res.status(404);
             return res.json({ error: 'No conversation found' });
         } else {
-            conversation.commentLast(req.body.comment);
-            return res.json({ status:'ok' });
+            try {
+                await conversation.commentLast(req.body.comment);
+                return res.json({ status:'ok' });
+            } finally {
+                await engine.assistant.closeConversation(conversation.id);
+            }
         }
     }).catch(next);
 });
@@ -84,17 +98,18 @@ router.post('/comment', (req, res, next) => {
 router.get('/log/:id.txt', (req, res, next) => {
     const engine = req.app.genie;
 
-    Promise.resolve().then(() => {
-        const conversation = engine.assistant.getConversation((req.params as any).id);
+    Promise.resolve().then(async () => {
+        const conversation = await engine.assistant.getOrOpenConversation(req.body.id, Config.CONVERSATION_OPTIONS);
         if (!conversation) {
             res.status(404);
-            res.send('No conversation found');
+            res.json({ error: 'No conversation found' });
             return;
         }
 
         res.set('Content-Type', 'text/plain');
         res.set('Content-Disposition', `attachment; filename="log-${conversation.id}.txt"`);
         conversation.readLog().pipe(res);
+        await engine.assistant.closeConversation(conversation.id);
     }).catch(next);
 });
 
