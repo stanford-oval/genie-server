@@ -32,7 +32,7 @@
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.0.0",
     "pug": "^3.0.2",
-    "pulseaudio2": "^0.5.4",
+    "pulseaudio2": "^0.5.5",
     "q": "^1.5.0",
     "serve-favicon": "^2.4.3",
     "thingpedia": "^2.10.0-alpha.6",
