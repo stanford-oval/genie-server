@@ -9,6 +9,8 @@ RUN apt-get update && \
         wget \
         curl \
         gnupg \
+        #for certs
+        libgnutls30 \ 
         pulseaudio \
         pulseaudio-utils \
         libpulse0 \
@@ -51,8 +53,6 @@ RUN \
         ninja-build \
         git \
         meson \
-        #for certs
-        libgnutls30 \ 
         libgstreamer1.0-dev \
         libasound2-dev \
         libglib2.0-dev \
