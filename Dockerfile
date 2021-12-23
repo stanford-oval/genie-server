@@ -51,6 +51,8 @@ RUN \
         ninja-build \
         git \
         meson \
+        #for certs
+        libgnutls30 \ 
         libgstreamer1.0-dev \
         libasound2-dev \
         libglib2.0-dev \
