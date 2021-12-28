@@ -108,7 +108,7 @@ block content
       p=_("Use the following configuration to connect a client to this server:")
       p
         strong=_("URL: ")
-        = `${server.origin}${Config.BASE_URL}/api/conversation`
+        = `${server.origin.replace(/^http/, 'ws')}${Config.BASE_URL}/api/conversation`
       if Config.IN_HOME_ASSISTANT_ADDON
         p
           strong= _("Authentication mode: ")
