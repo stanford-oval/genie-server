@@ -83,6 +83,8 @@ export default class ClientManager {
 
         if (!hasEchoSink)
             await this._safeLoadModule(client, 'module-echo-cancel', MODULE_ECHO_CANCEL_ARGUMENTS);
+
+        client.end();
     }
 
     private async _writeConfig() {
