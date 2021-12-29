@@ -1,3 +1,19 @@
+3.0.0-rc.1
+==========
+
+* Rebranded fully to Genie [#289].
+* The Genie platform was updated to version 0.9.0, bringing numerous improvements.
+* Audio support is now provided by the separate genie-client package. A client
+  is spawned automatically in the same container as the server, if PulseAudio is
+  available [#285, #288, #299].
+* Added support for PKCE OAuth authentication [#224].
+* The codebase was migrated to TypeScript [#215].
+* Misc bug fixes [#263, #265].
+* Misc build system fixes [#201, #250, #276, ]
+* Updated dependencies [#219, #220, #221, #223, #225, #226, #227, #229, #230, #231,
+  #232, #233, #234, #235, #247, #251, #258, #260, #261, #262, #266, #268, #270,
+  #274, #285, #287, #291].
+
 2.0.1
 =====
 
