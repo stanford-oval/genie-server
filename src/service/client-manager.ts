@@ -33,16 +33,22 @@ const MODULE_ROLE_DUCKING_ARGUMENTS = 'trigger_roles=voice-assistant ducking_rol
 //const MODULE_ECHO_CANCEL_ARGUMENTS = 'source_name=echosrc sink_name=echosink channels=2 rate=48000 aec_method=webrtc aec_args="analog_gain_control=0 digital_gain_control=1 agc_start_volume=255"';
 const MODULE_ECHO_CANCEL_ARGUMENTS = 'source_name=echosrc sink_name=echosink rate=48000';
 
+const RESPAWN_TIMEOUT = 5000;
+
 /**
  * Manage a genie client running in the same container/machine as almond-server
  */
 export default class ClientManager {
     private _child : child_process.ChildProcess|null;
     private _port : number;
+    private _killed : boolean;
+    private _restartTimeout : NodeJS.Timeout|null;
 
     constructor(port : number) {
         this._child = null;
         this._port = port;
+        this._killed = false;
+        this._restartTimeout = null;
     }
 
     private async _safeLoadModule(client : PulseAudio, modName : string, args : string) {
@@ -77,6 +83,8 @@ export default class ClientManager {
 
         if (!hasEchoSink)
             await this._safeLoadModule(client, 'module-echo-cancel', MODULE_ECHO_CANCEL_ARGUMENTS);
+
+        client.end();
     }
 
     private async _writeConfig() {
@@ -112,6 +120,10 @@ export default class ClientManager {
             this._writeConfig()
         ]);
 
+        this._spawnChild();
+    }
+
+    private _spawnChild() {
         const env : NodeJS.ProcessEnv = {};
         Object.assign(env, process.env);
         env.PULSE_SINK = 'echosink';
@@ -123,11 +135,28 @@ export default class ClientManager {
             env,
             detached: false
         });
+        this._child.on('exit', (code, signal) => {
+            if (code !== null && code !== 0)
+                console.error(`genie-client exited with code ${code}`);
+            else
+                console.error(`genie-client exited with signal ${signal}`);
+            if (this._killed)
+                return;
+            if (this._restartTimeout)
+                clearTimeout(this._restartTimeout);
+            this._restartTimeout = setTimeout(() => {
+                this._restartTimeout = null;
+                this._spawnChild();
+            }, RESPAWN_TIMEOUT);
+        });
     }
 
     async stop() {
         console.log('Stopping genie-client');
+        this._killed = true;
         if (this._child)
             this._child.kill('SIGTERM');
+        if (this._restartTimeout)
+            clearTimeout(this._restartTimeout);
     }
 }
