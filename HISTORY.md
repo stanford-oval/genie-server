@@ -1,4 +1,13 @@
-3.0.0-rc.1
+3.0.1
+=====
+
+* Version 3.0.0 was skipped due to a mistake in tagging the previous version.
+* Updated dependencies.
+
+Please see the previous releases for the full list of changes in this
+development cycle.
+
+3.0.1-rc.1
 ==========
 
 * Rebranded fully to Genie [#289].
