@@ -32,7 +32,7 @@ router.get('/status/:id', (req, res, next) => {
     const engine = req.app.genie;
 
     Promise.resolve().then(async () => {
-        const conversation = await engine.assistant.getOrOpenConversation(req.body.id, Config.CONVERSATION_OPTIONS);
+        const conversation = await engine.assistant.getOrOpenConversation(req.params.id, Config.CONVERSATION_OPTIONS);
         if (!conversation) {
             res.status(404);
             return res.json({ error: 'No conversation found' });
@@ -99,7 +99,7 @@ router.get('/log/:id.txt', (req, res, next) => {
     const engine = req.app.genie;
 
     Promise.resolve().then(async () => {
-        const conversation = await engine.assistant.getOrOpenConversation(req.body.id, Config.CONVERSATION_OPTIONS);
+        const conversation = await engine.assistant.getOrOpenConversation(req.params.id, Config.CONVERSATION_OPTIONS);
         if (!conversation) {
             res.status(404);
             res.json({ error: 'No conversation found' });
