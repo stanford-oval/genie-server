@@ -101,6 +101,8 @@ export default class ClientManager {
         if (!config.hasSection('general'))
             config.addSection('general');
         config.set('general', 'url', `ws://127.0.0.1:${this._port}/api/conversation`);
+        config.set('general', 'nlUrl', Config.NLP_URL);
+        config.set('general', 'locale', platform.locale);
         config.set('general', 'conversationId', 'main');
 
         if (Config.HOST_BASED_AUTHENTICATION === 'disabled') {
