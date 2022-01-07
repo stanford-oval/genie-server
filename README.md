@@ -28,7 +28,7 @@ podman run --name genie -p 3000:3000 \
     docker.io/stanfordoval/almond-server
 ```
 
-You can now navigate to [127.0.0.1:3000](http://127.0.0.1:3000) to access Genie, or use your voice with the hotword "computer".
+You can now navigate to [127.0.0.1:3000](http://127.0.0.1:3000) to access Genie, or use your voice with the wake-word "Hey Genie".
 
 To manage the container later, you can use:
 ```bash
