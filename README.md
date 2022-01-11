@@ -37,6 +37,10 @@ podman stop genie # stop the container
 podman logs genie # look at the most recent logs of a running container
 ```
 
+### I am Kubernetes!
+
+As an alternative, Almond-Server can run under Kubernetes; see sample configuration file in the [examples](https://github.com/stanford-oval/almond-server/tree/master/examples) directory for information on how to get started.
+
 ## Development setup
 
 To develop genie-server, you should clone this repository, then install the dependencies with:

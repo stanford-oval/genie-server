@@ -1,0 +1,166 @@
+# This file contains a basic configuration for kubernetes
+
+# DEPLOYMENT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: almond-server
+  # namespace <your namespace>
+spec:
+  selector:
+    matchLabels:
+      app: almond-server
+      role: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: almond-server
+        role: backend
+    spec:
+      #hostNetwork: true
+      #dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: almond-server
+        image: stanfordoval/almond-server
+        env:
+        - name: TZ
+          value: Europe/London
+        - name: THINGENGINE_HOST_BASED_AUTHENTICATION
+          value: local-ip
+        imagePullPolicy: "IfNotPresent"
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities: {}
+          readOnlyRootFilesystem: false
+          runAsGroup: 1000
+          runAsUser: 1000
+          seLinuxOptions: {}
+        volumeMounts:
+        - name: run-user-1000
+          mountPath: /run/pulse
+        - name: home-user-config-almond-server
+          mountPath: /var/lib/almond-server
+        workingDir: /opt/almond
+      - name: nginx-sidecar
+        image: nginx:alpine
+        env:
+        - name: TZ
+          value: Europe/London
+        volumeMounts:
+        - name: nginx-sidecar-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - hostPath:
+          path: /run/user/1000/pulse
+          type: Directory
+        name: run-user-1000
+      - hostPath:
+          path: /home/pi/.config/almond-server
+          type: Directory
+        name: home-user-config-almond-server
+      - name: nginx-sidecar-config
+        configMap:
+          name: nginx-sidecar-conf
+status: {}
+
+---
+
+# SERVICE
+# Uses nodeport for local access
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: almond-service
+  # namespace <your namespace>
+  labels:
+    app: almond-service
+spec:
+  type: NodePort
+  ports:
+  - name: almond-web
+    port: 80
+    targetPort: 3001
+    protocol: TCP
+    nodePort: 32000
+  selector:
+    app: almond-server
+    role: backend
+status: {}
+
+---
+
+# CONFIGMAP
+# nginx sidecar configmap
+# modify the allow section to allow only host you trust; deny all otherwise
+# monitor nginx logs for errors: e.g. kubectl logs -n namespace -c nginx-sidecar <pod id>
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-sidecar-conf
+  # namespace: <your namespace>
+data:
+  nginx.conf: |-
+    user nginx;
+    worker_processes  1;
+    pid /var/run/nginx.pid;
+    error_log /dev/stdout info;
+
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        include             mime.types;
+        default_type        application/octet-stream;
+        sendfile            on;
+        keepalive_timeout   65;
+        proxy_read_timeout  1d;
+        gzip                on;
+        gzip_disable        "msie6";
+
+        upstream backend {
+            ip_hash;
+            server 127.0.0.1:3000;
+            #server almond-service:3000;
+        }
+      
+        map $http_upgrade $connection_upgrade {
+            default upgrade;
+            ''      close;
+        }
+      
+        # API & Ingress
+        server {
+            listen 3001 default_server;
+            listen 8099 default_server;
+            listen [::]:3001 default_server;
+            listen [::]:8099 default_server;
+      
+            allow   127.0.0.1;  # localhost
+            deny    all;
+      
+            server_name _;
+            access_log /dev/stdout combined;
+      
+            client_max_body_size 4G;
+            keepalive_timeout 5;
+      
+            root /dev/null;
+      
+            location / {
+                proxy_redirect off;
+                proxy_pass http://backend;
+      
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection $connection_upgrade;
+                proxy_set_header Host "127.0.0.1:3000";
+                proxy_set_header Origin "http://127.0.0.1:3000";
+            }
+        }
+    }
