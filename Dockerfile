@@ -9,6 +9,8 @@ RUN apt-get update && \
         wget \
         curl \
         gnupg \
+        #for certs
+#        libgnutls30 \ 
         pulseaudio \
         pulseaudio-utils \
         libpulse0 \
