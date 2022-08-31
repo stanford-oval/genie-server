@@ -103,13 +103,20 @@ router.get('/oauth2/:kind', (req, res, next) => {
             // the actual redirect
             redirect = origin + '/hassio/ingress/' + info.data.slug + '?'
                 + qs.stringify({ almond_redirect: Config.BASE_URL + '/devices/oauth2/callback/' + kind });
+            const url = Config.CLOUD_SYNC_URL + `/proxy?` + qs.stringify({ redirect, kind });
+            res.redirect(url);
         } else {
             // redirect directly to the add-on page
-            redirect = origin + Config.BASE_URL;
+            // redirect = origin + Config.BASE_URL;
+            const engine = req.app.genie;
+            const result = await engine.startOAuth(kind);
+            if (result !== null) {
+                const redirect = result[0];
+                const session = result[1];
+                req.session.oauth2 = session;
+                res.redirect(303, redirect);
+            }
         }
-
-        const url = Config.CLOUD_SYNC_URL + `/proxy?` + qs.stringify({ redirect, kind });
-        res.redirect(url);
     }).catch(next);
 });
 
@@ -117,7 +124,7 @@ router.get('/oauth2/callback/:kind', (req, res, next) => {
     const kind = req.params.kind;
     const engine = req.app.genie;
     Promise.resolve().then(async () => {
-        const session = (req.query.proxy_session || {}) as Record<string, string>;
+        const session = (req.session.oauth2 || {}) as Record<string, string>;
         await engine.completeOAuth(kind, req.url, session);
         res.redirect(Config.BASE_URL + '/devices?class=online');
     }).catch((e) => {

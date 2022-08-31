@@ -68,6 +68,7 @@ declare module 'express-session' {
     interface SessionData {
         'device-redirect-to' : string;
         redirect_to : string;
+        oauth2: Record<string, string>;
     }
 }
 
