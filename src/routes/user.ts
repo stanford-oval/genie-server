@@ -107,7 +107,9 @@ router.post('/login', passport.authenticate('local', { failureRedirect: Config.B
 });
 
 router.get('/logout', (req, res, next) => {
-    req.logout();
+    req.logout((error) => {
+        return undefined;
+    });
     res.redirect(Config.BASE_URL + '/');
 });
 
