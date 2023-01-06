@@ -19,6 +19,13 @@
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
 import express from 'express';
+import multer from 'multer';
+import * as os from 'os';
+// import * as I18n from "../util/i18n";
+// import {SpeechToText}  from "../util/backend-microsoft";
+import * as fs from 'fs';
+import speech from '@google-cloud/speech';
+
 import passport from 'passport';
 import * as Genie from 'genie-toolkit';
 import WebSocket from 'ws';
@@ -30,6 +37,8 @@ import { makeRandom } from '../util/random';
 import conversationHandler from './conversation';
 
 const router = express.Router();
+
+const upload = multer({ dest: os.tmpdir() });
 
 router.use('/', (req, res, next) => {
     if (req.user) {
@@ -169,6 +178,91 @@ router.ws('/results', (ws, req, next) => {
 });
 
 router.ws('/conversation', conversationHandler);
+
+async function restSTT(
+    req : express.Request,
+    res : express.Response,
+    next : express.NextFunction
+) {
+    
+    if (!req.file) {
+        // iv.failKey(req, res, "audio", { json: true });
+        res.json({
+            status: "ok",
+            text: "req.file is undefined",
+        });
+        return;
+    }
+    // if (!I18n.get(req.params.locale, false)) {
+    //     res.status(404).json({ error: "Unsupported language" });
+    //     return;
+    // }
+
+    // const stt = new SpeechToText(req.params.locale);
+    // stt.recognizeOnce(req.file.path)
+    //     .then((text) => {
+    //         res.json({
+    //             result: "ok",
+    //             text: text,
+    //         });
+    //     })
+    //     .catch(next);
+
+    // const speech = require('@google-cloud/speech');
+
+    // Creates a client
+    const client = new speech.SpeechClient();
+
+    const filename = req.file.path;
+    // const encoding = 'LINEAR16'; // encoding can be omitted if the file format is wav
+    const sampleRateHertz = 48000; // default wav sample rate
+    const languageCode = 'en-US';
+
+    const config = {
+        // encoding: encoding,
+        sampleRateHertz: sampleRateHertz,
+	languageCode: languageCode,
+	"speechContexts": [{
+          "phrases": ["$OOV_CLASS_DIGIT_SEQUENCE","I would like to the see air supply equipment in corridor 529","fifth floor","fifth", "corridor","air supply equipment", "user manual", "equipment", "system name", "system", "building component", "load", "display","display system","assets","asset","air supply"]
+        }]
+    };
+
+    /**
+     * Note that transcription is limited to 60 seconds audio.
+     * Use a GCS file for audio longer than 1 minute.
+     */
+    const audio = {
+        content: fs.readFileSync(filename).toString('base64'),
+    };
+
+    const request = {
+        config: config,
+        audio: audio,
+    };
+
+    // // Detects speech in the audio file. This creates a recognition job that you
+    // // can wait for now, or get its result later.
+    // const [operation] = await client.longRunningRecognize(request);
+    // const [response] = await operation.promise();
+    const [response] = await client.recognize(request);
+    let transcription = '';
+    if (response.results &&
+        response.results[0] && 
+        response.results[0].alternatives && 
+        response.results[0].alternatives[0] &&
+        response.results[0].alternatives[0].transcript){
+            transcription = response.results[0].alternatives[0].transcript;
+            console.log('Transcription: ', transcription);
+        }
+    
+    res.json({
+        status: "ok",
+        text: transcription,
+    });
+}
+
+router.post('/stt', upload.single("audio"), restSTT);
+
 
 // if nothing handled the route, return a 404
 router.use('/', (req, res) => {

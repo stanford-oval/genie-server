@@ -107,6 +107,12 @@ export default class WebFrontend extends events.EventEmitter {
         });
 
         this._app.set('port', process.env.PORT || 3000);
+        // Check whether forge client ID and secret are available
+        if (!Config.FORGE_CLIENT_ID || !Config.FORGE_CLIENT_SECRET) {
+            console.error('Missing FORGE_CLIENT_ID and/or FORGE_CLIENT_SECRET env. variables.');
+            return;
+        }
+        //
         this._app.set('views', path.join(__dirname, '../views'));
         this._app.set('view engine', 'pug');
         if (Config.HAS_REVERSE_PROXY)
@@ -121,6 +127,7 @@ export default class WebFrontend extends events.EventEmitter {
                                 secret: secretKey.getSecretKey() }));
         this._app.use(connect_flash());
         this._app.use('/', express.static(path.join(__dirname, '../public')));
+        this._app.use(express.json({ limit: '50mb' })); // add this to limit the file size sent from Genie
 
         // development only
         if ('development' === this._app.get('env')) {
@@ -199,6 +206,7 @@ export default class WebFrontend extends events.EventEmitter {
         });
 
         // mount /api before csurf so we can perform requests without the CSRF token
+        this._app.use('/api/forge/oauth', (await import('./routes/oauth')).default); // Add Forge Oauth into api
         this._app.use('/api', (await import('./routes/api')).default);
 
         this._app.use(csurf({ cookie: false }));
@@ -207,6 +215,7 @@ export default class WebFrontend extends events.EventEmitter {
             next();
         });
         this._app.use('/', (await import('./routes/index')).default);
+        this._app.use('/api/forge/oauth', (await import('./routes/oauth')).default); //Add Oauth for Forge
         this._app.use('/apps', (await import('./routes/apps')).default);
         this._app.use('/user', (await import('./routes/user')).default);
         this._app.use('/config', (await import('./routes/config')).default);

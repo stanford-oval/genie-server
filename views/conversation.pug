@@ -1,64 +1,87 @@
 extends layout
 
 block scripts
-  script(src=Config.BASE_URL + '/javascripts/conversation.js')
+  script(src='https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js')
+  script(src='https://cdn.jsdelivr.net/npm/jQuery-QueryBuilder/dist/js/query-builder.standalone.min.js')
+  script(src=Config.BASE_URL + '/javascripts/forge-tree.js')
+  script(src=Config.BASE_URL + '/javascripts/forge-viewer.js')
+  script(src=Config.BASE_URL + '/javascripts/conversation.js', type="module")
+  script(src=Config.BASE_URL + '/javascripts/jquery-filter.js')
 
 block styles
+  link(rel="stylesheet" href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css")
+  link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/forge-viewer.css')
   link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/spinner.css')
   link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/conversation.css')
+  link(rel='stylesheet', href=Config.BASE_URL + '/stylesheets/query-builder.css')
 
 block page_name
-  = _("Chat with Genie")
+  = _("Genie Forge Viewer")
 
-block content
-  div#chat_upper_container
-    div.modal#comment-popup
-      div.modal-dialog
-        form(method='post')
-          div.modal-content
-            div.modal-body
-              div.form-group
-                label(for='comment-block').control-label= _("Write your comment for the last response")
-                textarea.form-control#comment-block
-            div.modal-footer
-              div.form-group
-                button(type='submit').btn.btn-primary= _("Comment")
+block content_container
+  if stdlayout
+    div#page-body(class="container-fluid fill")
+      if !index
+        div.row.hidden-xs.hidden-sm
+          h1.col-sm-12#page-title
+            block page_name
+      div(class="row fill")
+        div.col-sm-4
+          div#btn-group
+            button(type='button', title='Search').btn.btn-primary.btn-lg#btn-search= _("Search")
+            button(type='button', title='Reset').btn.btn-danger#btn-reset= _("Reset")
+            button(type='button', title='Test mongo query').btn.btn-primary.btn-lg#btn-mongo= _("Test")
+          div#builder
+          div#chat_upper_container
+            div.modal#comment-popup
+              div.modal-dialog
+                form(method='post')
+                  div.modal-content
+                    div.modal-body
+                      div.form-group
+                        label(for='comment-block').control-label= _("Write your comment for the last response")
+                        textarea.form-control#comment-block
+                    div.modal-footer
+                      div.form-group
+                        button(type='submit').btn.btn-primary= _("Comment")
 
-    div#toolbar
-      div.form-inline
+            div#toolbar
+              div.form-inline
+                div.form-group#save-log
+                  i.far.fa-save#save-button
+                  span= _("Save Conversation Log")
 
-        div.form-group#save-log
-          i.far.fa-save#save-button
-          span= _("Save Conversation Log")
+            div.modal#recording-save
+              div.modal-dialog
+                div.modal-content
+                  div.modal-body
+                    p= _("The conversation log has been updated.")
+                    pre#recording-log
+                    p.small= _("Privacy warning: The log may include your account and device names, as well as the results from performing actions on your accounts.")
+                  div.new-button.modal-footer
+                    button.btn.btn-primary#recording-download= _("Download")
+                    a(target='_blank',rel='noopener').btn.btn-primary#recording-share= _("Share with Genie Team")
+                    button.btn.btn-default#recording-save-done= _("Done")
 
+            div#conversation.single
+              div#chat
 
-    div.modal#recording-save
-      div.modal-dialog
-        div.modal-content
-          div.modal-body
-            p= _("The conversation log has been updated.")
-            pre#recording-log
-            p.small= _("Privacy warning: The log may include your account and device names, as well as the results from performing actions on your accounts.")
-          div.new-button.modal-footer
-            button.btn.btn-primary#recording-download= _("Download")
-            a(target='_blank',rel='noopener').btn.btn-primary#recording-share= _("Share with Genie Team")
-            button.btn.btn-default#recording-save-done= _("Done")
+              div#input-block
+                span(role='button').hidden#cancel
+                  span(aria-hidden='true').glyphicon.glyphicon-remove-circle
+                  span.sr-only= _("Cancel")
+                form(action='#')#input-form
+                  div.form-group.has-feedback#input-form-group
+                    label(for='#chat-input').sr-only= _("Command:")
+                    input(type='text', placeholder=_("Write your command or answer here"), value=command ? command : '').form-control#input
+                    button(type='button', title='Click to send a voice command').btn.btn-primary#record-button
 
-    div#conversation.single
-      div#chat
+            div#hidden-container
+              div.help-block.hidden= _("Lost connection to the server.")
+              div.almond-thinking.hidden
+                span
+                span
+                span
 
-      div#input-block
-        span(role='button').hidden#cancel
-          span(aria-hidden='true').glyphicon.glyphicon-remove-circle
-          span.sr-only= _("Cancel")
-        form(action='#')#input-form
-          div.form-group.has-feedback#input-form-group
-            label(for='#chat-input').sr-only= _("Command:")
-            input(type='text', placeholder=_("Write your command or answer here"), value=command ? command : '').form-control#input
-
-    div#hidden-container
-      div.help-block.hidden= _("Lost connection to the server.")
-      div.almond-thinking.hidden
-        span
-        span
-        span
+        div(class="col-sm-8 fill")
+          div#forgeViewer

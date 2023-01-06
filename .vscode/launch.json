@@ -1,0 +1,26 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "runtimeVersion": "18.12.1",
+            "request": "launch",
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/dist/main.js",
+            "env": {
+                "GOOGLE_APPLICATION_CREDENTIALS": "/Users/junwen/Documents/Github/genie-server/speech_key.json",
+                "FORGE_CLIENT_ID": "jC24FNiRZImr715384PCd1fvdA5sQ725",
+                "FORGE_CLIENT_SECRET": "ovvLJgBkzGxb9vgJ",
+                "FORGE_CALLBACK_URL": "http://localhost:3000/api/forge/callback/oauth",
+                "PORT": "3200",
+                "THINGENGINE_NLP_URL": "http://127.0.0.1:8400"
+            }
+        }
+    ]
+}

@@ -93,3 +93,16 @@ export const NLP_URL = process.env.THINGENGINE_NLP_URL || 'https://nlp.almond.st
 export const THINGPEDIA_URL = process.env.THINGPEDIA_URL || 'https://genie.stanford.edu/thingpedia';
 export const CLOUD_SYNC_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://genie.stanford.edu';
 export const OAUTH_REDIRECT_URL = process.env.THINGENGINE_CLOUD_SYNC_URL || 'https://genie.stanford.edu';
+
+/**
+  For Forge Oauth
+ */
+  export const FORGE_CLIENT_ID = process.env.FORGE_CLIENT_ID || '';
+  export const FORGE_CLIENT_SECRET = process.env.FORGE_CLIENT_SECRET || '';
+  export const FORGE_CALLBACK_URL = process.env.FORGE_CALLBACK_URL || '';
+  export const scopes = {
+    // Required scopes for the server-side application
+    internal: ['bucket:create', 'bucket:read', 'data:read', 'data:create', 'data:write'],
+    // Required scope for the client-side viewer
+    public: ['viewables:read']
+  };
