@@ -52,7 +52,7 @@
     "@types/gettext-parser": "^4.0.1",
     "@types/gm": "^1.18.11",
     "@types/morgan": "^1.9.3",
-    "@types/node": "^16.11.18",
+    "@types/node": "^18.14.2",
     "@types/passport": "^1.0.7",
     "@types/passport-http-bearer": "^1.0.37",
     "@types/passport-local": "^1.0.34",
