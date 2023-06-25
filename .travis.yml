@@ -38,4 +38,4 @@ jobs:
       - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - docker buildx create --use
       script:
-      - docker buildx build --platform linux/amd64 -t stanfordoval/almond-server:latest --push .
+      - docker buildx build --platform linux/amd64,linux/arm64 -t stanfordoval/almond-server:latest --push .
