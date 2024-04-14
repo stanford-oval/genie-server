@@ -18,24 +18,22 @@
 //
 // Author: Giovanni Campagna <gcampagn@cs.stanford.edu>
 
-process.on('unhandledRejection', (up) => { throw up; });
-
+import * as fs from 'fs';
 import * as Genie from 'genie-toolkit';
 import which from 'which';
-import * as fs from 'fs';
 
 import WebFrontend from './frontend';
-import type { ServerPlatform } from './service/platform';
-import platform from './service/platform';
+import platform, { ServerPlatform } from './service/platform';
 import ClientManager from './service/client-manager';
-
 import * as Config from './config';
 
 let _stopped = false;
 let _running = false;
-let _engine : Genie.AssistantEngine,
-    _frontend : WebFrontend,
-    _clientManager : ClientManager;
+let _engine: Genie.AssistantEngine;
+let _frontend: WebFrontend;
+let _clientManager: ClientManager;
+
+process.on('unhandledRejection', (up) => { throw up; });
 
 function handleStop() {
     if (_running)
@@ -44,9 +42,7 @@ function handleStop() {
         _stopped = true;
 }
 
-const DEBUG = false;
-
-async function init(platform : ServerPlatform) {
+async function init(platform: ServerPlatform) {
     _engine = new Genie.AssistantEngine(platform, {
         cloudSyncUrl: Config.CLOUD_SYNC_URL,
         thingpediaUrl: Config.THINGPEDIA_URL,
@@ -70,7 +66,6 @@ function spawnClient() {
             return;
         }
 
-        // great, we found it!
         _clientManager = new ClientManager(Number(process.env.PORT || 3000));
         _clientManager.start().catch((e) => {
             console.error(`Failed to spawn genie-client-cpp: ${e}`);
@@ -91,8 +86,6 @@ async function main() {
             await new Promise((resolve, reject) => {
                 _frontend.on('unlock', (key) => {
                     console.log('Attempting unlock...');
-                    if (DEBUG)
-                        console.log('Unlock key: ' + key.toString('hex'));
                     platform._setSqliteKey(key);
                     resolve(init(platform));
                 });
@@ -102,29 +95,24 @@ async function main() {
             await _frontend.open();
         }
 
-        try {
-            console.log('Ready');
-            if (!_stopped) {
-                _running = true;
-                spawnClient();
-                await _engine.run();
-            }
-        } finally {
-            if (_clientManager)
-                _clientManager.stop();
-            try {
-                await _engine.close();
-            } catch(error) {
-                console.log('Exception during stop: ' + error.message);
-                console.log(error.stack);
-            }
+        console.log('Ready');
+        if (!_stopped) {
+            _running = true;
+            spawnClient();
+            await _engine.run();
         }
-    } catch(error) {
-        console.error('Uncaught exception: ' + error.message);
-        console.error(error.stack);
     } finally {
-        console.log('Cleaning up');
-        platform.exit();
+        if (_clientManager)
+            _clientManager.stop();
+        try {
+            await _engine.close();
+        } catch(error) {
+            console.log('Exception during stop: ' + error.message);
+            console.log(error.stack);
+        } finally {
+            console.log('Cleaning up');
+            platform.exit();
+        }
     }
 }
 
